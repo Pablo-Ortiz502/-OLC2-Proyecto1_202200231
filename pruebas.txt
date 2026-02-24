@@ -1,0 +1,6 @@
+func main() {
+    var x int32 = 10
+    var y float32 = -3.14
+    var flag boole = true
+    var name string = "Pablo"
+}

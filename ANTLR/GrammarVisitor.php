@@ -1,0 +1,239 @@
+<?php
+
+/*
+ * Generated from Grammar.g4 by ANTLR 4.13.0
+ */
+
+use Antlr\Antlr4\Runtime\Tree\ParseTreeVisitor;
+
+/**
+ * This interface defines a complete generic visitor for a parse tree produced by {@see GrammarParser}.
+ */
+interface GrammarVisitor extends ParseTreeVisitor
+{
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::s()}.
+	 *
+	 * @param Context\SContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitS(Context\SContext $context);
+
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::stmts()}.
+	 *
+	 * @param Context\StmtsContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitStmts(Context\StmtsContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Declv` labeled alternative
+	 * in {@see GrammarParser::dec()}.
+	 *
+	 * @param Context\DeclvContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitDeclv(Context\DeclvContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Decl` labeled alternative
+	 * in {@see GrammarParser::dec()}.
+	 *
+	 * @param Context\DeclContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitDecl(Context\DeclContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Sdec` labeled alternative
+	 * in {@see GrammarParser::dec()}.
+	 *
+	 * @param Context\SdecContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitSdec(Context\SdecContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Asig` labeled alternative
+	 * in {@see GrammarParser::asg()}.
+	 *
+	 * @param Context\AsigContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitAsig(Context\AsigContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `PlusAsig` labeled alternative
+	 * in {@see GrammarParser::asg()}.
+	 *
+	 * @param Context\PlusAsigContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitPlusAsig(Context\PlusAsigContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `MinusAsig` labeled alternative
+	 * in {@see GrammarParser::asg()}.
+	 *
+	 * @param Context\MinusAsigContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitMinusAsig(Context\MinusAsigContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `MultAsig` labeled alternative
+	 * in {@see GrammarParser::asg()}.
+	 *
+	 * @param Context\MultAsigContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitMultAsig(Context\MultAsigContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `DivAsig` labeled alternative
+	 * in {@see GrammarParser::asg()}.
+	 *
+	 * @param Context\DivAsigContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitDivAsig(Context\DivAsigContext $context);
+
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::lid()}.
+	 *
+	 * @param Context\LidContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitLid(Context\LidContext $context);
+
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::lval()}.
+	 *
+	 * @param Context\LvalContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitLval(Context\LvalContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Var` labeled alternative
+	 * in {@see GrammarParser::pre()}.
+	 *
+	 * @param Context\VarContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitVar(Context\VarContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Const` labeled alternative
+	 * in {@see GrammarParser::pre()}.
+	 *
+	 * @param Context\ConstContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitConst(Context\ConstContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Pint` labeled alternative
+	 * in {@see GrammarParser::type()}.
+	 *
+	 * @param Context\PintContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitPint(Context\PintContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Pfloat` labeled alternative
+	 * in {@see GrammarParser::type()}.
+	 *
+	 * @param Context\PfloatContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitPfloat(Context\PfloatContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Pboole` labeled alternative
+	 * in {@see GrammarParser::type()}.
+	 *
+	 * @param Context\PbooleContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitPboole(Context\PbooleContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Pstring` labeled alternative
+	 * in {@see GrammarParser::type()}.
+	 *
+	 * @param Context\PstringContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitPstring(Context\PstringContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Num` labeled alternative
+	 * in {@see GrammarParser::val()}.
+	 *
+	 * @param Context\NumContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitNum(Context\NumContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Float` labeled alternative
+	 * in {@see GrammarParser::val()}.
+	 *
+	 * @param Context\FloatContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitFloat(Context\FloatContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Boole` labeled alternative
+	 * in {@see GrammarParser::val()}.
+	 *
+	 * @param Context\BooleContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitBoole(Context\BooleContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `String` labeled alternative
+	 * in {@see GrammarParser::val()}.
+	 *
+	 * @param Context\StringContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitString(Context\StringContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Nil` labeled alternative
+	 * in {@see GrammarParser::val()}.
+	 *
+	 * @param Context\NilContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitNil(Context\NilContext $context);
+}
