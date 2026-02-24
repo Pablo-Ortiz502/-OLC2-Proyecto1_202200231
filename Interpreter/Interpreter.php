@@ -15,6 +15,11 @@ use Context\DeclContext;
 use Context\StringContext;
 use Context\SdecContext;
 use Context\NilContext;
+use Context\AsigContext;
+use Context\DivAsigContext;
+use Context\MultAsigContext;
+use Context\PlusAsigContext;
+use Context\MinusAsigContext;
 
 
 class Interpreter extends GrammarBaseVisitor
@@ -124,11 +129,61 @@ class Interpreter extends GrammarBaseVisitor
                 return null;
         }
     }
+
+    private function isOperable($izqType, $derType, $op): bool
+    {
+        switch ($op) {
+            case "+": {
+                    if ((($izqType === "int32") | ($izqType === "float32")) && (($derType === "boole") | ($derType === "string"))) {
+                        return false;
+                    }
+                    if ($izqType === "boole" | $derType === "boole") {
+                        return false;
+                    }
+                    if ($izqType === "string" && $derType !== "string") {
+                        return false;
+                    }
+                }
+            case "-": {
+                    if ((($izqType === "int32") | ($izqType === "float32")) && (($derType === "boole") | ($derType === "string"))) {
+                        return false;
+                    }
+                    if ($izqType === "boole" | $derType === "boole") {
+                        return false;
+                    }
+                    if ($izqType === "string" | $derType === "string") {
+                        return false;
+                    }
+                }
+            case "*": {
+                    if ($izqType === "int32" && $derType === "boole") {
+                        return false;
+                    }
+                    if ($izqType === "float32" && ($derType === "boole" | $derType === "string")) {
+                        return false;
+                    }
+                    if ($izqType === "string" && $derType !== "int32") {
+                        return false;
+                    }
+                }
+            case "/": {
+                    if (($izqType !== "int32" && $izqType !== "float32") && ($derType !== "int32" && $derType !== "float32")) {
+                        return false;
+                    }
+                }
+        }
+        return true;
+    }
+
+
     private function isDuplicate(string $name): bool
     {
         return array_key_exists($name, $this->symbolTable);
     }
 
+
+
+    //-------funciones visit-------------
 
 
     public function visitNum(NumContext $context)
@@ -186,8 +241,216 @@ class Interpreter extends GrammarBaseVisitor
     {
         return "const";
     }
+    //-----------------Asignacion-------------------------- 
+    public function visitAsig(AsigContext $context)
+    {
 
+        $name = $context->ID()->getText();
+        if (!$this->isDuplicate($name)) {
+            $this->addError(
+                "La variable '$name' no ha sido declarada",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+        if ($this->symbolTable[$name]["caind"] === "const") {
+            $this->addError(
+                "La variable '$name' es una constante",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
 
+        $value = $this->visit($context->val());
+        $type = $this->symbolTable[$name]["type"];
+
+        if (!$this->validateType($type, $value)) {
+            $this->addError(
+                "Tipo incompatible en '$name'",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        $this->symbolTable[$name]["val"] = $value;
+        $this->symbolTable[$name]["etiq"] = $this->getEtiquete($value);
+        return null;
+    }
+
+    public function visitPlusAsig(PlusAsigContext $context)
+    {
+        $name = $context->ID()->getText();
+        if (!$this->isDuplicate($name)) {
+            $this->addError(
+                "La variable '$name' no ha sido declarada",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+        if ($this->symbolTable[$name]["caind"] === "const") {
+            $this->addError(
+                "La variable '$name' es una constante",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        $value = $this->visit($context->val());
+        $type = $this->symbolTable[$name]["type"];
+
+        if (!$this->validateType($type, $value)) {
+            $this->addError(
+                "Tipo incompatible en '$name'",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        if ($this->symbolTable[$name]["etiq"] === "nil") {
+            $this->addError(
+                "No se puede operar, la variable '$name' es nil",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        $this->symbolTable[$name]["val"] += $value;
+        $this->symbolTable[$name]["etiq"] = $this->getEtiquete($this->symbolTable[$name]["val"]);
+        return null;
+    }
+    public function visitMinusAsig(MinusAsigContext $context)
+    {
+        $name = $context->ID()->getText();
+        if (!$this->isDuplicate($name)) {
+            $this->addError(
+                "La variable '$name' no ha sido declarada",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+        if ($this->symbolTable[$name]["caind"] === "const") {
+            $this->addError(
+                "La variable '$name' es una constante",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        $value = $this->visit($context->val());
+        $type = $this->symbolTable[$name]["type"];
+
+        if (!$this->validateType($type, $value)) {
+            $this->addError(
+                "Tipo incompatible en '$name'",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        if ($this->symbolTable[$name]["etiq"] === "nil") {
+            $this->addError(
+                "No se puede operar, la variable '$name' es nil",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        $this->symbolTable[$name]["val"] -= $value;
+        $this->symbolTable[$name]["etiq"] = $this->getEtiquete($this->symbolTable[$name]["val"]);
+        return null;
+    }
+
+    public function visitMultAsig(MultAsigContext $context)
+    {
+        $name = $context->ID()->getText();
+        if (!$this->isDuplicate($name)) {
+            $this->addError(
+                "La variable '$name' no ha sido declarada",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+        if ($this->symbolTable[$name]["caind"] === "const") {
+            $this->addError(
+                "La variable '$name' es una constante",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        $value = $this->visit($context->val());
+        $type = $this->symbolTable[$name]["type"];
+
+        if (!$this->validateType($type, $value)) {
+            $this->addError(
+                "Tipo incompatible en '$name'",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        if ($this->symbolTable[$name]["etiq"] === "nil") {
+            $this->addError(
+                "No se puede operar, la variable '$name' es nil",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        $this->symbolTable[$name]["val"] *= $value;
+        $this->symbolTable[$name]["etiq"] = $this->getEtiquete($this->symbolTable[$name]["val"]);
+        return null;
+    }
+
+    public function visitDivAsig(DivAsigContext $context)
+    {
+        $name = $context->ID()->getText();
+        if (!$this->isDuplicate($name)) {
+            $this->addError(
+                "La variable '$name' no ha sido declarada",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+        if ($this->symbolTable[$name]["caind"] === "const") {
+            $this->addError(
+                "La variable '$name' es una constante",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        $value = $this->visit($context->val());
+        $type = $this->symbolTable[$name]["type"];
+        if (!$this->validateType($type, $value)) {
+            $this->addError(
+                "Tipo incompatible en '$name'",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+        if ($value === 0) {
+            $this->addError(
+                "No se puede dividir entre 0",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        if ($this->symbolTable[$name]["etiq"] === "nil") {
+            $this->addError(
+                "No se puede operar, la variable '$name' es nil",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        $this->symbolTable[$name]["val"] /= $value;
+        $this->symbolTable[$name]["etiq"] = $this->getEtiquete($this->symbolTable[$name]["val"]);
+        return null;
+    }
+
+    //---------------Declaraciones-------------------
 
     public function visitDeclv(DeclvContext $context)
     {
@@ -324,7 +587,6 @@ class Interpreter extends GrammarBaseVisitor
                 "etiq" => $this->getDefaultEtiquet($type)
             ];
         }
-
         return null;
     }
 }

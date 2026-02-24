@@ -7,7 +7,7 @@ stmts: dec | asg;
 dec:
 	pre lid type '=' lval	# Declv
 	| pre lid type			# Decl
-	| lid '=' lval			# Sdec;
+	| lid ':=' lval			# Sdec;
 
 asg:
 	ID '=' val		# Asig
