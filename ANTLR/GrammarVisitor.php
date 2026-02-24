@@ -110,6 +110,96 @@ interface GrammarVisitor extends ParseTreeVisitor
 	public function visitDivAsig(Context\DivAsigContext $context);
 
 	/**
+	 * Visit a parse tree produced by the `Nil` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\NilContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitNil(Context\NilContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Float` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\FloatContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitFloat(Context\FloatContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `MulDivMod` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\MulDivModContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitMulDivMod(Context\MulDivModContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `IdExpr` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\IdExprContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitIdExpr(Context\IdExprContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `AddSub` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\AddSubContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitAddSub(Context\AddSubContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Parens` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\ParensContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitParens(Context\ParensContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Num` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\NumContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitNum(Context\NumContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `String` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\StringContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitString(Context\StringContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Boole` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\BooleContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitBoole(Context\BooleContext $context);
+
+	/**
 	 * Visit a parse tree produced by {@see GrammarParser::lid()}.
 	 *
 	 * @param Context\LidContext $context The parse tree.
@@ -186,54 +276,4 @@ interface GrammarVisitor extends ParseTreeVisitor
 	 * @return mixed The visitor result.
 	 */
 	public function visitPstring(Context\PstringContext $context);
-
-	/**
-	 * Visit a parse tree produced by the `Num` labeled alternative
-	 * in {@see GrammarParser::val()}.
-	 *
-	 * @param Context\NumContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitNum(Context\NumContext $context);
-
-	/**
-	 * Visit a parse tree produced by the `Float` labeled alternative
-	 * in {@see GrammarParser::val()}.
-	 *
-	 * @param Context\FloatContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitFloat(Context\FloatContext $context);
-
-	/**
-	 * Visit a parse tree produced by the `Boole` labeled alternative
-	 * in {@see GrammarParser::val()}.
-	 *
-	 * @param Context\BooleContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitBoole(Context\BooleContext $context);
-
-	/**
-	 * Visit a parse tree produced by the `String` labeled alternative
-	 * in {@see GrammarParser::val()}.
-	 *
-	 * @param Context\StringContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitString(Context\StringContext $context);
-
-	/**
-	 * Visit a parse tree produced by the `Nil` labeled alternative
-	 * in {@see GrammarParser::val()}.
-	 *
-	 * @param Context\NilContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitNil(Context\NilContext $context);
 }

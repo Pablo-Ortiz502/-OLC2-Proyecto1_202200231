@@ -10,15 +10,26 @@ dec:
 	| lid ':=' lval			# Sdec;
 
 asg:
-	ID '=' val		# Asig
-	| ID '+=' val	# PlusAsig
-	| ID '-=' val	# MinusAsig
-	| ID '*=' val	# MultAsig
-	| ID '/=' val	# DivAsig;
+	ID '=' expr		# Asig
+	| ID '+=' expr	# PlusAsig
+	| ID '-=' expr	# MinusAsig
+	| ID '*=' expr	# MultAsig
+	| ID '/=' expr	# DivAsig;
+
+expr:
+	expr op = ('*' | '/' | '%') expr	# MulDivMod
+	| expr op = ('+' | '-') expr		# AddSub
+	| '(' expr ')'						# Parens
+	| NUM								# Num
+	| FLOAT								# Float
+	| ID								# IdExpr
+	| BOOLE								# Boole
+	| STRING							# String
+	| NIL								# Nil;
 
 lid: ID (',' ID)*;
 
-lval: val (',' val)*;
+lval: expr (',' expr)*;
 
 pre: PVAR # Var | PCONST # Const;
 
@@ -27,12 +38,6 @@ type:
 	| PFLOAT	# Pfloat
 	| PBOOL		# Pboole
 	| PSTRING	# Pstring;
-val:
-	NUM			# Num
-	| FLOAT		# Float
-	| BOOLE		# Boole
-	| STRING	# String
-	| NIL		# Nil;
 
 FUNC: 'func';
 MAIN: 'main';

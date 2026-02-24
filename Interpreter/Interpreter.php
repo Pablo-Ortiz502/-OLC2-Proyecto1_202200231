@@ -20,6 +20,10 @@ use Context\DivAsigContext;
 use Context\MultAsigContext;
 use Context\PlusAsigContext;
 use Context\MinusAsigContext;
+use Context\IdExprContext;
+use Context\ParensContext;
+use Context\AddSubContext;
+use Context\MulDivModContext;
 
 
 class Interpreter extends GrammarBaseVisitor
@@ -129,50 +133,57 @@ class Interpreter extends GrammarBaseVisitor
                 return null;
         }
     }
-
-    private function isOperable($izqType, $derType, $op): bool
+    private function isOperable($izqVal, $derVal, $op): bool
     {
         switch ($op) {
-            case "+": {
-                    if ((($izqType === "int32") | ($izqType === "float32")) && (($derType === "boole") | ($derType === "string"))) {
-                        return false;
-                    }
-                    if ($izqType === "boole" | $derType === "boole") {
-                        return false;
-                    }
-                    if ($izqType === "string" && $derType !== "string") {
-                        return false;
-                    }
+
+            case '+':
+                if (is_bool($izqVal) || is_bool($derVal)) {
+                    return false;
                 }
-            case "-": {
-                    if ((($izqType === "int32") | ($izqType === "float32")) && (($derType === "boole") | ($derType === "string"))) {
-                        return false;
-                    }
-                    if ($izqType === "boole" | $derType === "boole") {
-                        return false;
-                    }
-                    if ($izqType === "string" | $derType === "string") {
-                        return false;
-                    }
+
+                if (is_string($izqVal) || is_string($derVal)) {
+                    return is_string($izqVal) && is_string($derVal);
                 }
-            case "*": {
-                    if ($izqType === "int32" && $derType === "boole") {
-                        return false;
-                    }
-                    if ($izqType === "float32" && ($derType === "boole" | $derType === "string")) {
-                        return false;
-                    }
-                    if ($izqType === "string" && $derType !== "int32") {
-                        return false;
-                    }
+
+                return (is_int($izqVal) || is_float($izqVal)) &&
+                    (is_int($derVal) || is_float($derVal));
+
+
+            case '-':
+                return (is_int($izqVal) || is_float($izqVal)) &&
+                    (is_int($derVal) || is_float($derVal));
+
+
+            case '*':
+                if ((is_int($izqVal) || is_float($izqVal)) &&
+                    (is_int($derVal) || is_float($derVal))
+                ) {
+                    return true;
                 }
-            case "/": {
-                    if (($izqType !== "int32" && $izqType !== "float32") && ($derType !== "int32" && $derType !== "float32")) {
-                        return false;
-                    }
+
+                if (is_string($izqVal) && is_int($derVal)) {
+                    return true;
                 }
+                if (is_string($derVal) && is_int($izqVal)) {
+                    return true;
+                }
+
+                return false;
+
+
+            case '/':
+
+                return (is_int($izqVal) || is_float($izqVal)) &&
+                    (is_int($derVal) || is_float($derVal));
+
+
+            case '%':
+
+                return is_int($izqVal) && is_int($derVal);
         }
-        return true;
+
+        return false;
     }
 
 
@@ -261,7 +272,7 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $value = $this->visit($context->val());
+        $value = $this->visit($context->expr());
         $type = $this->symbolTable[$name]["type"];
 
         if (!$this->validateType($type, $value)) {
@@ -295,12 +306,12 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $value = $this->visit($context->val());
+        $value = $this->visit($context->expr());
         $type = $this->symbolTable[$name]["type"];
 
         if (!$this->validateType($type, $value)) {
             $this->addError(
-                "Tipo incompatible en '$name'",
+                "Tipos incompatibles en  para el operador +=",
                 $context->ID()->getSymbol()
             );
             return null;
@@ -336,12 +347,12 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $value = $this->visit($context->val());
+        $value = $this->visit($context->expr());
         $type = $this->symbolTable[$name]["type"];
 
         if (!$this->validateType($type, $value)) {
             $this->addError(
-                "Tipo incompatible en '$name'",
+                "Tipos incompatibles en  para el operador -=",
                 $context->ID()->getSymbol()
             );
             return null;
@@ -378,12 +389,12 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $value = $this->visit($context->val());
+        $value = $this->visit($context->expr());
         $type = $this->symbolTable[$name]["type"];
 
         if (!$this->validateType($type, $value)) {
             $this->addError(
-                "Tipo incompatible en '$name'",
+                "Tipos incompatibles en  para el operador *=",
                 $context->ID()->getSymbol()
             );
             return null;
@@ -420,11 +431,11 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $value = $this->visit($context->val());
+        $value = $this->visit($context->expr());
         $type = $this->symbolTable[$name]["type"];
         if (!$this->validateType($type, $value)) {
             $this->addError(
-                "Tipo incompatible en '$name'",
+                "Tipos incompatibles en  para el operador /=",
                 $context->ID()->getSymbol()
             );
             return null;
@@ -455,7 +466,7 @@ class Interpreter extends GrammarBaseVisitor
     public function visitDeclv(DeclvContext $context)
     {
         $ids  = $context->lid()->ID();
-        $vals = $context->lval()->val();
+        $vals = $context->lval()->expr();
         $caind = $context->pre()->getText();
         $type = $this->visit($context->type());
 
@@ -513,7 +524,7 @@ class Interpreter extends GrammarBaseVisitor
     public function visitSdec(SdecContext $context)
     {
         $ids  = $context->lid()->ID();
-        $vals = $context->lval()->val();
+        $vals = $context->lval()->expr();
 
         if (count($ids) != count($vals)) {
             $this->addError(
@@ -588,5 +599,87 @@ class Interpreter extends GrammarBaseVisitor
             ];
         }
         return null;
+    }
+    // ---------------- Expresiones ----------------
+
+    public function visitIdExpr(IdExprContext $context)
+    {
+        $name = $context->ID()->getText();
+
+        if (!$this->isDuplicate($name)) {
+            $this->addError(
+                "La variable '$name' no ha sido declarada",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        return $this->symbolTable[$name]["val"];
+    }
+
+    public function visitParens(ParensContext $context)
+    {
+        return $this->visit($context->expr());
+    }
+
+    public function visitAddSub(AddSubContext $context)
+    {
+        $left  = $this->visit($context->expr(0));
+        $right = $this->visit($context->expr(1));
+        $op    = $context->op->getText();
+
+        if (!$this->isOperable($left, $right, $op)) {
+            $this->addError(
+                "Operacion invalida entre tipos incompatibles",
+                $context->op
+            );
+            return null;
+        }
+
+        return match ($op) {
+            "+" => $left + $right,
+            "-" => $left - $right,
+        };
+    }
+
+    public function visitMulDivMod(MulDivModContext $context)
+    {
+        $left  = $this->visit($context->expr(0));
+        $right = $this->visit($context->expr(1));
+        $op    = $context->op->getText();
+
+        if (!$this->isOperable($left, $right, $op)) {
+            $this->addError(
+                "Operacion invalida entre tipos incompatibles",
+                $context->op
+            );
+            return null;
+        }
+
+        if ($op === "/" && $right == 0) {
+            $this->addError("No se puede dividir entre 0", $context->op);
+            return null;
+        }
+
+        if ($op == "*" && is_string($left) && is_int($right)) {
+            $res = $left;
+            for ($i = 0; $i < $right - 1; $i++) {
+                $left = $left . $res;
+            }
+            return $left;
+        }
+        if ($op == "*" && is_string($right) && is_int($left)) {
+            $res = $right;
+            for ($i = 0; $i < $left - 1; $i++) {
+                $right = $right . $res;
+            }
+            return $right;
+        }
+
+        return match ($op) {
+            "*" => $left * $right,
+            "/" => $left / $right,
+            "%" => $left % $right,
+        };
     }
 }
