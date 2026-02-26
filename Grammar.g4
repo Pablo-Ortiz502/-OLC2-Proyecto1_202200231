@@ -25,6 +25,7 @@ expr:
 	| ID								# IdExpr
 	| BOOLE								# Boole
 	| STRING							# String
+	| RUNE								# Rune
 	| NIL								# Nil;
 
 lid: ID (',' ID)*;
@@ -37,7 +38,8 @@ type:
 	PINT		# Pint
 	| PFLOAT	# Pfloat
 	| PBOOL		# Pboole
-	| PSTRING	# Pstring;
+	| PSTRING	# Pstring
+	| PRUNE		# Prune;
 
 FUNC: 'func';
 MAIN: 'main';
@@ -48,12 +50,14 @@ PINT: 'int32';
 PFLOAT: 'float32';
 PBOOL: 'boole';
 PSTRING: 'string';
+PRUNE: 'rune';
 
 NUM: '-'? [0-9]+;
 FLOAT: '-'? [0-9]+ '.' [0-9]+;
 NIL: 'nil';
 BOOLE: 'true' | 'false';
 STRING: '"' ( ~["\\\r\n] | '\\' .)* '"';
+RUNE: '\'' ~['\r\n] '\'';
 
 ID: [_\p{L}] [_\p{L}\p{Nd}]*;
 LINE_COMMENT: '//' ~[\r\n]* -> skip;

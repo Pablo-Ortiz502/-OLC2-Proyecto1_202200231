@@ -200,6 +200,16 @@ interface GrammarVisitor extends ParseTreeVisitor
 	public function visitBoole(Context\BooleContext $context);
 
 	/**
+	 * Visit a parse tree produced by the `Rune` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\RuneContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitRune(Context\RuneContext $context);
+
+	/**
 	 * Visit a parse tree produced by {@see GrammarParser::lid()}.
 	 *
 	 * @param Context\LidContext $context The parse tree.
@@ -276,4 +286,14 @@ interface GrammarVisitor extends ParseTreeVisitor
 	 * @return mixed The visitor result.
 	 */
 	public function visitPstring(Context\PstringContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Prune` labeled alternative
+	 * in {@see GrammarParser::type()}.
+	 *
+	 * @param Context\PruneContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitPrune(Context\PruneContext $context);
 }

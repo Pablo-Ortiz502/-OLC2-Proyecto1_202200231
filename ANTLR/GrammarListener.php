@@ -236,6 +236,18 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitBoole(Context\BooleContext $context): void;
 	/**
+	 * Enter a parse tree produced by the `Rune`
+	 * labeled alternative in {@see GrammarParser::expr()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterRune(Context\RuneContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `Rune` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitRune(Context\RuneContext $context): void;
+	/**
 	 * Enter a parse tree produced by {@see GrammarParser::lid()}.
 	 * @param $context The parse tree.
 	 */
@@ -327,4 +339,16 @@ interface GrammarListener extends ParseTreeListener {
 	 * @param $context The parse tree.
 	 */
 	public function exitPstring(Context\PstringContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `Prune`
+	 * labeled alternative in {@see GrammarParser::type()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterPrune(Context\PruneContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `Prune` labeled alternative
+	 * in {@see GrammarParser::type()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitPrune(Context\PruneContext $context): void;
 }

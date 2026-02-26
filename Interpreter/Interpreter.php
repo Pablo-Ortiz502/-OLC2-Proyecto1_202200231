@@ -24,14 +24,60 @@ use Context\IdExprContext;
 use Context\ParensContext;
 use Context\AddSubContext;
 use Context\MulDivModContext;
+use Context\RuneContext;
+use Context\PruneContext;
 
 
 class Interpreter extends GrammarBaseVisitor
 {
     public array $symbolTable = [];
     public array $errorTable = [];
+    public array $scopes = [];
     public int $erCount = 0;
     public int $syCount = 0;
+
+    private function enterScope(): void
+    {
+        array_push($this->scopes, []);
+    }
+
+    private function exitScope(): void
+    {
+        array_pop($this->scopes);
+    }
+
+    private function declare(string $name, array $info): bool
+    {
+        $currentScope = &$this->scopes[count($this->scopes) - 1];
+
+        if (isset($currentScope[$name])) {
+            return false; // duplicado en el mismo scope
+        }
+
+        $currentScope[$name] = $info;
+        return true;
+    }
+
+    private function resolve(string $name): ?array
+    {
+        for ($i = count($this->scopes) - 1; $i >= 0; $i--) {
+            if (isset($this->scopes[$i][$name])) {
+                return $this->scopes[$i][$name];
+            }
+        }
+        return null;
+    }
+
+    private function &resolveRef(string $name)
+    {
+        for ($i = count($this->scopes) - 1; $i >= 0; $i--) {
+            if (isset($this->scopes[$i][$name])) {
+                return $this->scopes[$i][$name];
+            }
+        }
+        $null = null;
+        return $null;
+    }
 
     private function validateType(string $type, $value): bool
     {
@@ -40,6 +86,7 @@ class Interpreter extends GrammarBaseVisitor
             "float32" => is_float($value) | is_null($value),
             "boole"   => is_bool($value) | is_null($value),
             "string"  => is_string($value) | is_null($value),
+            "rune"    => is_string($value) | is_null($value) | strlen($value) === 1,
             default   => false
         };
     }
@@ -180,7 +227,7 @@ class Interpreter extends GrammarBaseVisitor
 
             case '%':
 
-                return is_int($izqVal) && is_int($derVal);
+                return is_int($izqVal) && is_int($derVal) | (is_string($derVal) && is_string($izqVal) && strlen($izqVal) === 1 && strlen($derVal) === 1);
         }
 
         return false;
@@ -200,6 +247,12 @@ class Interpreter extends GrammarBaseVisitor
     public function visitNum(NumContext $context)
     {
         return (int)$context->getText();
+    }
+
+    public function visitRune(RuneContext $context)
+    {
+        $text = $context->getText();
+        return substr($text, 1, -1);
     }
 
     public function visitFloat(FloatContext $context)
@@ -241,6 +294,11 @@ class Interpreter extends GrammarBaseVisitor
     public function visitPstring(PstringContext $context)
     {
         return "string";
+    }
+
+    public function visitPrune(PruneContext $context)
+    {
+        return "rune";
     }
 
     public function visitVar(VarContext $context)
@@ -636,6 +694,13 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
+        if ($op == "+" && is_string($left) && is_string($right) && strlen($left) === 1 && strlen($right) === 1) {
+            return chr(ord($left) + ord($right));
+        }
+        if ($op == "-" && is_string($left) && is_string($right) && strlen($left) === 1 && strlen($right) === 1) {
+            return  chr(ord($left) - ord($right));
+        }
+
         return match ($op) {
             "+" => $left + $right,
             "-" => $left - $right,
@@ -674,6 +739,12 @@ class Interpreter extends GrammarBaseVisitor
                 $right = $right . $res;
             }
             return $right;
+        }
+        if ($op == "*" && is_string($left) && is_string($right) && strlen($left) === 1 && strlen($right) === 1) {
+            return chr(ord($left) * ord($right));
+        }
+        if ($op == "/" && is_string($left) && is_string($right) && strlen($left) === 1 && strlen($right) === 1) {
+            return  chr(ord($left) / ord($right));
         }
 
         return match ($op) {
