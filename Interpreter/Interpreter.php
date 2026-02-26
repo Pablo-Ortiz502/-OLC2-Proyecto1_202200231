@@ -26,19 +26,21 @@ use Context\AddSubContext;
 use Context\MulDivModContext;
 use Context\RuneContext;
 use Context\PruneContext;
-
+use Context\SContext;
 
 class Interpreter extends GrammarBaseVisitor
 {
-    public array $symbolTable = [];
     public array $errorTable = [];
     public array $scopes = [];
     public int $erCount = 0;
     public int $syCount = 0;
 
-    private function enterScope(): void
+    private function enterScope(string $scopeName): void
     {
-        array_push($this->scopes, []);
+        $this->scopes[] = [
+            "name" => $scopeName,
+            "symbols" => []
+        ];
     }
 
     private function exitScope(): void
@@ -48,10 +50,10 @@ class Interpreter extends GrammarBaseVisitor
 
     private function declare(string $name, array $info): bool
     {
-        $currentScope = &$this->scopes[count($this->scopes) - 1];
+        $currentScope = &$this->scopes[count($this->scopes) - 1]["symbols"];
 
         if (isset($currentScope[$name])) {
-            return false; // duplicado en el mismo scope
+            return false;
         }
 
         $currentScope[$name] = $info;
@@ -61,18 +63,19 @@ class Interpreter extends GrammarBaseVisitor
     private function resolve(string $name): ?array
     {
         for ($i = count($this->scopes) - 1; $i >= 0; $i--) {
-            if (isset($this->scopes[$i][$name])) {
-                return $this->scopes[$i][$name];
+            if (isset($this->scopes[$i]["symbols"][$name])) {
+                return $this->scopes[$i]["symbols"][$name];
             }
         }
         return null;
     }
 
+
     private function &resolveRef(string $name)
     {
         for ($i = count($this->scopes) - 1; $i >= 0; $i--) {
-            if (isset($this->scopes[$i][$name])) {
-                return $this->scopes[$i][$name];
+            if (isset($this->scopes[$i]["symbols"][$name])) {
+                return $this->scopes[$i]["symbols"][$name];
             }
         }
         $null = null;
@@ -234,15 +237,17 @@ class Interpreter extends GrammarBaseVisitor
     }
 
 
-    private function isDuplicate(string $name): bool
-    {
-        return array_key_exists($name, $this->symbolTable);
-    }
-
-
 
     //-------funciones visit-------------
 
+    public function visitS(SContext $context)
+    {
+        $this->enterScope("Global");
+
+        $this->visitChildren($context);
+
+        return null;
+    }
 
     public function visitNum(NumContext $context)
     {
@@ -313,16 +318,18 @@ class Interpreter extends GrammarBaseVisitor
     //-----------------Asignacion-------------------------- 
     public function visitAsig(AsigContext $context)
     {
-
         $name = $context->ID()->getText();
-        if (!$this->isDuplicate($name)) {
+        $symbol = &$this->resolveRef($name);
+
+        if ($symbol === null) {
             $this->addError(
                 "La variable '$name' no ha sido declarada",
                 $context->ID()->getSymbol()
             );
             return null;
         }
-        if ($this->symbolTable[$name]["caind"] === "const") {
+
+        if ($symbol["caind"] === "const") {
             $this->addError(
                 "La variable '$name' es una constante",
                 $context->ID()->getSymbol()
@@ -331,9 +338,8 @@ class Interpreter extends GrammarBaseVisitor
         }
 
         $value = $this->visit($context->expr());
-        $type = $this->symbolTable[$name]["type"];
 
-        if (!$this->validateType($type, $value)) {
+        if (!$this->validateType($symbol["type"], $value)) {
             $this->addError(
                 "Tipo incompatible en '$name'",
                 $context->ID()->getSymbol()
@@ -341,22 +347,26 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $this->symbolTable[$name]["val"] = $value;
-        $this->symbolTable[$name]["etiq"] = $this->getEtiquete($value);
+        $symbol["val"] = $value;
+        $symbol["etiq"] = $this->getEtiquete($value);
+
         return null;
     }
 
     public function visitPlusAsig(PlusAsigContext $context)
     {
         $name = $context->ID()->getText();
-        if (!$this->isDuplicate($name)) {
+        $symbol = &$this->resolveRef($name);
+
+        if ($symbol === null) {
             $this->addError(
                 "La variable '$name' no ha sido declarada",
                 $context->ID()->getSymbol()
             );
             return null;
         }
-        if ($this->symbolTable[$name]["caind"] === "const") {
+
+        if ($symbol["caind"] === "const") {
             $this->addError(
                 "La variable '$name' es una constante",
                 $context->ID()->getSymbol()
@@ -364,18 +374,7 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $value = $this->visit($context->expr());
-        $type = $this->symbolTable[$name]["type"];
-
-        if (!$this->validateType($type, $value)) {
-            $this->addError(
-                "Tipos incompatibles en  para el operador +=",
-                $context->ID()->getSymbol()
-            );
-            return null;
-        }
-
-        if ($this->symbolTable[$name]["etiq"] === "nil") {
+        if ($symbol["etiq"] === "nil") {
             $this->addError(
                 "No se puede operar, la variable '$name' es nil",
                 $context->ID()->getSymbol()
@@ -383,21 +382,36 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $this->symbolTable[$name]["val"] += $value;
-        $this->symbolTable[$name]["etiq"] = $this->getEtiquete($this->symbolTable[$name]["val"]);
+        $value = $this->visit($context->expr());
+
+        if (!$this->validateType($symbol["type"], $value)) {
+            $this->addError(
+                "Tipos incompatibles para el operador +=",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        $symbol["val"] += $value;
+        $symbol["etiq"] = $this->getEtiquete($symbol["val"]);
+
         return null;
     }
+
     public function visitMinusAsig(MinusAsigContext $context)
     {
         $name = $context->ID()->getText();
-        if (!$this->isDuplicate($name)) {
+        $symbol = &$this->resolveRef($name);
+
+        if ($symbol === null) {
             $this->addError(
                 "La variable '$name' no ha sido declarada",
                 $context->ID()->getSymbol()
             );
             return null;
         }
-        if ($this->symbolTable[$name]["caind"] === "const") {
+
+        if ($symbol["caind"] === "const") {
             $this->addError(
                 "La variable '$name' es una constante",
                 $context->ID()->getSymbol()
@@ -405,18 +419,7 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $value = $this->visit($context->expr());
-        $type = $this->symbolTable[$name]["type"];
-
-        if (!$this->validateType($type, $value)) {
-            $this->addError(
-                "Tipos incompatibles en  para el operador -=",
-                $context->ID()->getSymbol()
-            );
-            return null;
-        }
-
-        if ($this->symbolTable[$name]["etiq"] === "nil") {
+        if ($symbol["etiq"] === "nil") {
             $this->addError(
                 "No se puede operar, la variable '$name' es nil",
                 $context->ID()->getSymbol()
@@ -424,22 +427,36 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $this->symbolTable[$name]["val"] -= $value;
-        $this->symbolTable[$name]["etiq"] = $this->getEtiquete($this->symbolTable[$name]["val"]);
+        $value = $this->visit($context->expr());
+
+        if (!$this->validateType($symbol["type"], $value)) {
+            $this->addError(
+                "Tipos incompatibles para el operador +=",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        $symbol["val"] -= $value;
+        $symbol["etiq"] = $this->getEtiquete($symbol["val"]);
+
         return null;
     }
 
     public function visitMultAsig(MultAsigContext $context)
     {
         $name = $context->ID()->getText();
-        if (!$this->isDuplicate($name)) {
+        $symbol = &$this->resolveRef($name);
+
+        if ($symbol === null) {
             $this->addError(
                 "La variable '$name' no ha sido declarada",
                 $context->ID()->getSymbol()
             );
             return null;
         }
-        if ($this->symbolTable[$name]["caind"] === "const") {
+
+        if ($symbol["caind"] === "const") {
             $this->addError(
                 "La variable '$name' es una constante",
                 $context->ID()->getSymbol()
@@ -447,18 +464,7 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $value = $this->visit($context->expr());
-        $type = $this->symbolTable[$name]["type"];
-
-        if (!$this->validateType($type, $value)) {
-            $this->addError(
-                "Tipos incompatibles en  para el operador *=",
-                $context->ID()->getSymbol()
-            );
-            return null;
-        }
-
-        if ($this->symbolTable[$name]["etiq"] === "nil") {
+        if ($symbol["etiq"] === "nil") {
             $this->addError(
                 "No se puede operar, la variable '$name' es nil",
                 $context->ID()->getSymbol()
@@ -466,22 +472,36 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $this->symbolTable[$name]["val"] *= $value;
-        $this->symbolTable[$name]["etiq"] = $this->getEtiquete($this->symbolTable[$name]["val"]);
+        $value = $this->visit($context->expr());
+
+        if (!$this->validateType($symbol["type"], $value)) {
+            $this->addError(
+                "Tipos incompatibles para el operador +=",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        $symbol["val"] *= $value;
+        $symbol["etiq"] = $this->getEtiquete($symbol["val"]);
+
         return null;
     }
 
     public function visitDivAsig(DivAsigContext $context)
     {
         $name = $context->ID()->getText();
-        if (!$this->isDuplicate($name)) {
+        $symbol = &$this->resolveRef($name);
+
+        if ($symbol === null) {
             $this->addError(
                 "La variable '$name' no ha sido declarada",
                 $context->ID()->getSymbol()
             );
             return null;
         }
-        if ($this->symbolTable[$name]["caind"] === "const") {
+
+        if ($symbol["caind"] === "const") {
             $this->addError(
                 "La variable '$name' es una constante",
                 $context->ID()->getSymbol()
@@ -489,24 +509,7 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $value = $this->visit($context->expr());
-        $type = $this->symbolTable[$name]["type"];
-        if (!$this->validateType($type, $value)) {
-            $this->addError(
-                "Tipos incompatibles en  para el operador /=",
-                $context->ID()->getSymbol()
-            );
-            return null;
-        }
-        if ($value === 0) {
-            $this->addError(
-                "No se puede dividir entre 0",
-                $context->ID()->getSymbol()
-            );
-            return null;
-        }
-
-        if ($this->symbolTable[$name]["etiq"] === "nil") {
+        if ($symbol["etiq"] === "nil") {
             $this->addError(
                 "No se puede operar, la variable '$name' es nil",
                 $context->ID()->getSymbol()
@@ -514,12 +517,32 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $this->symbolTable[$name]["val"] /= $value;
-        $this->symbolTable[$name]["etiq"] = $this->getEtiquete($this->symbolTable[$name]["val"]);
+        $value = $this->visit($context->expr());
+        if ($value === 0) {
+            $this->addError(
+                "NO se puede dividir entre 0",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        if (!$this->validateType($symbol["type"], $value)) {
+            $this->addError(
+                "Tipos incompatibles para el operador +=",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        $symbol["val"] /= $value;
+        $symbol["etiq"] = $this->getEtiquete($symbol["val"]);
+
         return null;
     }
 
     //---------------Declaraciones-------------------
+
+
 
     public function visitDeclv(DeclvContext $context)
     {
@@ -536,18 +559,10 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-
         for ($i = 0; $i < count($ids); $i++) {
+
             $name  = $ids[$i]->getText();
             $value = $this->visit($vals[$i]);
-
-            if ($this->isDuplicate($name)) {
-                $this->addError(
-                    "Identificador '$name' ya fue declarado",
-                    $ids[$i]->getSymbol()
-                );
-                continue;
-            }
 
             if ($caind === "const" && is_null($value)) {
                 $this->addError(
@@ -565,14 +580,69 @@ class Interpreter extends GrammarBaseVisitor
                 continue;
             }
 
-            $etiq = $this->getEtiquete($value);
+            if (!$this->declare($name, [])) {
+                $this->addError(
+                    "Identificador '$name' ya fue declarado en este scope",
+                    $ids[$i]->getSymbol()
+                );
+                continue;
+            }
+
+
             $this->syCount++;
-            $this->symbolTable[$name] = [
+
+            $currentScope = &$this->scopes[count($this->scopes) - 1]["symbols"];
+
+            $currentScope[$name] = [
                 "n" => $this->syCount,
                 "caind" => $caind,
                 "type" => $type,
                 "val"  => $value,
-                "etiq" => $etiq
+                "etiq" => $this->getEtiquete($value)
+            ];
+        }
+
+        return null;
+    }
+
+
+    public function visitDecl(DeclContext $context)
+    {
+        $ids  = $context->lid()->ID();
+        $caind = $context->pre()->getText();
+        $type = $this->visit($context->type());
+        $value = $this->getDefaulValue($type);
+
+        for ($i = 0; $i < count($ids); $i++) {
+
+            $name = $ids[$i]->getText();
+
+            if ($caind === "const") {
+                $this->addError(
+                    "No se puede usar esta declaracion para constantes",
+                    $ids[$i]->getSymbol()
+                );
+                continue;
+            }
+
+            if (!$this->declare($name, [])) {
+                $this->addError(
+                    "Identificador '$name' ya fue declarado en este scope",
+                    $ids[$i]->getSymbol()
+                );
+                continue;
+            }
+
+            $this->syCount++;
+
+            $currentScope = &$this->scopes[count($this->scopes) - 1]["symbols"];
+
+            $currentScope[$name] = [
+                "n" => $this->syCount,
+                "caind" => $caind,
+                "type" => $type,
+                "val"  => $value,
+                "etiq" => $this->getEtiquete($value)
             ];
         }
 
@@ -593,78 +663,46 @@ class Interpreter extends GrammarBaseVisitor
         }
 
         for ($i = 0; $i < count($ids); $i++) {
+
             $name  = $ids[$i]->getText();
             $value = $this->visit($vals[$i]);
-            $type = $this->getTypeFromValue($value);
+            $type  = $this->getTypeFromValue($value);
 
-            if ($this->isDuplicate($name)) {
+            if (!$this->declare($name, [])) {
                 $this->addError(
-                    "Identificador '$name' ya fue declarado",
+                    "Identificador '$name' ya fue declarado en este scope",
                     $ids[$i]->getSymbol()
                 );
                 continue;
             }
 
             $etiq = $this->getEtiquete($value);
+
             $this->syCount++;
-            $this->symbolTable[$name] = [
+
+            $currentScope = &$this->scopes[count($this->scopes) - 1]["symbols"];
+
+            $currentScope[$name] = [
                 "n" => $this->syCount,
                 "caind" => "var",
                 "type" => $type,
                 "val"  => $value,
-                "etiq" => $etiq
+                "etiq" => $this->getEtiquete($value)
             ];
         }
 
         return null;
     }
 
-
-    public function visitDecl(DeclContext $context)
-    {
-        $ids  = $context->lid()->ID();
-        $caind = $context->pre()->getText();
-        $type = $this->visit($context->type());
-        $value = $this->getDefaulValue($type);
-
-
-
-        for ($i = 0; $i < count($ids); $i++) {
-            if ($caind === "const") {
-                $this->addError(
-                    "No se puede usar esta declaracion para constantes",
-                    $ids[$i]->getSymbol()
-                );
-                continue;
-            }
-
-            $name  = $ids[$i]->getText();
-            if ($this->isDuplicate($name)) {
-                $this->addError(
-                    "Identificador '$name' ya fue declarado",
-                    $ids[$i]->getSymbol()
-                );
-                continue;
-            }
-
-            $this->syCount++;
-            $this->symbolTable[$name] = [
-                "n" => $this->syCount,
-                "caind" => $caind,
-                "type" => $type,
-                "val"  => $value,
-                "etiq" => $this->getDefaultEtiquet($type)
-            ];
-        }
-        return null;
-    }
     // ---------------- Expresiones ----------------
 
     public function visitIdExpr(IdExprContext $context)
     {
         $name = $context->ID()->getText();
 
-        if (!$this->isDuplicate($name)) {
+        $symbol = $this->resolve($name);
+
+        if ($symbol === null) {
             $this->addError(
                 "La variable '$name' no ha sido declarada",
                 $context->ID()->getSymbol()
@@ -672,7 +710,7 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        return $this->symbolTable[$name]["val"];
+        return $symbol["val"];
     }
 
     public function visitParens(ParensContext $context)

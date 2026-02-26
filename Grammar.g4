@@ -1,6 +1,6 @@
 grammar Grammar;
 
-s: FUNC MAIN '(' ')' '{' stmts* '}' EOF;
+s: FUNC MAIN '(' ')' '{' stmts* '}' EOF # S;
 
 stmts: dec | asg;
 
@@ -17,16 +17,19 @@ asg:
 	| ID '/=' expr	# DivAsig;
 
 expr:
-	expr op = ('*' | '/' | '%') expr	# MulDivMod
-	| expr op = ('+' | '-') expr		# AddSub
-	| '(' expr ')'						# Parens
-	| NUM								# Num
-	| FLOAT								# Float
-	| ID								# IdExpr
-	| BOOLE								# Boole
-	| STRING							# String
-	| RUNE								# Rune
-	| NIL								# Nil;
+	expr op = ('*' | '/' | '%') expr			# MulDivMod
+	| expr op = ('+' | '-') expr				# AddSub
+	| expr op = ('==' | '!=') expr				# EqNotEq
+	| expr op = ('>=' | '<=' | '>' | '<') expr	# MoreLessEq
+	| expr op = ('&&' | '||') expr				# AndOr
+	| '(' expr ')'								# Parens
+	| NUM										# Num
+	| FLOAT										# Float
+	| ID										# IdExpr
+	| BOOLE										# Boole
+	| STRING									# String
+	| RUNE										# Rune
+	| NIL										# Nil;
 
 lid: ID (',' ID)*;
 

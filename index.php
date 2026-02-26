@@ -8,6 +8,9 @@
 <body>
 
     <?php
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+
     require __DIR__ . "/vendor/autoload.php";
     require_once "bootstrap.php";
 
@@ -30,23 +33,24 @@
                 $tokens = new CommonTokenStream($lexer);
                 $parser = new GrammarParser($tokens);
 
-                // Crear árbol sintáctico
+
                 $tree = $parser->s();
 
-                // Ejecutar intérprete
+
                 $interpreter = new Interpreter();
                 $interpreter->visit($tree);
 
-                // Mostrar tabla de símbolos (opcional)
-                $output = "<pre>" . print_r($interpreter->symbolTable, true) . "</pre>";
 
-                // Mostrar errores si existen
+                $output .= "<h3>Scopes</h3>";
+                $output .= "<pre>" . print_r($interpreter->scopes ?? [], true) . "</pre>";
+
+
                 if (!empty($interpreter->errorTable)) {
                     $output .= "<h3>Errores</h3><pre>" .
                         print_r($interpreter->errorTable, true) .
                         "</pre>";
                 }
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 $output = "<pre>Error: " . $e->getMessage() . "</pre>";
             }
         }
