@@ -110,36 +110,6 @@ interface GrammarVisitor extends ParseTreeVisitor
 	public function visitDivAsig(Context\DivAsigContext $context);
 
 	/**
-	 * Visit a parse tree produced by the `Nil` labeled alternative
-	 * in {@see GrammarParser::expr()}.
-	 *
-	 * @param Context\NilContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitNil(Context\NilContext $context);
-
-	/**
-	 * Visit a parse tree produced by the `Float` labeled alternative
-	 * in {@see GrammarParser::expr()}.
-	 *
-	 * @param Context\FloatContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitFloat(Context\FloatContext $context);
-
-	/**
-	 * Visit a parse tree produced by the `MulDivMod` labeled alternative
-	 * in {@see GrammarParser::expr()}.
-	 *
-	 * @param Context\MulDivModContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitMulDivMod(Context\MulDivModContext $context);
-
-	/**
 	 * Visit a parse tree produced by the `IdExpr` labeled alternative
 	 * in {@see GrammarParser::expr()}.
 	 *
@@ -200,6 +170,56 @@ interface GrammarVisitor extends ParseTreeVisitor
 	public function visitBoole(Context\BooleContext $context);
 
 	/**
+	 * Visit a parse tree produced by the `MoreLessEq` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\MoreLessEqContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitMoreLessEq(Context\MoreLessEqContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Nil` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\NilContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitNil(Context\NilContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Float` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\FloatContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitFloat(Context\FloatContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `MulDivMod` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\MulDivModContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitMulDivMod(Context\MulDivModContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `EqNotEq` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\EqNotEqContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitEqNotEq(Context\EqNotEqContext $context);
+
+	/**
 	 * Visit a parse tree produced by the `Rune` labeled alternative
 	 * in {@see GrammarParser::expr()}.
 	 *
@@ -208,6 +228,16 @@ interface GrammarVisitor extends ParseTreeVisitor
 	 * @return mixed The visitor result.
 	 */
 	public function visitRune(Context\RuneContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `AndOr` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\AndOrContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitAndOr(Context\AndOrContext $context);
 
 	/**
 	 * Visit a parse tree produced by {@see GrammarParser::lid()}.

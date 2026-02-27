@@ -25,11 +25,13 @@ namespace {
 	{
 		public const T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, 
                T__6 = 7, T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, 
-               T__12 = 13, T__13 = 14, T__14 = 15, T__15 = 16, FUNC = 17, 
-               MAIN = 18, PVAR = 19, PCONST = 20, PINT = 21, PFLOAT = 22, 
-               PBOOL = 23, PSTRING = 24, PRUNE = 25, NUM = 26, FLOAT = 27, 
-               NIL = 28, BOOLE = 29, STRING = 30, RUNE = 31, ID = 32, LINE_COMMENT = 33, 
-               BLOCK_COMMENT = 34, WS = 35;
+               T__12 = 13, T__13 = 14, T__14 = 15, T__15 = 16, T__16 = 17, 
+               T__17 = 18, T__18 = 19, T__19 = 20, T__20 = 21, T__21 = 22, 
+               T__22 = 23, T__23 = 24, FUNC = 25, MAIN = 26, PVAR = 27, 
+               PCONST = 28, PINT = 29, PFLOAT = 30, PBOOL = 31, PSTRING = 32, 
+               PRUNE = 33, NUM = 34, FLOAT = 35, NIL = 36, BOOLE = 37, STRING = 38, 
+               RUNE = 39, ID = 40, LINE_COMMENT = 41, BLOCK_COMMENT = 42, 
+               WS = 43;
 
 		public const RULE_s = 0, RULE_stmts = 1, RULE_dec = 2, RULE_asg = 3, RULE_expr = 4, 
                RULE_lid = 5, RULE_lval = 6, RULE_pre = 7, RULE_type = 8;
@@ -46,9 +48,10 @@ namespace {
 		 */
 		private const LITERAL_NAMES = [
 		    null, "'('", "')'", "'{'", "'}'", "'='", "':='", "'+='", "'-='", "'*='", 
-		    "'/='", "'*'", "'/'", "'%'", "'+'", "'-'", "','", "'func'", "'main'", 
-		    "'var'", "'const'", "'int32'", "'float32'", "'boole'", "'string'", 
-		    "'rune'", null, null, "'nil'"
+		    "'/='", "'*'", "'/'", "'%'", "'+'", "'-'", "'=='", "'!='", "'>='", 
+		    "'<='", "'>'", "'<'", "'&&'", "'||'", "','", "'func'", "'main'", "'var'", 
+		    "'const'", "'int32'", "'float32'", "'boole'", "'string'", "'rune'", 
+		    null, null, "'nil'"
 		];
 
 		/**
@@ -56,14 +59,14 @@ namespace {
 		 */
 		private const SYMBOLIC_NAMES = [
 		    null, null, null, null, null, null, null, null, null, null, null, 
-		    null, null, null, null, null, null, "FUNC", "MAIN", "PVAR", "PCONST", 
-		    "PINT", "PFLOAT", "PBOOL", "PSTRING", "PRUNE", "NUM", "FLOAT", "NIL", 
-		    "BOOLE", "STRING", "RUNE", "ID", "LINE_COMMENT", "BLOCK_COMMENT", 
-		    "WS"
+		    null, null, null, null, null, null, null, null, null, null, null, 
+		    null, null, null, "FUNC", "MAIN", "PVAR", "PCONST", "PINT", "PFLOAT", 
+		    "PBOOL", "PSTRING", "PRUNE", "NUM", "FLOAT", "NIL", "BOOLE", "STRING", 
+		    "RUNE", "ID", "LINE_COMMENT", "BLOCK_COMMENT", "WS"
 		];
 
 		private const SERIALIZED_ATN =
-			[4, 1, 35, 122, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 
+			[4, 1, 43, 131, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 
 		    7, 4, 2, 5, 7, 5, 2, 6, 7, 6, 2, 7, 7, 7, 2, 8, 7, 8, 1, 0, 1, 0, 
 		    1, 0, 1, 0, 1, 0, 1, 0, 5, 0, 25, 8, 0, 10, 0, 12, 0, 28, 9, 0, 1, 
 		    0, 1, 0, 1, 0, 1, 1, 1, 1, 3, 1, 35, 8, 1, 1, 2, 1, 2, 1, 2, 1, 2, 
@@ -71,54 +74,60 @@ namespace {
 		    51, 8, 2, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 
 		    3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 3, 3, 68, 8, 3, 1, 4, 1, 4, 1, 4, 
 		    1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 3, 4, 82, 8, 
-		    4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 5, 4, 90, 8, 4, 10, 4, 12, 
-		    4, 93, 9, 4, 1, 5, 1, 5, 1, 5, 5, 5, 98, 8, 5, 10, 5, 12, 5, 101, 
-		    9, 5, 1, 6, 1, 6, 1, 6, 5, 6, 106, 8, 6, 10, 6, 12, 6, 109, 9, 6, 
-		    1, 7, 1, 7, 3, 7, 113, 8, 7, 1, 8, 1, 8, 1, 8, 1, 8, 1, 8, 3, 8, 120, 
-		    8, 8, 1, 8, 0, 1, 8, 9, 0, 2, 4, 6, 8, 10, 12, 14, 16, 0, 2, 1, 0, 
-		    11, 13, 1, 0, 14, 15, 136, 0, 18, 1, 0, 0, 0, 2, 34, 1, 0, 0, 0, 4, 
-		    50, 1, 0, 0, 0, 6, 67, 1, 0, 0, 0, 8, 81, 1, 0, 0, 0, 10, 94, 1, 0, 
-		    0, 0, 12, 102, 1, 0, 0, 0, 14, 112, 1, 0, 0, 0, 16, 119, 1, 0, 0, 
-		    0, 18, 19, 5, 17, 0, 0, 19, 20, 5, 18, 0, 0, 20, 21, 5, 1, 0, 0, 21, 
-		    22, 5, 2, 0, 0, 22, 26, 5, 3, 0, 0, 23, 25, 3, 2, 1, 0, 24, 23, 1, 
-		    0, 0, 0, 25, 28, 1, 0, 0, 0, 26, 24, 1, 0, 0, 0, 26, 27, 1, 0, 0, 
-		    0, 27, 29, 1, 0, 0, 0, 28, 26, 1, 0, 0, 0, 29, 30, 5, 4, 0, 0, 30, 
-		    31, 5, 0, 0, 1, 31, 1, 1, 0, 0, 0, 32, 35, 3, 4, 2, 0, 33, 35, 3, 
-		    6, 3, 0, 34, 32, 1, 0, 0, 0, 34, 33, 1, 0, 0, 0, 35, 3, 1, 0, 0, 0, 
-		    36, 37, 3, 14, 7, 0, 37, 38, 3, 10, 5, 0, 38, 39, 3, 16, 8, 0, 39, 
-		    40, 5, 5, 0, 0, 40, 41, 3, 12, 6, 0, 41, 51, 1, 0, 0, 0, 42, 43, 3, 
-		    14, 7, 0, 43, 44, 3, 10, 5, 0, 44, 45, 3, 16, 8, 0, 45, 51, 1, 0, 
-		    0, 0, 46, 47, 3, 10, 5, 0, 47, 48, 5, 6, 0, 0, 48, 49, 3, 12, 6, 0, 
-		    49, 51, 1, 0, 0, 0, 50, 36, 1, 0, 0, 0, 50, 42, 1, 0, 0, 0, 50, 46, 
-		    1, 0, 0, 0, 51, 5, 1, 0, 0, 0, 52, 53, 5, 32, 0, 0, 53, 54, 5, 5, 
-		    0, 0, 54, 68, 3, 8, 4, 0, 55, 56, 5, 32, 0, 0, 56, 57, 5, 7, 0, 0, 
-		    57, 68, 3, 8, 4, 0, 58, 59, 5, 32, 0, 0, 59, 60, 5, 8, 0, 0, 60, 68, 
-		    3, 8, 4, 0, 61, 62, 5, 32, 0, 0, 62, 63, 5, 9, 0, 0, 63, 68, 3, 8, 
-		    4, 0, 64, 65, 5, 32, 0, 0, 65, 66, 5, 10, 0, 0, 66, 68, 3, 8, 4, 0, 
-		    67, 52, 1, 0, 0, 0, 67, 55, 1, 0, 0, 0, 67, 58, 1, 0, 0, 0, 67, 61, 
-		    1, 0, 0, 0, 67, 64, 1, 0, 0, 0, 68, 7, 1, 0, 0, 0, 69, 70, 6, 4, -1, 
-		    0, 70, 71, 5, 1, 0, 0, 71, 72, 3, 8, 4, 0, 72, 73, 5, 2, 0, 0, 73, 
-		    82, 1, 0, 0, 0, 74, 82, 5, 26, 0, 0, 75, 82, 5, 27, 0, 0, 76, 82, 
-		    5, 32, 0, 0, 77, 82, 5, 29, 0, 0, 78, 82, 5, 30, 0, 0, 79, 82, 5, 
-		    31, 0, 0, 80, 82, 5, 28, 0, 0, 81, 69, 1, 0, 0, 0, 81, 74, 1, 0, 0, 
-		    0, 81, 75, 1, 0, 0, 0, 81, 76, 1, 0, 0, 0, 81, 77, 1, 0, 0, 0, 81, 
-		    78, 1, 0, 0, 0, 81, 79, 1, 0, 0, 0, 81, 80, 1, 0, 0, 0, 82, 91, 1, 
-		    0, 0, 0, 83, 84, 10, 10, 0, 0, 84, 85, 7, 0, 0, 0, 85, 90, 3, 8, 4, 
-		    11, 86, 87, 10, 9, 0, 0, 87, 88, 7, 1, 0, 0, 88, 90, 3, 8, 4, 10, 
-		    89, 83, 1, 0, 0, 0, 89, 86, 1, 0, 0, 0, 90, 93, 1, 0, 0, 0, 91, 89, 
-		    1, 0, 0, 0, 91, 92, 1, 0, 0, 0, 92, 9, 1, 0, 0, 0, 93, 91, 1, 0, 0, 
-		    0, 94, 99, 5, 32, 0, 0, 95, 96, 5, 16, 0, 0, 96, 98, 5, 32, 0, 0, 
-		    97, 95, 1, 0, 0, 0, 98, 101, 1, 0, 0, 0, 99, 97, 1, 0, 0, 0, 99, 100, 
-		    1, 0, 0, 0, 100, 11, 1, 0, 0, 0, 101, 99, 1, 0, 0, 0, 102, 107, 3, 
-		    8, 4, 0, 103, 104, 5, 16, 0, 0, 104, 106, 3, 8, 4, 0, 105, 103, 1, 
-		    0, 0, 0, 106, 109, 1, 0, 0, 0, 107, 105, 1, 0, 0, 0, 107, 108, 1, 
-		    0, 0, 0, 108, 13, 1, 0, 0, 0, 109, 107, 1, 0, 0, 0, 110, 113, 5, 19, 
-		    0, 0, 111, 113, 5, 20, 0, 0, 112, 110, 1, 0, 0, 0, 112, 111, 1, 0, 
-		    0, 0, 113, 15, 1, 0, 0, 0, 114, 120, 5, 21, 0, 0, 115, 120, 5, 22, 
-		    0, 0, 116, 120, 5, 23, 0, 0, 117, 120, 5, 24, 0, 0, 118, 120, 5, 25, 
-		    0, 0, 119, 114, 1, 0, 0, 0, 119, 115, 1, 0, 0, 0, 119, 116, 1, 0, 
-		    0, 0, 119, 117, 1, 0, 0, 0, 119, 118, 1, 0, 0, 0, 120, 17, 1, 0, 0, 
-		    0, 11, 26, 34, 50, 67, 81, 89, 91, 99, 107, 112, 119];
+		    4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 
+		    4, 1, 4, 1, 4, 1, 4, 1, 4, 5, 4, 99, 8, 4, 10, 4, 12, 4, 102, 9, 4, 
+		    1, 5, 1, 5, 1, 5, 5, 5, 107, 8, 5, 10, 5, 12, 5, 110, 9, 5, 1, 6, 
+		    1, 6, 1, 6, 5, 6, 115, 8, 6, 10, 6, 12, 6, 118, 9, 6, 1, 7, 1, 7, 
+		    3, 7, 122, 8, 7, 1, 8, 1, 8, 1, 8, 1, 8, 1, 8, 3, 8, 129, 8, 8, 1, 
+		    8, 0, 1, 8, 9, 0, 2, 4, 6, 8, 10, 12, 14, 16, 0, 5, 1, 0, 11, 13, 
+		    1, 0, 14, 15, 1, 0, 16, 17, 1, 0, 18, 21, 1, 0, 22, 23, 148, 0, 18, 
+		    1, 0, 0, 0, 2, 34, 1, 0, 0, 0, 4, 50, 1, 0, 0, 0, 6, 67, 1, 0, 0, 
+		    0, 8, 81, 1, 0, 0, 0, 10, 103, 1, 0, 0, 0, 12, 111, 1, 0, 0, 0, 14, 
+		    121, 1, 0, 0, 0, 16, 128, 1, 0, 0, 0, 18, 19, 5, 25, 0, 0, 19, 20, 
+		    5, 26, 0, 0, 20, 21, 5, 1, 0, 0, 21, 22, 5, 2, 0, 0, 22, 26, 5, 3, 
+		    0, 0, 23, 25, 3, 2, 1, 0, 24, 23, 1, 0, 0, 0, 25, 28, 1, 0, 0, 0, 
+		    26, 24, 1, 0, 0, 0, 26, 27, 1, 0, 0, 0, 27, 29, 1, 0, 0, 0, 28, 26, 
+		    1, 0, 0, 0, 29, 30, 5, 4, 0, 0, 30, 31, 5, 0, 0, 1, 31, 1, 1, 0, 0, 
+		    0, 32, 35, 3, 4, 2, 0, 33, 35, 3, 6, 3, 0, 34, 32, 1, 0, 0, 0, 34, 
+		    33, 1, 0, 0, 0, 35, 3, 1, 0, 0, 0, 36, 37, 3, 14, 7, 0, 37, 38, 3, 
+		    10, 5, 0, 38, 39, 3, 16, 8, 0, 39, 40, 5, 5, 0, 0, 40, 41, 3, 12, 
+		    6, 0, 41, 51, 1, 0, 0, 0, 42, 43, 3, 14, 7, 0, 43, 44, 3, 10, 5, 0, 
+		    44, 45, 3, 16, 8, 0, 45, 51, 1, 0, 0, 0, 46, 47, 3, 10, 5, 0, 47, 
+		    48, 5, 6, 0, 0, 48, 49, 3, 12, 6, 0, 49, 51, 1, 0, 0, 0, 50, 36, 1, 
+		    0, 0, 0, 50, 42, 1, 0, 0, 0, 50, 46, 1, 0, 0, 0, 51, 5, 1, 0, 0, 0, 
+		    52, 53, 5, 40, 0, 0, 53, 54, 5, 5, 0, 0, 54, 68, 3, 8, 4, 0, 55, 56, 
+		    5, 40, 0, 0, 56, 57, 5, 7, 0, 0, 57, 68, 3, 8, 4, 0, 58, 59, 5, 40, 
+		    0, 0, 59, 60, 5, 8, 0, 0, 60, 68, 3, 8, 4, 0, 61, 62, 5, 40, 0, 0, 
+		    62, 63, 5, 9, 0, 0, 63, 68, 3, 8, 4, 0, 64, 65, 5, 40, 0, 0, 65, 66, 
+		    5, 10, 0, 0, 66, 68, 3, 8, 4, 0, 67, 52, 1, 0, 0, 0, 67, 55, 1, 0, 
+		    0, 0, 67, 58, 1, 0, 0, 0, 67, 61, 1, 0, 0, 0, 67, 64, 1, 0, 0, 0, 
+		    68, 7, 1, 0, 0, 0, 69, 70, 6, 4, -1, 0, 70, 71, 5, 1, 0, 0, 71, 72, 
+		    3, 8, 4, 0, 72, 73, 5, 2, 0, 0, 73, 82, 1, 0, 0, 0, 74, 82, 5, 34, 
+		    0, 0, 75, 82, 5, 35, 0, 0, 76, 82, 5, 40, 0, 0, 77, 82, 5, 37, 0, 
+		    0, 78, 82, 5, 38, 0, 0, 79, 82, 5, 39, 0, 0, 80, 82, 5, 36, 0, 0, 
+		    81, 69, 1, 0, 0, 0, 81, 74, 1, 0, 0, 0, 81, 75, 1, 0, 0, 0, 81, 76, 
+		    1, 0, 0, 0, 81, 77, 1, 0, 0, 0, 81, 78, 1, 0, 0, 0, 81, 79, 1, 0, 
+		    0, 0, 81, 80, 1, 0, 0, 0, 82, 100, 1, 0, 0, 0, 83, 84, 10, 13, 0, 
+		    0, 84, 85, 7, 0, 0, 0, 85, 99, 3, 8, 4, 14, 86, 87, 10, 12, 0, 0, 
+		    87, 88, 7, 1, 0, 0, 88, 99, 3, 8, 4, 13, 89, 90, 10, 11, 0, 0, 90, 
+		    91, 7, 2, 0, 0, 91, 99, 3, 8, 4, 12, 92, 93, 10, 10, 0, 0, 93, 94, 
+		    7, 3, 0, 0, 94, 99, 3, 8, 4, 11, 95, 96, 10, 9, 0, 0, 96, 97, 7, 4, 
+		    0, 0, 97, 99, 3, 8, 4, 10, 98, 83, 1, 0, 0, 0, 98, 86, 1, 0, 0, 0, 
+		    98, 89, 1, 0, 0, 0, 98, 92, 1, 0, 0, 0, 98, 95, 1, 0, 0, 0, 99, 102, 
+		    1, 0, 0, 0, 100, 98, 1, 0, 0, 0, 100, 101, 1, 0, 0, 0, 101, 9, 1, 
+		    0, 0, 0, 102, 100, 1, 0, 0, 0, 103, 108, 5, 40, 0, 0, 104, 105, 5, 
+		    24, 0, 0, 105, 107, 5, 40, 0, 0, 106, 104, 1, 0, 0, 0, 107, 110, 1, 
+		    0, 0, 0, 108, 106, 1, 0, 0, 0, 108, 109, 1, 0, 0, 0, 109, 11, 1, 0, 
+		    0, 0, 110, 108, 1, 0, 0, 0, 111, 116, 3, 8, 4, 0, 112, 113, 5, 24, 
+		    0, 0, 113, 115, 3, 8, 4, 0, 114, 112, 1, 0, 0, 0, 115, 118, 1, 0, 
+		    0, 0, 116, 114, 1, 0, 0, 0, 116, 117, 1, 0, 0, 0, 117, 13, 1, 0, 0, 
+		    0, 118, 116, 1, 0, 0, 0, 119, 122, 5, 27, 0, 0, 120, 122, 5, 28, 0, 
+		    0, 121, 119, 1, 0, 0, 0, 121, 120, 1, 0, 0, 0, 122, 15, 1, 0, 0, 0, 
+		    123, 129, 5, 29, 0, 0, 124, 129, 5, 30, 0, 0, 125, 129, 5, 31, 0, 
+		    0, 126, 129, 5, 32, 0, 0, 127, 129, 5, 33, 0, 0, 128, 123, 1, 0, 0, 
+		    0, 128, 124, 1, 0, 0, 0, 128, 125, 1, 0, 0, 0, 128, 126, 1, 0, 0, 
+		    0, 128, 127, 1, 0, 0, 0, 129, 17, 1, 0, 0, 0, 11, 26, 34, 50, 67, 
+		    81, 98, 100, 108, 116, 121, 128];
 		protected static $atn;
 		protected static $decisionToDFA;
 		protected static $sharedContextCache;
@@ -204,7 +213,7 @@ namespace {
 		        $this->errorHandler->sync($this);
 
 		        $_la = $this->input->LA(1);
-		        while (((($_la) & ~0x3f) === 0 && ((1 << $_la) & 4296540160) !== 0)) {
+		        while (((($_la) & ~0x3f) === 0 && ((1 << $_la) & 1099914280960) !== 0)) {
 		        	$this->setState(23);
 		        	$this->stmts();
 		        	$this->setState(28);
@@ -504,7 +513,7 @@ namespace {
 					throw new NoViableAltException($this);
 				}
 				$this->ctx->stop = $this->input->LT(-1);
-				$this->setState(91);
+				$this->setState(100);
 				$this->errorHandler->sync($this);
 
 				$alt = $this->getInterpreter()->adaptivePredict($this->input, 6, $this->ctx);
@@ -516,7 +525,7 @@ namespace {
 						}
 
 						$previousContext = $localContext;
-						$this->setState(89);
+						$this->setState(98);
 						$this->errorHandler->sync($this);
 
 						switch ($this->getInterpreter()->adaptivePredict($this->input, 5, $this->ctx)) {
@@ -525,8 +534,8 @@ namespace {
 							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
 							    $this->setState(83);
 
-							    if (!($this->precpred($this->ctx, 10))) {
-							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 10)");
+							    if (!($this->precpred($this->ctx, 13))) {
+							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 13)");
 							    }
 							    $this->setState(84);
 
@@ -544,7 +553,7 @@ namespace {
 							    	$this->consume();
 							    }
 							    $this->setState(85);
-							    $this->recursiveExpr(11);
+							    $this->recursiveExpr(14);
 							break;
 
 							case 2:
@@ -552,8 +561,8 @@ namespace {
 							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
 							    $this->setState(86);
 
-							    if (!($this->precpred($this->ctx, 9))) {
-							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 9)");
+							    if (!($this->precpred($this->ctx, 12))) {
+							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 12)");
 							    }
 							    $this->setState(87);
 
@@ -571,12 +580,93 @@ namespace {
 							    	$this->consume();
 							    }
 							    $this->setState(88);
+							    $this->recursiveExpr(13);
+							break;
+
+							case 3:
+							    $localContext = new Context\EqNotEqContext(new Context\ExprContext($parentContext, $parentState));
+							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
+							    $this->setState(89);
+
+							    if (!($this->precpred($this->ctx, 11))) {
+							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 11)");
+							    }
+							    $this->setState(90);
+
+							    $localContext->op = $this->input->LT(1);
+							    $_la = $this->input->LA(1);
+
+							    if (!($_la === self::T__15 || $_la === self::T__16)) {
+							    	    $localContext->op = $this->errorHandler->recoverInline($this);
+							    } else {
+							    	if ($this->input->LA(1) === Token::EOF) {
+							    	    $this->matchedEOF = true;
+							        }
+
+							    	$this->errorHandler->reportMatch($this);
+							    	$this->consume();
+							    }
+							    $this->setState(91);
+							    $this->recursiveExpr(12);
+							break;
+
+							case 4:
+							    $localContext = new Context\MoreLessEqContext(new Context\ExprContext($parentContext, $parentState));
+							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
+							    $this->setState(92);
+
+							    if (!($this->precpred($this->ctx, 10))) {
+							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 10)");
+							    }
+							    $this->setState(93);
+
+							    $localContext->op = $this->input->LT(1);
+							    $_la = $this->input->LA(1);
+
+							    if (!(((($_la) & ~0x3f) === 0 && ((1 << $_la) & 3932160) !== 0))) {
+							    	    $localContext->op = $this->errorHandler->recoverInline($this);
+							    } else {
+							    	if ($this->input->LA(1) === Token::EOF) {
+							    	    $this->matchedEOF = true;
+							        }
+
+							    	$this->errorHandler->reportMatch($this);
+							    	$this->consume();
+							    }
+							    $this->setState(94);
+							    $this->recursiveExpr(11);
+							break;
+
+							case 5:
+							    $localContext = new Context\AndOrContext(new Context\ExprContext($parentContext, $parentState));
+							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
+							    $this->setState(95);
+
+							    if (!($this->precpred($this->ctx, 9))) {
+							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 9)");
+							    }
+							    $this->setState(96);
+
+							    $localContext->op = $this->input->LT(1);
+							    $_la = $this->input->LA(1);
+
+							    if (!($_la === self::T__21 || $_la === self::T__22)) {
+							    	    $localContext->op = $this->errorHandler->recoverInline($this);
+							    } else {
+							    	if ($this->input->LA(1) === Token::EOF) {
+							    	    $this->matchedEOF = true;
+							        }
+
+							    	$this->errorHandler->reportMatch($this);
+							    	$this->consume();
+							    }
+							    $this->setState(97);
 							    $this->recursiveExpr(10);
 							break;
 						} 
 					}
 
-					$this->setState(93);
+					$this->setState(102);
 					$this->errorHandler->sync($this);
 
 					$alt = $this->getInterpreter()->adaptivePredict($this->input, 6, $this->ctx);
@@ -603,18 +693,18 @@ namespace {
 
 		    try {
 		        $this->enterOuterAlt($localContext, 1);
-		        $this->setState(94);
+		        $this->setState(103);
 		        $this->match(self::ID);
-		        $this->setState(99);
+		        $this->setState(108);
 		        $this->errorHandler->sync($this);
 
 		        $_la = $this->input->LA(1);
-		        while ($_la === self::T__15) {
-		        	$this->setState(95);
-		        	$this->match(self::T__15);
-		        	$this->setState(96);
+		        while ($_la === self::T__23) {
+		        	$this->setState(104);
+		        	$this->match(self::T__23);
+		        	$this->setState(105);
 		        	$this->match(self::ID);
-		        	$this->setState(101);
+		        	$this->setState(110);
 		        	$this->errorHandler->sync($this);
 		        	$_la = $this->input->LA(1);
 		        }
@@ -640,18 +730,18 @@ namespace {
 
 		    try {
 		        $this->enterOuterAlt($localContext, 1);
-		        $this->setState(102);
+		        $this->setState(111);
 		        $this->recursiveExpr(0);
-		        $this->setState(107);
+		        $this->setState(116);
 		        $this->errorHandler->sync($this);
 
 		        $_la = $this->input->LA(1);
-		        while ($_la === self::T__15) {
-		        	$this->setState(103);
-		        	$this->match(self::T__15);
-		        	$this->setState(104);
+		        while ($_la === self::T__23) {
+		        	$this->setState(112);
+		        	$this->match(self::T__23);
+		        	$this->setState(113);
 		        	$this->recursiveExpr(0);
-		        	$this->setState(109);
+		        	$this->setState(118);
 		        	$this->errorHandler->sync($this);
 		        	$_la = $this->input->LA(1);
 		        }
@@ -676,21 +766,21 @@ namespace {
 		    $this->enterRule($localContext, 14, self::RULE_pre);
 
 		    try {
-		        $this->setState(112);
+		        $this->setState(121);
 		        $this->errorHandler->sync($this);
 
 		        switch ($this->input->LA(1)) {
 		            case self::PVAR:
 		            	$localContext = new Context\VarContext($localContext);
 		            	$this->enterOuterAlt($localContext, 1);
-		            	$this->setState(110);
+		            	$this->setState(119);
 		            	$this->match(self::PVAR);
 		            	break;
 
 		            case self::PCONST:
 		            	$localContext = new Context\ConstContext($localContext);
 		            	$this->enterOuterAlt($localContext, 2);
-		            	$this->setState(111);
+		            	$this->setState(120);
 		            	$this->match(self::PCONST);
 		            	break;
 
@@ -718,42 +808,42 @@ namespace {
 		    $this->enterRule($localContext, 16, self::RULE_type);
 
 		    try {
-		        $this->setState(119);
+		        $this->setState(128);
 		        $this->errorHandler->sync($this);
 
 		        switch ($this->input->LA(1)) {
 		            case self::PINT:
 		            	$localContext = new Context\PintContext($localContext);
 		            	$this->enterOuterAlt($localContext, 1);
-		            	$this->setState(114);
+		            	$this->setState(123);
 		            	$this->match(self::PINT);
 		            	break;
 
 		            case self::PFLOAT:
 		            	$localContext = new Context\PfloatContext($localContext);
 		            	$this->enterOuterAlt($localContext, 2);
-		            	$this->setState(115);
+		            	$this->setState(124);
 		            	$this->match(self::PFLOAT);
 		            	break;
 
 		            case self::PBOOL:
 		            	$localContext = new Context\PbooleContext($localContext);
 		            	$this->enterOuterAlt($localContext, 3);
-		            	$this->setState(116);
+		            	$this->setState(125);
 		            	$this->match(self::PBOOL);
 		            	break;
 
 		            case self::PSTRING:
 		            	$localContext = new Context\PstringContext($localContext);
 		            	$this->enterOuterAlt($localContext, 4);
-		            	$this->setState(117);
+		            	$this->setState(126);
 		            	$this->match(self::PSTRING);
 		            	break;
 
 		            case self::PRUNE:
 		            	$localContext = new Context\PruneContext($localContext);
 		            	$this->enterOuterAlt($localContext, 5);
-		            	$this->setState(118);
+		            	$this->setState(127);
 		            	$this->match(self::PRUNE);
 		            	break;
 
@@ -786,9 +876,18 @@ namespace {
 		{
 			switch ($predicateIndex) {
 			    case 0:
-			        return $this->precpred($this->ctx, 10);
+			        return $this->precpred($this->ctx, 13);
 
 			    case 1:
+			        return $this->precpred($this->ctx, 12);
+
+			    case 2:
+			        return $this->precpred($this->ctx, 11);
+
+			    case 3:
+			        return $this->precpred($this->ctx, 10);
+
+			    case 4:
 			        return $this->precpred($this->ctx, 9);
 			}
 
@@ -1332,132 +1431,6 @@ namespace Context {
 		}
 	}
 
-	class NilContext extends ExprContext
-	{
-		public function __construct(ExprContext $context)
-		{
-		    parent::__construct($context);
-
-		    $this->copyFrom($context);
-	    }
-
-	    public function NIL(): ?TerminalNode
-	    {
-	        return $this->getToken(GrammarParser::NIL, 0);
-	    }
-
-		public function enterRule(ParseTreeListener $listener): void
-		{
-			if ($listener instanceof GrammarListener) {
-			    $listener->enterNil($this);
-		    }
-		}
-
-		public function exitRule(ParseTreeListener $listener): void
-		{
-			if ($listener instanceof GrammarListener) {
-			    $listener->exitNil($this);
-		    }
-		}
-
-		public function accept(ParseTreeVisitor $visitor): mixed
-		{
-			if ($visitor instanceof GrammarVisitor) {
-			    return $visitor->visitNil($this);
-		    }
-
-			return $visitor->visitChildren($this);
-		}
-	}
-
-	class FloatContext extends ExprContext
-	{
-		public function __construct(ExprContext $context)
-		{
-		    parent::__construct($context);
-
-		    $this->copyFrom($context);
-	    }
-
-	    public function FLOAT(): ?TerminalNode
-	    {
-	        return $this->getToken(GrammarParser::FLOAT, 0);
-	    }
-
-		public function enterRule(ParseTreeListener $listener): void
-		{
-			if ($listener instanceof GrammarListener) {
-			    $listener->enterFloat($this);
-		    }
-		}
-
-		public function exitRule(ParseTreeListener $listener): void
-		{
-			if ($listener instanceof GrammarListener) {
-			    $listener->exitFloat($this);
-		    }
-		}
-
-		public function accept(ParseTreeVisitor $visitor): mixed
-		{
-			if ($visitor instanceof GrammarVisitor) {
-			    return $visitor->visitFloat($this);
-		    }
-
-			return $visitor->visitChildren($this);
-		}
-	}
-
-	class MulDivModContext extends ExprContext
-	{
-		/**
-		 * @var Token|null $op
-		 */
-		public $op;
-
-		public function __construct(ExprContext $context)
-		{
-		    parent::__construct($context);
-
-		    $this->copyFrom($context);
-	    }
-
-	    /**
-	     * @return array<ExprContext>|ExprContext|null
-	     */
-	    public function expr(?int $index = null)
-	    {
-	    	if ($index === null) {
-	    		return $this->getTypedRuleContexts(ExprContext::class);
-	    	}
-
-	        return $this->getTypedRuleContext(ExprContext::class, $index);
-	    }
-
-		public function enterRule(ParseTreeListener $listener): void
-		{
-			if ($listener instanceof GrammarListener) {
-			    $listener->enterMulDivMod($this);
-		    }
-		}
-
-		public function exitRule(ParseTreeListener $listener): void
-		{
-			if ($listener instanceof GrammarListener) {
-			    $listener->exitMulDivMod($this);
-		    }
-		}
-
-		public function accept(ParseTreeVisitor $visitor): mixed
-		{
-			if ($visitor instanceof GrammarVisitor) {
-			    return $visitor->visitMulDivMod($this);
-		    }
-
-			return $visitor->visitChildren($this);
-		}
-	}
-
 	class IdExprContext extends ExprContext
 	{
 		public function __construct(ExprContext $context)
@@ -1698,6 +1671,232 @@ namespace Context {
 		}
 	}
 
+	class MoreLessEqContext extends ExprContext
+	{
+		/**
+		 * @var Token|null $op
+		 */
+		public $op;
+
+		public function __construct(ExprContext $context)
+		{
+		    parent::__construct($context);
+
+		    $this->copyFrom($context);
+	    }
+
+	    /**
+	     * @return array<ExprContext>|ExprContext|null
+	     */
+	    public function expr(?int $index = null)
+	    {
+	    	if ($index === null) {
+	    		return $this->getTypedRuleContexts(ExprContext::class);
+	    	}
+
+	        return $this->getTypedRuleContext(ExprContext::class, $index);
+	    }
+
+		public function enterRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->enterMoreLessEq($this);
+		    }
+		}
+
+		public function exitRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->exitMoreLessEq($this);
+		    }
+		}
+
+		public function accept(ParseTreeVisitor $visitor): mixed
+		{
+			if ($visitor instanceof GrammarVisitor) {
+			    return $visitor->visitMoreLessEq($this);
+		    }
+
+			return $visitor->visitChildren($this);
+		}
+	}
+
+	class NilContext extends ExprContext
+	{
+		public function __construct(ExprContext $context)
+		{
+		    parent::__construct($context);
+
+		    $this->copyFrom($context);
+	    }
+
+	    public function NIL(): ?TerminalNode
+	    {
+	        return $this->getToken(GrammarParser::NIL, 0);
+	    }
+
+		public function enterRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->enterNil($this);
+		    }
+		}
+
+		public function exitRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->exitNil($this);
+		    }
+		}
+
+		public function accept(ParseTreeVisitor $visitor): mixed
+		{
+			if ($visitor instanceof GrammarVisitor) {
+			    return $visitor->visitNil($this);
+		    }
+
+			return $visitor->visitChildren($this);
+		}
+	}
+
+	class FloatContext extends ExprContext
+	{
+		public function __construct(ExprContext $context)
+		{
+		    parent::__construct($context);
+
+		    $this->copyFrom($context);
+	    }
+
+	    public function FLOAT(): ?TerminalNode
+	    {
+	        return $this->getToken(GrammarParser::FLOAT, 0);
+	    }
+
+		public function enterRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->enterFloat($this);
+		    }
+		}
+
+		public function exitRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->exitFloat($this);
+		    }
+		}
+
+		public function accept(ParseTreeVisitor $visitor): mixed
+		{
+			if ($visitor instanceof GrammarVisitor) {
+			    return $visitor->visitFloat($this);
+		    }
+
+			return $visitor->visitChildren($this);
+		}
+	}
+
+	class MulDivModContext extends ExprContext
+	{
+		/**
+		 * @var Token|null $op
+		 */
+		public $op;
+
+		public function __construct(ExprContext $context)
+		{
+		    parent::__construct($context);
+
+		    $this->copyFrom($context);
+	    }
+
+	    /**
+	     * @return array<ExprContext>|ExprContext|null
+	     */
+	    public function expr(?int $index = null)
+	    {
+	    	if ($index === null) {
+	    		return $this->getTypedRuleContexts(ExprContext::class);
+	    	}
+
+	        return $this->getTypedRuleContext(ExprContext::class, $index);
+	    }
+
+		public function enterRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->enterMulDivMod($this);
+		    }
+		}
+
+		public function exitRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->exitMulDivMod($this);
+		    }
+		}
+
+		public function accept(ParseTreeVisitor $visitor): mixed
+		{
+			if ($visitor instanceof GrammarVisitor) {
+			    return $visitor->visitMulDivMod($this);
+		    }
+
+			return $visitor->visitChildren($this);
+		}
+	}
+
+	class EqNotEqContext extends ExprContext
+	{
+		/**
+		 * @var Token|null $op
+		 */
+		public $op;
+
+		public function __construct(ExprContext $context)
+		{
+		    parent::__construct($context);
+
+		    $this->copyFrom($context);
+	    }
+
+	    /**
+	     * @return array<ExprContext>|ExprContext|null
+	     */
+	    public function expr(?int $index = null)
+	    {
+	    	if ($index === null) {
+	    		return $this->getTypedRuleContexts(ExprContext::class);
+	    	}
+
+	        return $this->getTypedRuleContext(ExprContext::class, $index);
+	    }
+
+		public function enterRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->enterEqNotEq($this);
+		    }
+		}
+
+		public function exitRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->exitEqNotEq($this);
+		    }
+		}
+
+		public function accept(ParseTreeVisitor $visitor): mixed
+		{
+			if ($visitor instanceof GrammarVisitor) {
+			    return $visitor->visitEqNotEq($this);
+		    }
+
+			return $visitor->visitChildren($this);
+		}
+	}
+
 	class RuneContext extends ExprContext
 	{
 		public function __construct(ExprContext $context)
@@ -1730,6 +1929,56 @@ namespace Context {
 		{
 			if ($visitor instanceof GrammarVisitor) {
 			    return $visitor->visitRune($this);
+		    }
+
+			return $visitor->visitChildren($this);
+		}
+	}
+
+	class AndOrContext extends ExprContext
+	{
+		/**
+		 * @var Token|null $op
+		 */
+		public $op;
+
+		public function __construct(ExprContext $context)
+		{
+		    parent::__construct($context);
+
+		    $this->copyFrom($context);
+	    }
+
+	    /**
+	     * @return array<ExprContext>|ExprContext|null
+	     */
+	    public function expr(?int $index = null)
+	    {
+	    	if ($index === null) {
+	    		return $this->getTypedRuleContexts(ExprContext::class);
+	    	}
+
+	        return $this->getTypedRuleContext(ExprContext::class, $index);
+	    }
+
+		public function enterRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->enterAndOr($this);
+		    }
+		}
+
+		public function exitRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->exitAndOr($this);
+		    }
+		}
+
+		public function accept(ParseTreeVisitor $visitor): mixed
+		{
+			if ($visitor instanceof GrammarVisitor) {
+			    return $visitor->visitAndOr($this);
 		    }
 
 			return $visitor->visitChildren($this);

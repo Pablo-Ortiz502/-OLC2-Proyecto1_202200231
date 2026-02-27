@@ -27,6 +27,9 @@ use Context\MulDivModContext;
 use Context\RuneContext;
 use Context\PruneContext;
 use Context\SContext;
+use Context\AndOrContext;
+use Context\EqNotEqContext;
+use Context\MoreLessEqContext;
 
 class Interpreter extends GrammarBaseVisitor
 {
@@ -85,11 +88,11 @@ class Interpreter extends GrammarBaseVisitor
     private function validateType(string $type, $value): bool
     {
         return match ($type) {
-            "int32"   => is_int($value) | is_null($value),
-            "float32" => is_float($value) | is_null($value),
-            "boole"   => is_bool($value) | is_null($value),
-            "string"  => is_string($value) | is_null($value),
-            "rune"    => is_string($value) | is_null($value) | strlen($value) === 1,
+            "int32"   => is_int($value) || is_null($value),
+            "float32" => is_float($value) || is_null($value),
+            "boole"   => is_bool($value) || is_null($value),
+            "string"  => is_string($value) || is_null($value),
+            "rune"    => is_string($value) || is_null($value) || strlen($value) === 1,
             default   => false
         };
     }
@@ -164,6 +167,8 @@ class Interpreter extends GrammarBaseVisitor
                 return 0.0;
             case "int32":
                 return 0;
+            case "rune":
+                return  chr(0);
             default:
                 return null;
         }
@@ -172,50 +177,102 @@ class Interpreter extends GrammarBaseVisitor
     {
         switch ($type) {
             case "string":
-                return "''";
+                return "" / "";
             case "boole":
                 return "false";
             case "float32":
                 return "0.0";
             case "int32":
                 return "0";
+            case "rune":
+                return "'\u0000'";
             default:
                 return null;
         }
     }
-    private function isOperable($izqVal, $derVal, $op): bool
+    private function isComparable($left, $right, $op): bool
+    {
+        switch ($op) {
+            case '!=':
+            case '==': {
+                    if (is_bool($left) || is_bool($right)) {
+                        return is_bool($left) && is_bool($right);
+                    }
+                    if (is_int($left) || is_int($right)) {
+                        return !(is_bool($left) || is_bool($right) || (is_string($left) && strlen($left) > 1) || (is_string($right)  && strlen($right) > 1));
+                    }
+                    if (is_float($left) || is_float($right)) {
+                        return !(is_bool($left) || is_bool($right) || (is_string($left) && strlen($left) > 1) || (is_string($right)  && strlen($right) > 1));
+                    }
+                    if ((is_string($left) && strlen($left) === 1) || (is_string($right) && strlen($right) === 1)) {
+                        return !(is_bool($left) || is_bool($right) || is_string($left) || is_string($right));
+                    }
+                    if (is_string($left) || is_string($right)) {
+                        return is_string($left) && is_string($right);
+                    }
+                }
+            case '>':
+            case '<':
+            case '<=':
+            case '>=': {
+                    if (is_bool($left) || is_bool($right)) {
+                        return false;
+                    }
+                    if (is_int($left) || is_int($right)) {
+                        return !(is_bool($left) || is_bool($right) || (is_string($left) && strlen($left) > 1) || (is_string($right)  && strlen($right) > 1));
+                    }
+                    if (is_float($left) || is_float($right)) {
+                        return !(is_bool($left) || is_bool($right) || (is_string($left) && strlen($left) > 1) || (is_string($right)  && strlen($right) > 1));
+                    }
+                    if ((is_string($left) && strlen($left) === 1) || (is_string($right) && strlen($right) === 1)) {
+                        return !(is_bool($left) || is_bool($right) || is_string($left) || is_string($right));
+                    }
+                    if (is_string($left) || is_string($right)) {
+                        return is_string($left) && is_string($right);
+                    }
+                }
+        }
+        return false;
+    }
+
+    private function isOperable($left, $right, $op): bool
     {
         switch ($op) {
 
             case '+':
-                if (is_bool($izqVal) || is_bool($derVal)) {
+                if (is_bool($left) || is_bool($right)) {
                     return false;
                 }
 
-                if (is_string($izqVal) || is_string($derVal)) {
-                    return is_string($izqVal) && is_string($derVal);
+                if ((is_string($left) && strlen($left) === 1 && is_numeric($right)) || (is_string($right) && strlen($right) === 1 && is_numeric($left))) {
+                    return true;
                 }
 
-                return (is_int($izqVal) || is_float($izqVal)) &&
-                    (is_int($derVal) || is_float($derVal));
+                if (is_string($left) || is_string($right)) {
+                    return is_string($left) && is_string($right);
+                }
+
+
+                return (is_int($left) || is_float($left)) &&
+                    (is_int($right) || is_float($right));
 
 
             case '-':
-                return (is_int($izqVal) || is_float($izqVal)) &&
-                    (is_int($derVal) || is_float($derVal));
+                return (is_int($left) || is_float($left)) &&
+                    (is_int($right) || is_float($right));
 
 
             case '*':
-                if ((is_int($izqVal) || is_float($izqVal)) &&
-                    (is_int($derVal) || is_float($derVal))
+                if ((is_int($left) || is_float($left)) &&
+                    (is_int($right) || is_float($right))
                 ) {
                     return true;
                 }
 
-                if (is_string($izqVal) && is_int($derVal)) {
+                if (is_string($left) && is_int($right)) {
                     return true;
                 }
-                if (is_string($derVal) && is_int($izqVal)) {
+                if (is_string($right) && is_int($left)) {
                     return true;
                 }
 
@@ -224,13 +281,13 @@ class Interpreter extends GrammarBaseVisitor
 
             case '/':
 
-                return (is_int($izqVal) || is_float($izqVal)) &&
-                    (is_int($derVal) || is_float($derVal));
+                return (is_int($left) || is_float($left)) &&
+                    (is_int($right) || is_float($right));
 
 
             case '%':
 
-                return is_int($izqVal) && is_int($derVal) | (is_string($derVal) && is_string($izqVal) && strlen($izqVal) === 1 && strlen($derVal) === 1);
+                return is_int($left) && is_int($right) || (is_string($right) && is_string($left) && strlen($left) === 1 && strlen($right) === 1);
         }
 
         return false;
@@ -642,7 +699,7 @@ class Interpreter extends GrammarBaseVisitor
                 "caind" => $caind,
                 "type" => $type,
                 "val"  => $value,
-                "etiq" => $this->getEtiquete($value)
+                "etiq" => $this->getDefaultEtiquet($type)
             ];
         }
 
@@ -676,7 +733,6 @@ class Interpreter extends GrammarBaseVisitor
                 continue;
             }
 
-            $etiq = $this->getEtiquete($value);
 
             $this->syCount++;
 
@@ -695,6 +751,126 @@ class Interpreter extends GrammarBaseVisitor
     }
 
     // ---------------- Expresiones ----------------
+
+    public function visitAndOr(AndOrContext $context)
+    {
+        $left  = $this->visit($context->expr(0));
+        $right = $this->visit($context->expr(1));
+        $op    = $context->op->getText();
+
+        if (!(is_bool($right) && is_bool($left))) {
+            $this->addError(
+                "Elos operadores && y || solo se pueden usar entre booleanos",
+                $context->op
+            );
+            return null;
+        }
+
+        if (!$left && $op === "&&") {
+            return false;
+        }
+
+        return match ($op) {
+            "&&" => $left && $right,
+            "||" => $left || $right,
+        };
+    }
+
+    public function visitEqNotEq(EqNotEqContext $context)
+    {
+        $left  = $this->visit($context->expr(0));
+        $right = $this->visit($context->expr(1));
+        $op    = $context->op->getText();
+
+        if (is_null($left) || is_null($right)) {
+            $this->addError(
+                "No se puede comparar nil",
+                $context->op
+            );
+            return null;
+        }
+
+        if (!$this->isComparable($left, $right, $op)) {
+            $this->addError(
+                "Comparacion invalida entre tipos incompatibles",
+                $context->op
+            );
+            return null;
+        }
+
+        if ($op == "==" && is_numeric($left) && is_string($right) && strlen($right) === 1) {
+            return $left === ord($right);
+        }
+        if ($op == "==" && is_string($left) && is_numeric($right) && strlen($left) === 1) {
+            return  ord($left) === $right;
+        }
+        if ($op == "!=" && is_numeric($left) && is_string($right) && strlen($right) === 1) {
+            return $left !== ord($right);
+        }
+        if ($op == "!=" && is_string($left) && is_numeric($right) && strlen($left) === 1) {
+            return  ord($left) !== $right;
+        }
+
+
+        return match ($op) {
+            "==" => $left === $right,
+            "!=" => $left !== $right
+        };
+    }
+
+    public function visitMoreLessEq(MoreLessEqContext $context)
+    {
+        $left  = $this->visit($context->expr(0));
+        $right = $this->visit($context->expr(1));
+        $op    = $context->op->getText();
+
+        if (is_null($left) || is_null($right)) {
+            $this->addError(
+                "No se puede comparar nil",
+                $context->op
+            );
+            return null;
+        }
+        if (!$this->isComparable($left, $right, $op)) {
+            $this->addError(
+                "Comparacion invalida entre tipos incompatibles",
+                $context->op
+            );
+            return null;
+        }
+
+        if ($op == "<=" && is_numeric($left) && is_string($right) && strlen($right) === 1) {
+            return $left <= ord($right);
+        }
+        if ($op == "<=" && is_string($left) && is_numeric($right) && strlen($left) === 1) {
+            return ord($left) <= $right;
+        }
+        if ($op == ">=" && is_numeric($left) && is_string($right) && strlen($right) === 1) {
+            return $left >= ord($right);
+        }
+        if ($op == ">=" && is_string($left) && is_numeric($right) && strlen($left) === 1) {
+            return  ord($left) >= $right;
+        }
+        if ($op == ">" && is_numeric($left) && is_string($right) && strlen($right) === 1) {
+            return $left > ord($right);
+        }
+        if ($op == ">" && is_string($left) && is_numeric($right) && strlen($left) === 1) {
+            return  ord($left) > $right;
+        }
+        if ($op == "<" && is_numeric($left) && is_string($right) && strlen($right) === 1) {
+            return $left < ord($right);
+        }
+        if ($op == "<" && is_string($left) && is_numeric($right) && strlen($left) === 1) {
+            return  ord($left) < $right;
+        }
+
+        return match ($op) {
+            "<" => $left < $right,
+            "<=" => $left <= $right,
+            ">" => $left > $right,
+            ">=" => $left >= $right
+        };
+    }
 
     public function visitIdExpr(IdExprContext $context)
     {
@@ -724,6 +900,15 @@ class Interpreter extends GrammarBaseVisitor
         $right = $this->visit($context->expr(1));
         $op    = $context->op->getText();
 
+        if (is_null($left) || is_null($right)) {
+            $this->addError(
+                "No se puede operar nil",
+                $context->op
+            );
+            return null;
+        }
+
+
         if (!$this->isOperable($left, $right, $op)) {
             $this->addError(
                 "Operacion invalida entre tipos incompatibles",
@@ -733,10 +918,22 @@ class Interpreter extends GrammarBaseVisitor
         }
 
         if ($op == "+" && is_string($left) && is_string($right) && strlen($left) === 1 && strlen($right) === 1) {
-            return chr(ord($left) + ord($right));
+            return ord($left) + ord($right);
         }
         if ($op == "-" && is_string($left) && is_string($right) && strlen($left) === 1 && strlen($right) === 1) {
-            return  chr(ord($left) - ord($right));
+            return  ord($left) - ord($right);
+        }
+        if ($op == "+" && is_numeric($left) && is_string($right) && strlen($right) === 1) {
+            return $left + ord($right);
+        }
+        if ($op == "+" && is_string($left) && is_numeric($right) && strlen($left) === 1) {
+            return ord($left)  + $right;
+        }
+        if ($op == "-" && is_numeric($left) && is_string($right) && strlen($right) === 1) {
+            return $left - ord($right);
+        }
+        if ($op == "-" && is_string($left) && is_numeric($right) && strlen($left) === 1) {
+            return  ord($left) - $right;
         }
 
         return match ($op) {
@@ -750,6 +947,14 @@ class Interpreter extends GrammarBaseVisitor
         $left  = $this->visit($context->expr(0));
         $right = $this->visit($context->expr(1));
         $op    = $context->op->getText();
+
+        if (is_null($left) || is_null($right)) {
+            $this->addError(
+                "No se puede operar nil",
+                $context->op
+            );
+            return null;
+        }
 
         if (!$this->isOperable($left, $right, $op)) {
             $this->addError(
@@ -778,11 +983,24 @@ class Interpreter extends GrammarBaseVisitor
             }
             return $right;
         }
+
         if ($op == "*" && is_string($left) && is_string($right) && strlen($left) === 1 && strlen($right) === 1) {
-            return chr(ord($left) * ord($right));
+            return ord($left) * ord($right);
         }
         if ($op == "/" && is_string($left) && is_string($right) && strlen($left) === 1 && strlen($right) === 1) {
-            return  chr(ord($left) / ord($right));
+            return  ord($left) / ord($right);
+        }
+        if ($op == "*" && is_numeric($left) && is_string($right) && strlen($right) === 1) {
+            return $left * ord($right);
+        }
+        if ($op == "*" && is_string($left) && is_numeric($right) && strlen($left) === 1) {
+            return  ord($left) * $right;
+        }
+        if ($op == "/" && is_numeric($left) && is_string($right) && strlen($right) === 1) {
+            return $left / ord($right);
+        }
+        if ($op == "/" && is_string($left) && is_numeric($right) && strlen($left) === 1) {
+            return  ord($left) / $right;
         }
 
         return match ($op) {

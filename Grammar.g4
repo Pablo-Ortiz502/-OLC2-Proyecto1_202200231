@@ -1,6 +1,6 @@
 grammar Grammar;
 
-s: FUNC MAIN '(' ')' '{' stmts* '}' EOF # S;
+s: FUNC MAIN '(' ')' '{' stmts* '}' EOF;
 
 stmts: dec | asg;
 
