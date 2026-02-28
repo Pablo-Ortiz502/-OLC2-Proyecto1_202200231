@@ -1,8 +1,25 @@
 grammar Grammar;
 
-s: FUNC MAIN '(' ')' '{' stmts* '}' EOF;
+s: program EOF;
 
-stmts: dec | asg;
+program: FUNC MAIN '(' ')' block;
+
+stmts: dec | asg | ifStmt | forStmt | inst;
+
+block: '{' stmts* '}';
+inst: BREAK | CONTINUE;
+
+ifStmt: IF expr block (ELSE block)?;
+
+forStmt:
+	FOR forInit? ';' forCond? ';' forUpdate? block	# LongFor
+	| FOR expr block								# MidFor
+	| FOR block										# ShortFor;
+
+forInit: dec | asg;
+forCond: expr;
+forUpdate: asg | incDec;
+incDec: ID '++' | ID '--';
 
 dec:
 	pre lid type '=' lval	# Declv
@@ -48,6 +65,12 @@ FUNC: 'func';
 MAIN: 'main';
 PVAR: 'var';
 PCONST: 'const';
+IF: 'if';
+ELSE: 'else';
+FOR: 'for';
+BREAK: 'break';
+CONTINUE: 'continue';
+RETURN: 'return';
 
 PINT: 'int32';
 PFLOAT: 'float32';

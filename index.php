@@ -42,7 +42,7 @@
 
 
                 $output .= "<h3>Scopes</h3>";
-                $output .= "<pre>" . print_r($interpreter->scopes ?? [], true) . "</pre>";
+                $output .= "<pre>" . print_r($interpreter->symbolTable ?? [], true) . "</pre>";
 
 
                 if (!empty($interpreter->errorTable)) {

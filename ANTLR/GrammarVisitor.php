@@ -21,6 +21,15 @@ interface GrammarVisitor extends ParseTreeVisitor
 	public function visitS(Context\SContext $context);
 
 	/**
+	 * Visit a parse tree produced by {@see GrammarParser::program()}.
+	 *
+	 * @param Context\ProgramContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitProgram(Context\ProgramContext $context);
+
+	/**
 	 * Visit a parse tree produced by {@see GrammarParser::stmts()}.
 	 *
 	 * @param Context\StmtsContext $context The parse tree.
@@ -28,6 +37,99 @@ interface GrammarVisitor extends ParseTreeVisitor
 	 * @return mixed The visitor result.
 	 */
 	public function visitStmts(Context\StmtsContext $context);
+
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::block()}.
+	 *
+	 * @param Context\BlockContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitBlock(Context\BlockContext $context);
+
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::inst()}.
+	 *
+	 * @param Context\InstContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitInst(Context\InstContext $context);
+
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::ifStmt()}.
+	 *
+	 * @param Context\IfStmtContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitIfStmt(Context\IfStmtContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `LongFor` labeled alternative
+	 * in {@see GrammarParser::forStmt()}.
+	 *
+	 * @param Context\LongForContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitLongFor(Context\LongForContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `MidFor` labeled alternative
+	 * in {@see GrammarParser::forStmt()}.
+	 *
+	 * @param Context\MidForContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitMidFor(Context\MidForContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `ShortFor` labeled alternative
+	 * in {@see GrammarParser::forStmt()}.
+	 *
+	 * @param Context\ShortForContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitShortFor(Context\ShortForContext $context);
+
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::forInit()}.
+	 *
+	 * @param Context\ForInitContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitForInit(Context\ForInitContext $context);
+
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::forCond()}.
+	 *
+	 * @param Context\ForCondContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitForCond(Context\ForCondContext $context);
+
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::forUpdate()}.
+	 *
+	 * @param Context\ForUpdateContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitForUpdate(Context\ForUpdateContext $context);
+
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::incDec()}.
+	 *
+	 * @param Context\IncDecContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitIncDec(Context\IncDecContext $context);
 
 	/**
 	 * Visit a parse tree produced by the `Declv` labeled alternative

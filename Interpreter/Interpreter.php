@@ -27,16 +27,31 @@ use Context\MulDivModContext;
 use Context\RuneContext;
 use Context\PruneContext;
 use Context\SContext;
+use Context\IfStmtContext;
 use Context\AndOrContext;
 use Context\EqNotEqContext;
 use Context\MoreLessEqContext;
+use Context\ProgramContext;
+use Context\BlockContext;
+use Context\IncDecContext;
+use Context\LongForContext;
+use Context\InstContext;
+
+class BreakException extends \Exception {}
+class ContinueException extends \Exception {}
 
 class Interpreter extends GrammarBaseVisitor
 {
     public array $errorTable = [];
-    public array $scopes = [];
-    public int $erCount = 0;
-    public int $syCount = 0;
+    public string $console = "";
+    public array $symbolTable = [];
+    private array $scopes = [];
+    private int $inLoop = 0;
+    private int $erCount = 0;
+    private int $syCount = 0;
+    private int $ifCount = 0;
+    private int $forCount = 0;
+    private int $elseCount = 0;
 
     private function enterScope(string $scopeName): void
     {
@@ -44,6 +59,16 @@ class Interpreter extends GrammarBaseVisitor
             "name" => $scopeName,
             "symbols" => []
         ];
+    }
+
+    private function getCurrentScopeLevelOf(string $name): ?int
+    {
+        for ($i = count($this->scopes) - 1; $i >= 0; $i--) {
+            if (isset($this->scopes[$i]["symbols"][$name])) {
+                return $i;
+            }
+        }
+        return null;
     }
 
     private function exitScope(): void
@@ -121,6 +146,10 @@ class Interpreter extends GrammarBaseVisitor
 
         if (is_bool($value)) {
             return "boole";
+        }
+
+        if (is_string($value) && strlen($value) === 1) {
+            return "rune";
         }
 
         if (is_string($value)) {
@@ -295,14 +324,29 @@ class Interpreter extends GrammarBaseVisitor
 
 
 
-    //-------funciones visit-------------
-
+    //-------funciones visit-------------------------------------------------------
     public function visitS(SContext $context)
     {
         $this->enterScope("Global");
 
-        $this->visitChildren($context);
+        $this->visit($context->program());
 
+        return null;
+    }
+
+    public function visitProgram(ProgramContext $context)
+    {
+        $this->enterScope("main");
+        $this->visit($context->block());
+        $this->exitScope();
+        return null;
+    }
+
+    public function visitBlock(BlockContext $context)
+    {
+        foreach ($context->stmts() as $stmt) {
+            $this->visit($stmt);
+        }
         return null;
     }
 
@@ -372,6 +416,144 @@ class Interpreter extends GrammarBaseVisitor
     {
         return "const";
     }
+
+
+    //------------------------if------------------------------
+
+    public function visitIfStmt(IfStmtContext $context)
+    {
+        $condition = $this->visit($context->expr());
+
+        if ($this->getTypeFromValue($condition) !== "boole") {
+            $this->addError(
+                "La condición del if debe ser booleana",
+                $context->expr()->getStart()
+            );
+            return null;
+        }
+
+
+        if ($condition) {
+            $this->ifCount++;
+            $this->enterScope("If" . $this->ifCount);
+            $this->visit($context->block(0));
+            $this->exitScope();
+        } else if ($context->ELSE() !== null) {
+            $this->elseCount++;
+            $this->enterScope("Else" . $this->elseCount);
+            $this->visit($context->block(1));
+            $this->exitScope();
+        }
+
+        return null;
+    }
+
+    //-----------------------for----------------------------------------------------
+
+    public function visitInst(InstContext $context)
+    {
+        if ($this->inLoop === 0) {
+            $this->addError(
+                "break/continue fuera de un ciclo",
+                $context->getStart()
+            );
+            return null;
+        }
+
+        if ($context->BREAK() !== null) {
+            throw new BreakException();
+        }
+
+        if ($context->CONTINUE() !== null) {
+            throw new ContinueException();
+        }
+
+        return null;
+    }
+
+
+    public function visitIncDec(IncDecContext $context)
+    {
+        $name = $context->ID()->getText();
+        $symbol = &$this->resolveRef($name);
+
+        if ($symbol === null) {
+            $this->addError("Variable '$name' no declarada", $context->getStart());
+            return null;
+        }
+
+        if ($symbol["kind"] === "const") {
+            $this->addError("No se puede modificar constante '$name'", $context->getStart());
+            return null;
+        }
+
+        if ($symbol["type"] !== "int32") {
+            $this->addError("++ y -- solo funcionan con int32", $context->getStart());
+            return null;
+        }
+
+        if ($context->getChild(1)->getText() === "++") {
+            $symbol["val"]++;
+        } else {
+            $symbol["val"]--;
+        }
+        $symbol["etiq"] = $this->getEtiquete($symbol["val"]);
+
+        $scopeLevel = $this->getCurrentScopeLevelOf($name);
+
+        $this->symbolTable[$scopeLevel][$name]["etiq"] =  $symbol["etiq"];
+
+        return null;
+    }
+
+    public function visitLongFor(LongForContext $context)
+    {
+        $this->forCount++;
+        $this->enterScope("For" . $this->forCount);
+        if ($context->forInit() !== null) {
+            $this->visit($context->forInit());
+        }
+
+        $this->inLoop++;
+
+
+
+        while (true) {
+
+            if ($context->forCond() !== null) {
+                $cond = $this->visit($context->forCond());
+
+                if (!$cond) {
+                    break;
+                }
+            }
+
+            try {
+
+                $this->visit($context->block());
+            } catch (ContinueException $e) {
+
+                if ($context->forUpdate() !== null) {
+                    $this->visit($context->forUpdate());
+                }
+
+                continue;
+            } catch (BreakException $e) {
+
+                break;
+            }
+
+            if ($context->forUpdate() !== null) {
+                $this->visit($context->forUpdate());
+            }
+        }
+
+        $this->inLoop--;
+        $this->exitScope();
+
+        return null;
+    }
+
     //-----------------Asignacion-------------------------- 
     public function visitAsig(AsigContext $context)
     {
@@ -386,7 +568,7 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        if ($symbol["caind"] === "const") {
+        if ($symbol["kind"] === "const") {
             $this->addError(
                 "La variable '$name' es una constante",
                 $context->ID()->getSymbol()
@@ -404,8 +586,12 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $symbol["val"] = $value;
+        $symbol["val"]  = $value;
         $symbol["etiq"] = $this->getEtiquete($value);
+        $scopeLevel = $this->getCurrentScopeLevelOf($name);
+
+        $this->symbolTable[$scopeLevel][$name]["etiq"] = $symbol["etiq"];
+
 
         return null;
     }
@@ -423,7 +609,7 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        if ($symbol["caind"] === "const") {
+        if ($symbol["kind"] === "const") {
             $this->addError(
                 "La variable '$name' es una constante",
                 $context->ID()->getSymbol()
@@ -449,9 +635,12 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $symbol["val"] += $value;
-        $symbol["etiq"] = $this->getEtiquete($symbol["val"]);
+        $v = $symbol["val"] + $value;
+        $symbol["val"] = $v;
+        $symbol["etiq"] = $this->getEtiquete($v);
 
+        $scopeLevel = $this->getCurrentScopeLevelOf($name);
+        $this->symbolTable[$scopeLevel][$name]["etiq"] = $symbol["etiq"];
         return null;
     }
 
@@ -468,7 +657,7 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        if ($symbol["caind"] === "const") {
+        if ($symbol["kind"] === "const") {
             $this->addError(
                 "La variable '$name' es una constante",
                 $context->ID()->getSymbol()
@@ -494,8 +683,13 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $symbol["val"] -= $value;
-        $symbol["etiq"] = $this->getEtiquete($symbol["val"]);
+        $v = $symbol["val"] - $value;
+        $symbol["val"] = $v;
+        $symbol["etiq"] = $this->getEtiquete($v);
+
+        $scopeLevel = $this->getCurrentScopeLevelOf($name);
+        $this->symbolTable[$scopeLevel][$name]["etiq"] = $symbol["etiq"];
+        return null;
 
         return null;
     }
@@ -513,7 +707,7 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        if ($symbol["caind"] === "const") {
+        if ($symbol["kind"] === "const") {
             $this->addError(
                 "La variable '$name' es una constante",
                 $context->ID()->getSymbol()
@@ -539,8 +733,12 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $symbol["val"] *= $value;
-        $symbol["etiq"] = $this->getEtiquete($symbol["val"]);
+        $v = $symbol["val"] * $value;
+        $symbol["val"] = $v;
+        $symbol["etiq"] = $this->getEtiquete($v);
+
+        $scopeLevel = $this->getCurrentScopeLevelOf($name);
+        $this->symbolTable[$scopeLevel][$name]["etiq"] = $symbol["etiq"];
 
         return null;
     }
@@ -558,7 +756,7 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        if ($symbol["caind"] === "const") {
+        if ($symbol["kind"] === "const") {
             $this->addError(
                 "La variable '$name' es una constante",
                 $context->ID()->getSymbol()
@@ -591,8 +789,13 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $symbol["val"] /= $value;
-        $symbol["etiq"] = $this->getEtiquete($symbol["val"]);
+
+        $v = $symbol["val"] / $value;
+        $symbol["val"] = $v;
+        $symbol["etiq"] = $this->getEtiquete($v);
+
+        $scopeLevel = $this->getCurrentScopeLevelOf($name);
+        $this->symbolTable[$scopeLevel][$name]["etiq"] = $symbol["etiq"];
 
         return null;
     }
@@ -605,7 +808,7 @@ class Interpreter extends GrammarBaseVisitor
     {
         $ids  = $context->lid()->ID();
         $vals = $context->lval()->expr();
-        $caind = $context->pre()->getText();
+        $kind = $context->pre()->getText();
         $type = $this->visit($context->type());
 
         if (count($ids) != count($vals)) {
@@ -621,7 +824,7 @@ class Interpreter extends GrammarBaseVisitor
             $name  = $ids[$i]->getText();
             $value = $this->visit($vals[$i]);
 
-            if ($caind === "const" && is_null($value)) {
+            if ($kind === "const" && is_null($value)) {
                 $this->addError(
                     "No se pueden inicializar constantes como nil",
                     $ids[$i]->getSymbol()
@@ -637,7 +840,8 @@ class Interpreter extends GrammarBaseVisitor
                 continue;
             }
 
-            if (!$this->declare($name, [])) {
+
+            if (!$this->declare($name, []) && $this->inLoop === 0) {
                 $this->addError(
                     "Identificador '$name' ya fue declarado en este scope",
                     $ids[$i]->getSymbol()
@@ -645,17 +849,26 @@ class Interpreter extends GrammarBaseVisitor
                 continue;
             }
 
+            if ($this->declare($name, [])) {
+                $this->syCount++;
+            }
 
-            $this->syCount++;
-
-            $currentScope = &$this->scopes[count($this->scopes) - 1]["symbols"];
-
+            $scopeLevel = count($this->scopes) - 1;
+            $currentScope = &$this->scopes[$scopeLevel]["symbols"];
+            $etiq = $this->getEtiquete($value);
             $currentScope[$name] = [
-                "n" => $this->syCount,
-                "caind" => $caind,
+                "kind" => $kind,
                 "type" => $type,
                 "val"  => $value,
-                "etiq" => $this->getEtiquete($value)
+                "etiq" => $etiq
+            ];
+
+            $this->symbolTable[$scopeLevel][$name] = [
+                "ScopeName" => $this->scopes[$scopeLevel]["name"],
+                "n" => $this->syCount,
+                "type"      => $type,
+                "kind"      => $kind,
+                "etiq"      => $etiq
             ];
         }
 
@@ -666,7 +879,7 @@ class Interpreter extends GrammarBaseVisitor
     public function visitDecl(DeclContext $context)
     {
         $ids  = $context->lid()->ID();
-        $caind = $context->pre()->getText();
+        $kind = $context->pre()->getText();
         $type = $this->visit($context->type());
         $value = $this->getDefaulValue($type);
 
@@ -674,7 +887,7 @@ class Interpreter extends GrammarBaseVisitor
 
             $name = $ids[$i]->getText();
 
-            if ($caind === "const") {
+            if ($kind === "const") {
                 $this->addError(
                     "No se puede usar esta declaracion para constantes",
                     $ids[$i]->getSymbol()
@@ -682,7 +895,7 @@ class Interpreter extends GrammarBaseVisitor
                 continue;
             }
 
-            if (!$this->declare($name, [])) {
+            if (!$this->declare($name, []) && $this->inLoop === 0) {
                 $this->addError(
                     "Identificador '$name' ya fue declarado en este scope",
                     $ids[$i]->getSymbol()
@@ -690,16 +903,26 @@ class Interpreter extends GrammarBaseVisitor
                 continue;
             }
 
-            $this->syCount++;
-
-            $currentScope = &$this->scopes[count($this->scopes) - 1]["symbols"];
+            if ($this->declare($name, [])) {
+                $this->syCount++;
+            }
+            $scopeLevel = count($this->scopes) - 1;
+            $currentScope = &$this->scopes[$scopeLevel]["symbols"];
+            $etiq = $this->getDefaultEtiquet($type);
 
             $currentScope[$name] = [
-                "n" => $this->syCount,
-                "caind" => $caind,
+                "kind" => $kind,
                 "type" => $type,
                 "val"  => $value,
-                "etiq" => $this->getDefaultEtiquet($type)
+                "etiq" => $etiq
+            ];
+
+            $this->symbolTable[$scopeLevel][$name] = [
+                "ScopeName" => $this->scopes[$scopeLevel]["name"],
+                "n" => $this->syCount,
+                "type"      => $type,
+                "kind"      => $kind,
+                "etiq"      => $etiq
             ];
         }
 
@@ -719,13 +942,18 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
+        $scopeLevel = count($this->scopes) - 1;
+        $currentScope = &$this->scopes[$scopeLevel]["symbols"];
+
         for ($i = 0; $i < count($ids); $i++) {
 
             $name  = $ids[$i]->getText();
             $value = $this->visit($vals[$i]);
             $type  = $this->getTypeFromValue($value);
+            $etiq  = $this->getEtiquete($value);
 
-            if (!$this->declare($name, [])) {
+
+            if (isset($currentScope[$name]) && $this->inLoop === 0) {
                 $this->addError(
                     "Identificador '$name' ya fue declarado en este scope",
                     $ids[$i]->getSymbol()
@@ -734,16 +962,22 @@ class Interpreter extends GrammarBaseVisitor
             }
 
 
-            $this->syCount++;
-
-            $currentScope = &$this->scopes[count($this->scopes) - 1]["symbols"];
+            if ($this->declare($name, [])) {
+                $this->syCount++;
+            }
 
             $currentScope[$name] = [
+                "kind" => "var",
+                "type"  => $type,
+                "val"   => $value,
+                "etiq"  => $etiq
+            ];
+            $this->symbolTable[$scopeLevel][$name] = [
+                "ScopeName" => $this->scopes[$scopeLevel]["name"],
                 "n" => $this->syCount,
-                "caind" => "var",
-                "type" => $type,
-                "val"  => $value,
-                "etiq" => $this->getEtiquete($value)
+                "type"      => $type,
+                "kind"      => "var",
+                "etiq"      => $etiq,
             ];
         }
 

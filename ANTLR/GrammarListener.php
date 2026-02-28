@@ -22,6 +22,16 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitS(Context\SContext $context): void;
 	/**
+	 * Enter a parse tree produced by {@see GrammarParser::program()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterProgram(Context\ProgramContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::program()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitProgram(Context\ProgramContext $context): void;
+	/**
 	 * Enter a parse tree produced by {@see GrammarParser::stmts()}.
 	 * @param $context The parse tree.
 	 */
@@ -31,6 +41,112 @@ interface GrammarListener extends ParseTreeListener {
 	 * @param $context The parse tree.
 	 */
 	public function exitStmts(Context\StmtsContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::block()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterBlock(Context\BlockContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::block()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitBlock(Context\BlockContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::inst()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterInst(Context\InstContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::inst()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitInst(Context\InstContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::ifStmt()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterIfStmt(Context\IfStmtContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::ifStmt()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitIfStmt(Context\IfStmtContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `LongFor`
+	 * labeled alternative in {@see GrammarParser::forStmt()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterLongFor(Context\LongForContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `LongFor` labeled alternative
+	 * in {@see GrammarParser::forStmt()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitLongFor(Context\LongForContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `MidFor`
+	 * labeled alternative in {@see GrammarParser::forStmt()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterMidFor(Context\MidForContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `MidFor` labeled alternative
+	 * in {@see GrammarParser::forStmt()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitMidFor(Context\MidForContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `ShortFor`
+	 * labeled alternative in {@see GrammarParser::forStmt()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterShortFor(Context\ShortForContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `ShortFor` labeled alternative
+	 * in {@see GrammarParser::forStmt()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitShortFor(Context\ShortForContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::forInit()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterForInit(Context\ForInitContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::forInit()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitForInit(Context\ForInitContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::forCond()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterForCond(Context\ForCondContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::forCond()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitForCond(Context\ForCondContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::forUpdate()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterForUpdate(Context\ForUpdateContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::forUpdate()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitForUpdate(Context\ForUpdateContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::incDec()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterIncDec(Context\IncDecContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::incDec()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitIncDec(Context\IncDecContext $context): void;
 	/**
 	 * Enter a parse tree produced by the `Declv`
 	 * labeled alternative in {@see GrammarParser::dec()}.
