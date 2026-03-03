@@ -113,7 +113,7 @@ namespace {
 		    3, 6, 3, 0, 50, 43, 1, 0, 0, 0, 50, 44, 1, 0, 0, 0, 50, 45, 1, 0, 
 		    0, 0, 50, 46, 1, 0, 0, 0, 50, 47, 1, 0, 0, 0, 50, 48, 1, 0, 0, 0, 
 		    50, 49, 1, 0, 0, 0, 51, 5, 1, 0, 0, 0, 52, 53, 5, 38, 0, 0, 53, 54, 
-		    5, 1, 0, 0, 54, 55, 3, 24, 12, 0, 55, 56, 5, 2, 0, 0, 56, 7, 1, 0, 
+		    5, 1, 0, 0, 54, 55, 3, 28, 14, 0, 55, 56, 5, 2, 0, 0, 56, 7, 1, 0, 
 		    0, 0, 57, 58, 5, 42, 0, 0, 58, 59, 5, 1, 0, 0, 59, 60, 3, 24, 12, 
 		    0, 60, 61, 5, 2, 0, 0, 61, 71, 1, 0, 0, 0, 62, 63, 5, 40, 0, 0, 63, 
 		    64, 5, 1, 0, 0, 64, 71, 5, 2, 0, 0, 65, 66, 5, 39, 0, 0, 66, 67, 5, 
@@ -377,7 +377,7 @@ namespace {
 		        $this->setState(53);
 		        $this->match(self::T__0);
 		        $this->setState(54);
-		        $this->recursiveExpr(0);
+		        $this->lval();
 		        $this->setState(55);
 		        $this->match(self::T__1);
 		    } catch (RecognitionException $exception) {
@@ -1522,9 +1522,9 @@ namespace Context {
 	        return $this->getToken(GrammarParser::PRINT, 0);
 	    }
 
-	    public function expr(): ?ExprContext
+	    public function lval(): ?LvalContext
 	    {
-	    	return $this->getTypedRuleContext(ExprContext::class, 0);
+	    	return $this->getTypedRuleContext(LvalContext::class, 0);
 	    }
 
 		public function enterRule(ParseTreeListener $listener): void

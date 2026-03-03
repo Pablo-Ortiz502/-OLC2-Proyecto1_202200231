@@ -423,23 +423,25 @@ class Interpreter extends GrammarBaseVisitor
     {
         return "const";
     }
-    //----------------------------functions---------------------
+    //----------------------------funciones---------------------
 
     public function visitPrintln(PrintlnContext $context)
     {
         $result = null;
-
-        if ($context->expr() === null) {
+        $vals = $context->lval()->expr();
+        if ($context->lval() === null) {
             $this->addError(
                 "debe agragar un valor a la funcion fmt.Println()",
-                $context->expr()->getStart()
+                $context->lval()->getStart()
             );
             return null;
         }
 
-        $result = $this->visit($context->expr());
-        $this->console .= $result . "\n";
-
+        for ($i = 0; $i < count($vals); $i++) {
+            $result = $this->visit($vals[$i]);
+            $this->console .= " " . $result;
+        }
+        $this->console .= "\n";
         return null;
     }
 

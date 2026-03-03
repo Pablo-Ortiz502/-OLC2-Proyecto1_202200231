@@ -6,7 +6,7 @@ program: FUNC MAIN '(' ')' block;
 
 stmts: dec | asg | ifStmt | forStmt | inst | reserved | pri;
 
-pri: PRINT '(' expr ')' # Println;
+pri: PRINT '(' lval ')' # Println;
 
 reserved:
 	TYPEOF '(' expr ')'	# TypeO
