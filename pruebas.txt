@@ -13,6 +13,7 @@ func main() {
   g := 0
   for{
     g ++
+    fmt.Println(g)
     if g >4{
       break
     }

@@ -43,7 +43,8 @@
 
                 $output .= "<h3>Scopes</h3>";
                 $output .= "<pre>" . print_r($interpreter->symbolTable ?? [], true) . "</pre>";
-
+                $output .= "<h3>Consola</h3>";
+                $output .= "<pre>" . $interpreter->console . "</pre>";
 
                 if (!empty($interpreter->errorTable)) {
                     $output .= "<h3>Errores</h3><pre>" .

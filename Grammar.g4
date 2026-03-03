@@ -4,7 +4,14 @@ s: program EOF;
 
 program: FUNC MAIN '(' ')' block;
 
-stmts: dec | asg | ifStmt | forStmt | inst;
+stmts: dec | asg | ifStmt | forStmt | inst | reserved | pri;
+
+pri: PRINT '(' expr ')' # Println;
+
+reserved:
+	TYPEOF '(' expr ')'	# TypeO
+	| NOW '(' ')'		# NowFunc
+	| LEN '(' expr ')'	# LenFunc;
 
 block: '{' stmts* '}';
 inst: BREAK | CONTINUE;
@@ -44,7 +51,8 @@ expr:
 	| BOOLE										# Boole
 	| STRING									# String
 	| RUNE										# Rune
-	| NIL										# Nil;
+	| NIL										# Nil
+	| reserved									# re;
 
 lid: ID (',' ID)*;
 
@@ -69,7 +77,11 @@ FOR: 'for';
 BREAK: 'break';
 CONTINUE: 'continue';
 RETURN: 'return';
-
+PRINT: 'fmt.Println';
+LEN: 'len';
+NOW: 'now';
+SUBTSTR: 'substr';
+TYPEOF: 'typeOf';
 PINT: 'int32';
 PFLOAT: 'float32';
 PBOOL: 'boole';

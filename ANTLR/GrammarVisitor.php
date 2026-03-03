@@ -39,6 +39,46 @@ interface GrammarVisitor extends ParseTreeVisitor
 	public function visitStmts(Context\StmtsContext $context);
 
 	/**
+	 * Visit a parse tree produced by the `Println` labeled alternative
+	 * in {@see GrammarParser::pri()}.
+	 *
+	 * @param Context\PrintlnContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitPrintln(Context\PrintlnContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `TypeO` labeled alternative
+	 * in {@see GrammarParser::reserved()}.
+	 *
+	 * @param Context\TypeOContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitTypeO(Context\TypeOContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `NowFunc` labeled alternative
+	 * in {@see GrammarParser::reserved()}.
+	 *
+	 * @param Context\NowFuncContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitNowFunc(Context\NowFuncContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `LenFunc` labeled alternative
+	 * in {@see GrammarParser::reserved()}.
+	 *
+	 * @param Context\LenFuncContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitLenFunc(Context\LenFuncContext $context);
+
+	/**
 	 * Visit a parse tree produced by {@see GrammarParser::block()}.
 	 *
 	 * @param Context\BlockContext $context The parse tree.
@@ -293,6 +333,16 @@ interface GrammarVisitor extends ParseTreeVisitor
 	 * @return mixed The visitor result.
 	 */
 	public function visitMulDivMod(Context\MulDivModContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `re` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\ReContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitRe(Context\ReContext $context);
 
 	/**
 	 * Visit a parse tree produced by the `EqNotEq` labeled alternative

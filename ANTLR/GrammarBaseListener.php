@@ -60,6 +60,58 @@ class GrammarBaseListener implements GrammarListener
 	 *
 	 * The default implementation does nothing.
 	 */
+	public function enterPrintln(Context\PrintlnContext $context): void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitPrintln(Context\PrintlnContext $context): void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function enterTypeO(Context\TypeOContext $context): void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitTypeO(Context\TypeOContext $context): void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function enterNowFunc(Context\NowFuncContext $context): void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitNowFunc(Context\NowFuncContext $context): void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function enterLenFunc(Context\LenFuncContext $context): void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitLenFunc(Context\LenFuncContext $context): void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
 	public function enterBlock(Context\BlockContext $context): void {}
 
 	/**
@@ -393,6 +445,19 @@ class GrammarBaseListener implements GrammarListener
 	 * The default implementation does nothing.
 	 */
 	public function exitMulDivMod(Context\MulDivModContext $context): void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function enterRe(Context\ReContext $context): void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitRe(Context\ReContext $context): void {}
 	/**
 	 * {@inheritdoc}
 	 *

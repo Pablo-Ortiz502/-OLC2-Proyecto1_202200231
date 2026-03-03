@@ -38,6 +38,10 @@ use Context\LongForContext;
 use Context\InstContext;
 use Context\MidForContext;
 use Context\ShortForContext;
+use Context\PrintlnContext;
+use Context\TypeOContext;
+use Context\NowFuncContext;
+use Context\LenFuncContext;
 
 class BreakException extends \Exception {}
 class ContinueException extends \Exception {}
@@ -47,6 +51,7 @@ class Interpreter extends GrammarBaseVisitor
     public array $errorTable = [];
     public string $console = "";
     public array $symbolTable = [];
+
     private array $scopes = [];
     private int $inLoop = 0;
     private int $erCount = 0;
@@ -418,6 +423,51 @@ class Interpreter extends GrammarBaseVisitor
     {
         return "const";
     }
+    //----------------------------functions---------------------
+
+    public function visitPrintln(PrintlnContext $context)
+    {
+        $result = null;
+
+        if ($context->expr() === null) {
+            $this->addError(
+                "debe agragar un valor a la funcion fmt.Println()",
+                $context->expr()->getStart()
+            );
+            return null;
+        }
+
+        $result = $this->visit($context->expr());
+        $this->console .= $result . "\n";
+
+        return null;
+    }
+
+    public function visitTypeO(TypeOContext $context)
+    {
+        $result = $this->visit($context->expr());
+        return $this->getTypeFromValue($result);
+    }
+
+    public function visitNowFunc(NowFuncContext $context): string
+    {
+        return date("Y-m-d H:i:s");
+    }
+
+    public function visitLenFunc(LenFuncContext $context): int
+    {
+        $result = $this->visit($context->expr());
+
+        if (!is_string($result)) { // cambiar cuando se agreguen los arrays
+            $this->addError(
+                "La len() solo hacepta Strings",
+                $context->expr()->getStart()
+            );
+            return -1;
+        }
+        return strlen($result);
+    }
+
 
 
     //------------------------if------------------------------
@@ -1259,6 +1309,9 @@ class Interpreter extends GrammarBaseVisitor
         }
         if ($op == "-" && is_string($left) && is_numeric($right) && strlen($left) === 1) {
             return  ord($left) - $right;
+        }
+        if ($op == "+" && is_string($left) && is_string($right)) {
+            return $left . $right;
         }
 
         return match ($op) {
