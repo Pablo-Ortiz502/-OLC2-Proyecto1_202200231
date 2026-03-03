@@ -36,6 +36,8 @@ use Context\BlockContext;
 use Context\IncDecContext;
 use Context\LongForContext;
 use Context\InstContext;
+use Context\MidForContext;
+use Context\ShortForContext;
 
 class BreakException extends \Exception {}
 class ContinueException extends \Exception {}
@@ -472,84 +474,139 @@ class Interpreter extends GrammarBaseVisitor
     }
 
 
-    public function visitIncDec(IncDecContext $context)
-    {
-        $name = $context->ID()->getText();
-        $symbol = &$this->resolveRef($name);
-
-        if ($symbol === null) {
-            $this->addError("Variable '$name' no declarada", $context->getStart());
-            return null;
-        }
-
-        if ($symbol["kind"] === "const") {
-            $this->addError("No se puede modificar constante '$name'", $context->getStart());
-            return null;
-        }
-
-        if ($symbol["type"] !== "int32") {
-            $this->addError("++ y -- solo funcionan con int32", $context->getStart());
-            return null;
-        }
-
-        if ($context->getChild(1)->getText() === "++") {
-            $symbol["val"]++;
-        } else {
-            $symbol["val"]--;
-        }
-        $symbol["etiq"] = $this->getEtiquete($symbol["val"]);
-
-        $scopeLevel = $this->getCurrentScopeLevelOf($name);
-
-        $this->symbolTable[$scopeLevel][$name]["etiq"] =  $symbol["etiq"];
-
-        return null;
-    }
-
     public function visitLongFor(LongForContext $context)
     {
         $this->forCount++;
         $this->enterScope("For" . $this->forCount);
-        if ($context->forInit() !== null) {
-            $this->visit($context->forInit());
+        $this->visit($context->dec());;
+        $firstId = "";
+        $cond = $this->visit($context->expr());
+        if (!is_bool($cond)) {
+            $this->addError(
+                "La condición del for debe ser booleana",
+                $context->expr()->getStart()
+            );
+            return null;
         }
 
-        $this->inLoop++;
+        $decContext = $context->dec();
+        if ($decContext instanceof DeclvContext || $decContext instanceof DeclContext || $decContext instanceof SdecContext) {
 
-
-
-        while (true) {
-
-            if ($context->forCond() !== null) {
-                $cond = $this->visit($context->forCond());
-
-                if (!$cond) {
-                    break;
-                }
+            $ids = $decContext->lid()->ID();
+            if (count($ids) > 1) {
+                $this->addError(
+                    "En el for solo se puede declara una variable",
+                    $context->getStart()
+                );
+                return null;
             }
+            $firstId = $ids[0]->getText();
+        }
 
-            try {
+        $secondtId = $context->incdec()->ID()->getText();
 
-                $this->visit($context->block());
-            } catch (ContinueException $e) {
-
-                if ($context->forUpdate() !== null) {
-                    $this->visit($context->forUpdate());
-                }
-
-                continue;
-            } catch (BreakException $e) {
-
+        if ($firstId !== $secondtId) {
+            $this->addError(
+                "En el for se deben modificar las mismas variables index",
+                $context->getStart()
+            );
+            return null;
+        }
+        $this->inLoop++;
+        while (true) {
+            $cond = $this->visit($context->expr());
+            if (!$cond) {
                 break;
             }
-
-            if ($context->forUpdate() !== null) {
-                $this->visit($context->forUpdate());
+            try {
+                $this->visit($context->block());
+                $this->visit($context->incdec());
+            } catch (ContinueException $e) {
+                continue;
+            } catch (BreakException $e) {
+                $this->exitScope();
+                break;
             }
         }
 
         $this->inLoop--;
         $this->exitScope();
+        return null;
+    }
+
+    public function visitMidFor(MidForContext $context)
+    {
+        $this->forCount++;
+        $this->enterScope("For" . $this->forCount);
+        $this->inLoop++;
+
+        try {
+
+            while (true) {
+
+                $cond = $this->visit($context->expr());
+
+                if (!is_bool($cond)) {
+                    $this->addError(
+                        "La condición del for debe ser booleana",
+                        $context->expr()->getStart()
+                    );
+                    break;
+                }
+
+                if (!$cond) {
+                    break;
+                }
+
+                try {
+                    $this->visit($context->block());
+                } catch (ContinueException $e) {
+                    continue;
+                } catch (BreakException $e) {
+                    break;
+                }
+            }
+        } finally {
+
+            $this->inLoop--;
+            $this->exitScope();
+        }
+
+        return null;
+    }
+
+    public function visitShortFor(ShortForContext $context)
+    {
+        $this->forCount++;
+        $this->enterScope("For" . $this->forCount);
+        $this->inLoop++;
+        $safeCount = 0;
+
+        try {
+            while (true) {
+                $safeCount++;
+                if ($safeCount > 300) {
+                    $this->addError(
+                        "Bucle Infinito",
+                        $context->getStart()
+                    );
+                    $this->exitScope();
+                    break;
+                }
+                try {
+                    $this->visit($context->Block());
+                } catch (ContinueException $e) {
+                    continue;
+                } catch (BreakException $e) {
+                    $this->exitScope();
+                    break;
+                }
+            }
+        } finally {
+
+            $this->inLoop--;
+            $this->exitScope();
+        }
 
         return null;
     }
@@ -592,6 +649,40 @@ class Interpreter extends GrammarBaseVisitor
 
         $this->symbolTable[$scopeLevel][$name]["etiq"] = $symbol["etiq"];
 
+
+        return null;
+    }
+
+    public function visitIncDec(IncDecContext $context)
+    {
+        $name = $context->ID()->getText();
+        $symbol = &$this->resolveRef($name);
+        $op = $context->op->getText();
+
+        if ($symbol === null) {
+            $this->addError("Variable '$name' no declarada", $context->getStart());
+            return null;
+        }
+
+        if ($symbol["kind"] === "const") {
+            $this->addError("No se puede modificar constante '$name'", $context->getStart());
+            return null;
+        }
+
+        if ($symbol["type"] !== "int32") {
+            $this->addError("++ y -- solo funcionan con int32", $context->getStart());
+            return null;
+        }
+
+        if ($op == '++') {
+            $symbol["val"]++;
+        } else {
+            $symbol["val"]--;
+        }
+
+        $symbol["etiq"] = $this->getEtiquete($symbol["val"]);
+        $scopeLevel = $this->getCurrentScopeLevelOf($name);
+        $this->symbolTable[$scopeLevel][$name]["etiq"] =  $symbol["etiq"];
 
         return null;
     }

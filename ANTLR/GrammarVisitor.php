@@ -96,42 +96,6 @@ interface GrammarVisitor extends ParseTreeVisitor
 	public function visitShortFor(Context\ShortForContext $context);
 
 	/**
-	 * Visit a parse tree produced by {@see GrammarParser::forInit()}.
-	 *
-	 * @param Context\ForInitContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitForInit(Context\ForInitContext $context);
-
-	/**
-	 * Visit a parse tree produced by {@see GrammarParser::forCond()}.
-	 *
-	 * @param Context\ForCondContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitForCond(Context\ForCondContext $context);
-
-	/**
-	 * Visit a parse tree produced by {@see GrammarParser::forUpdate()}.
-	 *
-	 * @param Context\ForUpdateContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitForUpdate(Context\ForUpdateContext $context);
-
-	/**
-	 * Visit a parse tree produced by {@see GrammarParser::incDec()}.
-	 *
-	 * @param Context\IncDecContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitIncDec(Context\IncDecContext $context);
-
-	/**
 	 * Visit a parse tree produced by the `Declv` labeled alternative
 	 * in {@see GrammarParser::dec()}.
 	 *
@@ -210,6 +174,25 @@ interface GrammarVisitor extends ParseTreeVisitor
 	 * @return mixed The visitor result.
 	 */
 	public function visitDivAsig(Context\DivAsigContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Inde` labeled alternative
+	 * in {@see GrammarParser::asg()}.
+	 *
+	 * @param Context\IndeContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitInde(Context\IndeContext $context);
+
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::incdec()}.
+	 *
+	 * @param Context\IncdecContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitIncdec(Context\IncdecContext $context);
 
 	/**
 	 * Visit a parse tree produced by the `IdExpr` labeled alternative

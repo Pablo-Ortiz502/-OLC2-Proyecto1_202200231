@@ -12,14 +12,9 @@ inst: BREAK | CONTINUE;
 ifStmt: IF expr block (ELSE block)?;
 
 forStmt:
-	FOR forInit? ';' forCond? ';' forUpdate? block	# LongFor
-	| FOR expr block								# MidFor
-	| FOR block										# ShortFor;
-
-forInit: dec | asg;
-forCond: expr;
-forUpdate: asg | incDec;
-incDec: ID '++' | ID '--';
+	FOR dec ';' expr ';' incdec block	# LongFor
+	| FOR expr block					# MidFor
+	| FOR block							# ShortFor;
 
 dec:
 	pre lid type '=' lval	# Declv
@@ -31,7 +26,10 @@ asg:
 	| ID '+=' expr	# PlusAsig
 	| ID '-=' expr	# MinusAsig
 	| ID '*=' expr	# MultAsig
-	| ID '/=' expr	# DivAsig;
+	| ID '/=' expr	# DivAsig
+	| incdec		# Inde;
+
+incdec: ID op = ('++' | '--');
 
 expr:
 	expr op = ('*' | '/' | '%') expr			# MulDivMod

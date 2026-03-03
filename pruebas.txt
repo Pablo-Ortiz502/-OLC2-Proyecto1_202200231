@@ -1,9 +1,21 @@
 func main() {
-    for var i int32 = 0; i < 3; i++ {
+  for var i int32 = 0; i < 3; i++ {
     y := 5
     if i == 2 {
         y = 2
         break
     }
   }
+  x := 0
+  for x<10{
+    x += 1
+  }
+  g := 0
+  for{
+    g ++
+    if g >4{
+      break
+    }
+  }
+
 }

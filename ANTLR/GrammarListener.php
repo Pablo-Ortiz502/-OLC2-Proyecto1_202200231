@@ -108,46 +108,6 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitShortFor(Context\ShortForContext $context): void;
 	/**
-	 * Enter a parse tree produced by {@see GrammarParser::forInit()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterForInit(Context\ForInitContext $context): void;
-	/**
-	 * Exit a parse tree produced by {@see GrammarParser::forInit()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitForInit(Context\ForInitContext $context): void;
-	/**
-	 * Enter a parse tree produced by {@see GrammarParser::forCond()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterForCond(Context\ForCondContext $context): void;
-	/**
-	 * Exit a parse tree produced by {@see GrammarParser::forCond()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitForCond(Context\ForCondContext $context): void;
-	/**
-	 * Enter a parse tree produced by {@see GrammarParser::forUpdate()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterForUpdate(Context\ForUpdateContext $context): void;
-	/**
-	 * Exit a parse tree produced by {@see GrammarParser::forUpdate()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitForUpdate(Context\ForUpdateContext $context): void;
-	/**
-	 * Enter a parse tree produced by {@see GrammarParser::incDec()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterIncDec(Context\IncDecContext $context): void;
-	/**
-	 * Exit a parse tree produced by {@see GrammarParser::incDec()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitIncDec(Context\IncDecContext $context): void;
-	/**
 	 * Enter a parse tree produced by the `Declv`
 	 * labeled alternative in {@see GrammarParser::dec()}.
 	 * @param $context The parse tree.
@@ -243,6 +203,28 @@ interface GrammarListener extends ParseTreeListener {
 	 * @param $context The parse tree.
 	 */
 	public function exitDivAsig(Context\DivAsigContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `Inde`
+	 * labeled alternative in {@see GrammarParser::asg()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterInde(Context\IndeContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `Inde` labeled alternative
+	 * in {@see GrammarParser::asg()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitInde(Context\IndeContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::incdec()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterIncdec(Context\IncdecContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::incdec()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitIncdec(Context\IncdecContext $context): void;
 	/**
 	 * Enter a parse tree produced by the `IdExpr`
 	 * labeled alternative in {@see GrammarParser::expr()}.
