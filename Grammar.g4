@@ -4,14 +4,23 @@ s: program EOF;
 
 program: FUNC MAIN '(' ')' block;
 
-stmts: dec | asg | ifStmt | forStmt | inst | reserved | pri;
+stmts:
+	dec
+	| asg
+	| ifStmt
+	| forStmt
+	| inst
+	| reserved
+	| pri
+	| switchStmt;
 
 pri: PRINT '(' lval ')' # Println;
 
 reserved:
-	TYPEOF '(' expr ')'	# TypeO
-	| NOW '(' ')'		# NowFunc
-	| LEN '(' expr ')'	# LenFunc;
+	TYPEOF '(' expr ')'						# TypeO
+	| NOW '(' ')'							# NowFunc
+	| LEN '(' expr ')'						# LenFunc
+	| SUBSTR '(' expr ',' expr ',' expr ')'	# SubS;
 
 block: '{' stmts* '}';
 inst: BREAK | CONTINUE;
@@ -22,6 +31,12 @@ forStmt:
 	FOR dec ';' expr ';' incdec block	# LongFor
 	| FOR expr block					# MidFor
 	| FOR block							# ShortFor;
+
+switchStmt: SWITCH expr '{' caseClause+ defaultClause? '}';
+
+caseClause: CASE lval ':' stmts;
+
+defaultClause: DEFAULT ':' stmts;
 
 dec:
 	pre lid type '=' lval	# Declv
@@ -45,14 +60,17 @@ expr:
 	| expr op = ('>=' | '<=' | '>' | '<') expr	# MoreLessEq
 	| expr op = ('&&' | '||') expr				# AndOr
 	| '(' expr ')'								# Parens
-	| NUM										# Num
-	| FLOAT										# Float
-	| ID										# IdExpr
-	| BOOLE										# Boole
-	| STRING									# String
-	| RUNE										# Rune
-	| NIL										# Nil
+	| vals										# va
 	| reserved									# re;
+
+vals:
+	NUM			# Num
+	| FLOAT		# Float
+	| ID		# IdExpr
+	| BOOLE		# Boole
+	| STRING	# String
+	| RUNE		# Rune
+	| NIL		# Nil;
 
 lid: ID (',' ID)*;
 
@@ -73,14 +91,17 @@ PVAR: 'var';
 PCONST: 'const';
 IF: 'if';
 ELSE: 'else';
+DEFAULT: 'default';
+CASE: 'case';
+SWITCH: 'switch';
 FOR: 'for';
 BREAK: 'break';
 CONTINUE: 'continue';
 RETURN: 'return';
 PRINT: 'fmt.Println';
+SUBSTR: 'substr';
 LEN: 'len';
 NOW: 'now';
-SUBTSTR: 'substr';
 TYPEOF: 'typeOf';
 PINT: 'int32';
 PFLOAT: 'float32';

@@ -90,6 +90,18 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitLenFunc(Context\LenFuncContext $context): void;
 	/**
+	 * Enter a parse tree produced by the `SubS`
+	 * labeled alternative in {@see GrammarParser::reserved()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterSubS(Context\SubSContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `SubS` labeled alternative
+	 * in {@see GrammarParser::reserved()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitSubS(Context\SubSContext $context): void;
+	/**
 	 * Enter a parse tree produced by {@see GrammarParser::block()}.
 	 * @param $context The parse tree.
 	 */
@@ -155,6 +167,36 @@ interface GrammarListener extends ParseTreeListener {
 	 * @param $context The parse tree.
 	 */
 	public function exitShortFor(Context\ShortForContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::switchStmt()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterSwitchStmt(Context\SwitchStmtContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::switchStmt()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitSwitchStmt(Context\SwitchStmtContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::caseClause()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterCaseClause(Context\CaseClauseContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::caseClause()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitCaseClause(Context\CaseClauseContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::defaultClause()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterDefaultClause(Context\DefaultClauseContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::defaultClause()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitDefaultClause(Context\DefaultClauseContext $context): void;
 	/**
 	 * Enter a parse tree produced by the `Declv`
 	 * labeled alternative in {@see GrammarParser::dec()}.
@@ -274,114 +316,6 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitIncdec(Context\IncdecContext $context): void;
 	/**
-	 * Enter a parse tree produced by the `IdExpr`
-	 * labeled alternative in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterIdExpr(Context\IdExprContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `IdExpr` labeled alternative
-	 * in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitIdExpr(Context\IdExprContext $context): void;
-	/**
-	 * Enter a parse tree produced by the `AddSub`
-	 * labeled alternative in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterAddSub(Context\AddSubContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `AddSub` labeled alternative
-	 * in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitAddSub(Context\AddSubContext $context): void;
-	/**
-	 * Enter a parse tree produced by the `Parens`
-	 * labeled alternative in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterParens(Context\ParensContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `Parens` labeled alternative
-	 * in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitParens(Context\ParensContext $context): void;
-	/**
-	 * Enter a parse tree produced by the `Num`
-	 * labeled alternative in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterNum(Context\NumContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `Num` labeled alternative
-	 * in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitNum(Context\NumContext $context): void;
-	/**
-	 * Enter a parse tree produced by the `String`
-	 * labeled alternative in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterString(Context\StringContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `String` labeled alternative
-	 * in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitString(Context\StringContext $context): void;
-	/**
-	 * Enter a parse tree produced by the `Boole`
-	 * labeled alternative in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterBoole(Context\BooleContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `Boole` labeled alternative
-	 * in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitBoole(Context\BooleContext $context): void;
-	/**
-	 * Enter a parse tree produced by the `MoreLessEq`
-	 * labeled alternative in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterMoreLessEq(Context\MoreLessEqContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `MoreLessEq` labeled alternative
-	 * in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitMoreLessEq(Context\MoreLessEqContext $context): void;
-	/**
-	 * Enter a parse tree produced by the `Nil`
-	 * labeled alternative in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterNil(Context\NilContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `Nil` labeled alternative
-	 * in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitNil(Context\NilContext $context): void;
-	/**
-	 * Enter a parse tree produced by the `Float`
-	 * labeled alternative in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterFloat(Context\FloatContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `Float` labeled alternative
-	 * in {@see GrammarParser::expr()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitFloat(Context\FloatContext $context): void;
-	/**
 	 * Enter a parse tree produced by the `MulDivMod`
 	 * labeled alternative in {@see GrammarParser::expr()}.
 	 * @param $context The parse tree.
@@ -418,17 +352,41 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitEqNotEq(Context\EqNotEqContext $context): void;
 	/**
-	 * Enter a parse tree produced by the `Rune`
+	 * Enter a parse tree produced by the `AddSub`
 	 * labeled alternative in {@see GrammarParser::expr()}.
 	 * @param $context The parse tree.
 	 */
-	public function enterRune(Context\RuneContext $context): void;
+	public function enterAddSub(Context\AddSubContext $context): void;
 	/**
-	 * Exit a parse tree produced by the `Rune` labeled alternative
+	 * Exit a parse tree produced by the `AddSub` labeled alternative
 	 * in {@see GrammarParser::expr()}.
 	 * @param $context The parse tree.
 	 */
-	public function exitRune(Context\RuneContext $context): void;
+	public function exitAddSub(Context\AddSubContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `Parens`
+	 * labeled alternative in {@see GrammarParser::expr()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterParens(Context\ParensContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `Parens` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitParens(Context\ParensContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `va`
+	 * labeled alternative in {@see GrammarParser::expr()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterVa(Context\VaContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `va` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitVa(Context\VaContext $context): void;
 	/**
 	 * Enter a parse tree produced by the `AndOr`
 	 * labeled alternative in {@see GrammarParser::expr()}.
@@ -441,6 +399,102 @@ interface GrammarListener extends ParseTreeListener {
 	 * @param $context The parse tree.
 	 */
 	public function exitAndOr(Context\AndOrContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `MoreLessEq`
+	 * labeled alternative in {@see GrammarParser::expr()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterMoreLessEq(Context\MoreLessEqContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `MoreLessEq` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitMoreLessEq(Context\MoreLessEqContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `Num`
+	 * labeled alternative in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterNum(Context\NumContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `Num` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitNum(Context\NumContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `Float`
+	 * labeled alternative in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterFloat(Context\FloatContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `Float` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitFloat(Context\FloatContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `IdExpr`
+	 * labeled alternative in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterIdExpr(Context\IdExprContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `IdExpr` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitIdExpr(Context\IdExprContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `Boole`
+	 * labeled alternative in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterBoole(Context\BooleContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `Boole` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitBoole(Context\BooleContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `String`
+	 * labeled alternative in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterString(Context\StringContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `String` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitString(Context\StringContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `Rune`
+	 * labeled alternative in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterRune(Context\RuneContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `Rune` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitRune(Context\RuneContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `Nil`
+	 * labeled alternative in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterNil(Context\NilContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `Nil` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitNil(Context\NilContext $context): void;
 	/**
 	 * Enter a parse tree produced by {@see GrammarParser::lid()}.
 	 * @param $context The parse tree.

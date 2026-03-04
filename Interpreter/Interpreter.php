@@ -42,6 +42,8 @@ use Context\PrintlnContext;
 use Context\TypeOContext;
 use Context\NowFuncContext;
 use Context\LenFuncContext;
+use Context\SubSContext;
+use Context\SwitchStmtContext;
 
 class BreakException extends \Exception {}
 class ContinueException extends \Exception {}
@@ -456,7 +458,7 @@ class Interpreter extends GrammarBaseVisitor
         return date("Y-m-d H:i:s");
     }
 
-    public function visitLenFunc(LenFuncContext $context): int
+    public function visitLenFunc(LenFuncContext $context)
     {
         $result = $this->visit($context->expr());
 
@@ -465,12 +467,81 @@ class Interpreter extends GrammarBaseVisitor
                 "La len() solo hacepta Strings",
                 $context->expr()->getStart()
             );
-            return -1;
+            return null;
         }
         return strlen($result);
     }
 
+    public function visitSubS(SubSContext $context)
+    {
+        $str = $this->visit($context->expr(0));
+        $start = $this->visit($context->expr(1));
+        $long =  $this->visit($context->expr(2));
 
+        if (!is_string($str)) {
+            $this->addError(
+                "La la cadena debe ser String",
+                $context->expr(0)->getStart()
+            );
+            return null;
+        }
+        $max = strlen($str);
+
+        if (!is_int($start) || !is_int($long)) {
+            $this->addError(
+                "La substr() solo hacepta indices tipo Int32",
+                $context->expr(0)->getStart()
+            );
+            return null;
+        }
+        if ($start < 0 || $long < 1) {
+            $this->addError(
+                "Indices fuera de rango",
+                $context->expr(0)->getStart()
+            );
+            return null;
+        }
+
+        if ($max < $start + $long) {
+            $this->addError(
+                "Indice fuera del limite",
+                $context->expr(0)->getStart()
+            );
+            return null;
+        }
+
+        return substr($str, $start, $long);
+    }
+
+
+
+    //----------------------------switch----------------------------------
+    public function visitSwitchStmt(SwitchStmtContext $context)
+    {
+        $condition = $this->visit($context->expr());
+        $caluses = $context->caseClause();
+        $def = $context->defaultClause();
+
+        for ($i = 0; $i < count($caluses); $i++) {
+            $cases = $caluses[$i]->lval()->expr();
+
+            for ($x = 0; $x < count($cases); $x++) {
+
+                if ($this->visit($cases[$x]) === $condition) {
+
+                    $this->visit($caluses[$i]->stmts());
+                    return null;
+                }
+            }
+        }
+
+        if ($def) {
+            $this->visit($def->stmts());
+            return null;
+        }
+
+        return null;
+    }
 
     //------------------------if------------------------------
 
@@ -944,8 +1015,6 @@ class Interpreter extends GrammarBaseVisitor
     }
 
     //---------------Declaraciones-------------------
-
-
 
     public function visitDeclv(DeclvContext $context)
     {
