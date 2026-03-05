@@ -29,6 +29,8 @@ use Context\PruneContext;
 use Context\SContext;
 use Context\IfStmtContext;
 use Context\AndOrContext;
+use Context\ArrayElementContext;
+use Context\ArrayValueContext;
 use Context\EqNotEqContext;
 use Context\MoreLessEqContext;
 use Context\ProgramContext;
@@ -42,8 +44,11 @@ use Context\PrintlnContext;
 use Context\TypeOContext;
 use Context\NowFuncContext;
 use Context\LenFuncContext;
+use Context\LongArrayDecContext;
+use Context\ShortArrayDecContext;
 use Context\SubSContext;
 use Context\SwitchStmtContext;
+use LDAP\Result;
 
 class BreakException extends \Exception {}
 class ContinueException extends \Exception {}
@@ -331,6 +336,73 @@ class Interpreter extends GrammarBaseVisitor
         return false;
     }
 
+    private function arrayToString($arr)
+    {
+        if (!is_array($arr)) {
+            return $arr;
+        }
+
+        $parts = [];
+
+        foreach ($arr as $value) {
+            $parts[] =  $this->arrayToString($value);
+        }
+
+        return '{' . implode(',', $parts) . '}';
+    }
+
+    private function validateArray($type, $arr)
+    {
+        if (!is_array($arr)) {
+            return $this->validateType($type, $arr);
+        }
+
+        foreach ($arr as $value) {
+            if (is_array($value)) {
+                if (!$this->validateArray($type, $value)) {
+                    return false;
+                }
+            } else {
+                if (!$this->validateType($type, $value)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private function generateArray($dimensions, $type)
+    {
+        if (count($dimensions) === 0) {
+            return $this->getDefaulValue($type);
+        }
+
+        $size = array_shift($dimensions);
+        $result = [];
+
+        for ($i = 0; $i < $size; $i++) {
+            $result[] = $this->generateArray($dimensions, $type);
+        }
+
+        return $result;
+    }
+
+    private function getEtiqArray($arr)
+    {
+        if (!is_array($arr)) {
+            return $this->getEtiqArray($arr);
+        }
+
+        $result = [];
+
+        foreach ($arr as $k => $v) {
+            $result[$k] = $this->getEtiqArray($v);
+        }
+
+        return $result;
+    }
+
 
 
     //-------funciones visit-------------------------------------------------------
@@ -425,6 +497,7 @@ class Interpreter extends GrammarBaseVisitor
     {
         return "const";
     }
+
     //----------------------------funciones---------------------
 
     public function visitPrintln(PrintlnContext $context)
@@ -527,7 +600,8 @@ class Interpreter extends GrammarBaseVisitor
 
             for ($x = 0; $x < count($cases); $x++) {
 
-                if ($this->visit($cases[$x]) === $condition) {
+                $case = $this->visit($cases[$x]);
+                if ($case === $condition) {
 
                     $this->visit($caluses[$i]->stmts());
                     return null;
@@ -1118,6 +1192,7 @@ class Interpreter extends GrammarBaseVisitor
             if ($this->declare($name, [])) {
                 $this->syCount++;
             }
+
             $scopeLevel = count($this->scopes) - 1;
             $currentScope = &$this->scopes[$scopeLevel]["symbols"];
             $etiq = $this->getDefaultEtiquet($type);
@@ -1194,6 +1269,164 @@ class Interpreter extends GrammarBaseVisitor
         }
 
         return null;
+    }
+
+
+    //------------------------arrays-----------------------------------
+
+    public function visitArrayValue(ArrayValueContext $context)
+    {
+        $result = [];
+
+        if ($context->arrayElements() === null) {
+            return $result;
+        }
+
+        foreach ($context->arrayElements()->arrayElement() as $element) {
+            $result[] = $this->visit($element);
+        }
+
+        return $result;
+    }
+
+    public function visitArrayElement(ArrayElementContext $context)
+    {
+        if ($context->expr() !== null) {
+            return $this->visit($context->expr());
+        }
+
+        if ($context->arrayValue() !== null) {
+            return $this->visit($context->arrayValue());
+        }
+
+        return null;
+    }
+
+    public function visitLongArrayDec(LongArrayDecContext $context)
+    {
+        $name = $context->ID()->getText();
+        $type1 = $this->visit($context->type(0));
+        $type2 = $this->visit($context->type(1));
+        $value = $this->visit($context->arrayValue());
+        $leftDims = $context->larray(0)->NUM();
+        $rightDims = $context->larray(1)->NUM();
+
+
+        if (count($leftDims) !== count($rightDims)) {
+            $this->addError(
+                "Los valores Dimensionales no coinciden",
+                $rightDims = $context->larray(1)->getStart()
+            );
+            return null;
+        }
+
+
+        if (!$this->validateArray($type1, $value)) {
+            $this->addError(
+                "Error al guardar en array, tipos incomplatibles",
+                $rightDims = $context->arrayValue()->getStart()
+            );
+            return null;
+        }
+
+        for ($i = 0; $i < count($leftDims); $i++) {
+            if ($leftDims[$i]->getText() !== $rightDims[$i]->getText()) {
+                $this->addError(
+                    "Los valores Dimensionales no coinciden",
+                    $rightDims = $context->larray(1)->getStart()
+                );
+                return null;
+            }
+        }
+
+
+        if ($type1 !== $type2) {
+            $this->addError(
+                "Los valores Dimensionales no coinciden",
+                $rightDims = $context->type(1)->getStart()
+            );
+            return null;
+        }
+
+        if (isset($currentScope[$name]) && $this->inLoop === 0) {
+            $this->addError(
+                "Identificador '$name' ya fue declarado en este scope",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        if ($this->declare($name, [])) {
+            $this->syCount++;
+        }
+
+        $scopeLevel = count($this->scopes) - 1;
+        $currentScope = &$this->scopes[$scopeLevel]["symbols"];
+        $currentScope[$name] = [
+            "kind" => "var",
+            "type"  => $type1,
+            "val"   => $value,
+            "etiq"  => "array"
+        ];
+
+        $this->symbolTable[$scopeLevel][$name] = [
+            "ScopeName" => $this->scopes[$scopeLevel]["name"],
+            "n" => $this->syCount,
+            "type"      => "array " . $type1,
+            "kind"      => "var",
+            "etiq"      => $this->arrayToString($value)
+        ];
+    }
+
+    public function visitShortArrayDec(ShortArrayDecContext $context)
+    {
+        $name = $context->ID()->getText();
+        $type = $this->visit($context->type());
+        $leftDims = $context->larray()->NUM();
+
+
+
+        if (isset($currentScope[$name]) && $this->inLoop === 0) {
+            $this->addError(
+                "Identificador '$name' ya fue declarado en este scope",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+
+        if ($this->declare($name, [])) {
+            $this->syCount++;
+        }
+
+        $temp = [];
+        for ($i = 0; $i < count($leftDims); $i++) {
+            $temp[] = $leftDims[$i]->gettext(0);
+        }
+
+
+        $value =  $this->generateArray($temp, $type);
+        print_r($value);
+
+
+
+        $scopeLevel = count($this->scopes) - 1;
+        $currentScope = &$this->scopes[$scopeLevel]["symbols"];
+        $currentScope[$name] = [
+            "kind" => "var",
+            "type"  => $type,
+            "val"   => $value,
+            "etiq"  => "array"
+        ];
+
+
+        $this->symbolTable[$scopeLevel][$name] = [
+            "ScopeName" => $this->scopes[$scopeLevel]["name"],
+            "n" => $this->syCount,
+            "type"      => "array " . $type,
+            "kind"      => "var",
+            "etiq"      => $this->arrayToString($value)
+        ];
     }
 
     // ---------------- Expresiones ----------------

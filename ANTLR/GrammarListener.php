@@ -234,6 +234,70 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitSdec(Context\SdecContext $context): void;
 	/**
+	 * Enter a parse tree produced by the `LongArrayDec`
+	 * labeled alternative in {@see GrammarParser::arraydec()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterLongArrayDec(Context\LongArrayDecContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `LongArrayDec` labeled alternative
+	 * in {@see GrammarParser::arraydec()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitLongArrayDec(Context\LongArrayDecContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `ShortArrayDec`
+	 * labeled alternative in {@see GrammarParser::arraydec()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterShortArrayDec(Context\ShortArrayDecContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `ShortArrayDec` labeled alternative
+	 * in {@see GrammarParser::arraydec()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitShortArrayDec(Context\ShortArrayDecContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::larray()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterLarray(Context\LarrayContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::larray()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitLarray(Context\LarrayContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::arrayValue()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterArrayValue(Context\ArrayValueContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::arrayValue()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitArrayValue(Context\ArrayValueContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::arrayElements()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterArrayElements(Context\ArrayElementsContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::arrayElements()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitArrayElements(Context\ArrayElementsContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::arrayElement()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterArrayElement(Context\ArrayElementContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::arrayElement()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitArrayElement(Context\ArrayElementContext $context): void;
+	/**
 	 * Enter a parse tree produced by the `Asig`
 	 * labeled alternative in {@see GrammarParser::asg()}.
 	 * @param $context The parse tree.

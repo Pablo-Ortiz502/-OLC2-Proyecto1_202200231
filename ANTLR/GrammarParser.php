@@ -28,28 +28,32 @@ namespace {
                T__12 = 13, T__13 = 14, T__14 = 15, T__15 = 16, T__16 = 17, 
                T__17 = 18, T__18 = 19, T__19 = 20, T__20 = 21, T__21 = 22, 
                T__22 = 23, T__23 = 24, T__24 = 25, T__25 = 26, T__26 = 27, 
-               T__27 = 28, FUNC = 29, MAIN = 30, PVAR = 31, PCONST = 32, 
-               IF = 33, ELSE = 34, DEFAULT = 35, CASE = 36, SWITCH = 37, 
-               FOR = 38, BREAK = 39, CONTINUE = 40, RETURN = 41, PRINT = 42, 
-               SUBSTR = 43, LEN = 44, NOW = 45, TYPEOF = 46, PINT = 47, 
-               PFLOAT = 48, PBOOL = 49, PSTRING = 50, PRUNE = 51, NUM = 52, 
-               FLOAT = 53, NIL = 54, BOOLE = 55, STRING = 56, RUNE = 57, 
-               ID = 58, LINE_COMMENT = 59, BLOCK_COMMENT = 60, WS = 61;
+               T__27 = 28, T__28 = 29, T__29 = 30, FUNC = 31, MAIN = 32, 
+               PVAR = 33, PCONST = 34, IF = 35, ELSE = 36, DEFAULT = 37, 
+               CASE = 38, SWITCH = 39, FOR = 40, BREAK = 41, CONTINUE = 42, 
+               RETURN = 43, PRINT = 44, SUBSTR = 45, LEN = 46, NOW = 47, 
+               TYPEOF = 48, PINT = 49, PFLOAT = 50, PBOOL = 51, PSTRING = 52, 
+               PRUNE = 53, NUM = 54, FLOAT = 55, NIL = 56, BOOLE = 57, STRING = 58, 
+               RUNE = 59, ID = 60, LINE_COMMENT = 61, BLOCK_COMMENT = 62, 
+               WS = 63;
 
 		public const RULE_s = 0, RULE_program = 1, RULE_stmts = 2, RULE_pri = 3, 
                RULE_reserved = 4, RULE_block = 5, RULE_inst = 6, RULE_ifStmt = 7, 
                RULE_forStmt = 8, RULE_switchStmt = 9, RULE_caseClause = 10, 
-               RULE_defaultClause = 11, RULE_dec = 12, RULE_asg = 13, RULE_incdec = 14, 
-               RULE_expr = 15, RULE_vals = 16, RULE_lid = 17, RULE_lval = 18, 
-               RULE_pre = 19, RULE_type = 20;
+               RULE_defaultClause = 11, RULE_dec = 12, RULE_arraydec = 13, 
+               RULE_larray = 14, RULE_arrayValue = 15, RULE_arrayElements = 16, 
+               RULE_arrayElement = 17, RULE_asg = 18, RULE_incdec = 19, 
+               RULE_expr = 20, RULE_vals = 21, RULE_lid = 22, RULE_lval = 23, 
+               RULE_pre = 24, RULE_type = 25;
 
 		/**
 		 * @var array<string>
 		 */
 		public const RULE_NAMES = [
 			's', 'program', 'stmts', 'pri', 'reserved', 'block', 'inst', 'ifStmt', 
-			'forStmt', 'switchStmt', 'caseClause', 'defaultClause', 'dec', 'asg', 
-			'incdec', 'expr', 'vals', 'lid', 'lval', 'pre', 'type'
+			'forStmt', 'switchStmt', 'caseClause', 'defaultClause', 'dec', 'arraydec', 
+			'larray', 'arrayValue', 'arrayElements', 'arrayElement', 'asg', 'incdec', 
+			'expr', 'vals', 'lid', 'lval', 'pre', 'type'
 		];
 
 		/**
@@ -57,10 +61,10 @@ namespace {
 		 */
 		private const LITERAL_NAMES = [
 		    null, "'('", "')'", "','", "'{'", "'}'", "';'", "':'", "'='", "':='", 
-		    "'+='", "'-='", "'*='", "'/='", "'++'", "'--'", "'*'", "'/'", "'%'", 
-		    "'+'", "'-'", "'=='", "'!='", "'>='", "'<='", "'>'", "'<'", "'&&'", 
-		    "'||'", "'func'", "'main'", "'var'", "'const'", "'if'", "'else'", 
-		    "'default'", "'case'", "'switch'", "'for'", "'break'", "'continue'", 
+		    "'['", "']'", "'+='", "'-='", "'*='", "'/='", "'++'", "'--'", "'*'", 
+		    "'/'", "'%'", "'+'", "'-'", "'=='", "'!='", "'>='", "'<='", "'>'", 
+		    "'<'", "'&&'", "'||'", "'func'", "'main'", "'var'", "'const'", "'if'", 
+		    "'else'", "'default'", "'case'", "'switch'", "'for'", "'break'", "'continue'", 
 		    "'return'", "'fmt.Println'", "'substr'", "'len'", "'now'", "'typeOf'", 
 		    "'int32'", "'float32'", "'boole'", "'string'", "'rune'", null, null, 
 		    "'nil'"
@@ -72,132 +76,159 @@ namespace {
 		private const SYMBOLIC_NAMES = [
 		    null, null, null, null, null, null, null, null, null, null, null, 
 		    null, null, null, null, null, null, null, null, null, null, null, 
-		    null, null, null, null, null, null, null, "FUNC", "MAIN", "PVAR", 
-		    "PCONST", "IF", "ELSE", "DEFAULT", "CASE", "SWITCH", "FOR", "BREAK", 
-		    "CONTINUE", "RETURN", "PRINT", "SUBSTR", "LEN", "NOW", "TYPEOF", "PINT", 
-		    "PFLOAT", "PBOOL", "PSTRING", "PRUNE", "NUM", "FLOAT", "NIL", "BOOLE", 
-		    "STRING", "RUNE", "ID", "LINE_COMMENT", "BLOCK_COMMENT", "WS"
+		    null, null, null, null, null, null, null, null, null, "FUNC", "MAIN", 
+		    "PVAR", "PCONST", "IF", "ELSE", "DEFAULT", "CASE", "SWITCH", "FOR", 
+		    "BREAK", "CONTINUE", "RETURN", "PRINT", "SUBSTR", "LEN", "NOW", "TYPEOF", 
+		    "PINT", "PFLOAT", "PBOOL", "PSTRING", "PRUNE", "NUM", "FLOAT", "NIL", 
+		    "BOOLE", "STRING", "RUNE", "ID", "LINE_COMMENT", "BLOCK_COMMENT", 
+		    "WS"
 		];
 
 		private const SERIALIZED_ATN =
-			[4, 1, 61, 249, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 
+			[4, 1, 63, 305, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 
 		    7, 4, 2, 5, 7, 5, 2, 6, 7, 6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 
 		    2, 10, 7, 10, 2, 11, 7, 11, 2, 12, 7, 12, 2, 13, 7, 13, 2, 14, 7, 
 		    14, 2, 15, 7, 15, 2, 16, 7, 16, 2, 17, 7, 17, 2, 18, 7, 18, 2, 19, 
-		    7, 19, 2, 20, 7, 20, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
-		    1, 1, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 3, 2, 60, 
-		    8, 2, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 
-		    1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 
-		    1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 3, 4, 89, 8, 4, 1, 5, 1, 5, 5, 
-		    5, 93, 8, 5, 10, 5, 12, 5, 96, 9, 5, 1, 5, 1, 5, 1, 6, 1, 6, 1, 7, 
-		    1, 7, 1, 7, 1, 7, 1, 7, 3, 7, 107, 8, 7, 1, 8, 1, 8, 1, 8, 1, 8, 1, 
-		    8, 1, 8, 1, 8, 1, 8, 1, 8, 1, 8, 1, 8, 1, 8, 1, 8, 1, 8, 3, 8, 123, 
-		    8, 8, 1, 9, 1, 9, 1, 9, 1, 9, 4, 9, 129, 8, 9, 11, 9, 12, 9, 130, 
-		    1, 9, 3, 9, 134, 8, 9, 1, 9, 1, 9, 1, 10, 1, 10, 1, 10, 1, 10, 1, 
-		    10, 1, 11, 1, 11, 1, 11, 1, 11, 1, 12, 1, 12, 1, 12, 1, 12, 1, 12, 
-		    1, 12, 1, 12, 1, 12, 1, 12, 1, 12, 1, 12, 1, 12, 1, 12, 1, 12, 3, 
-		    12, 161, 8, 12, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 
-		    13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 3, 13, 
-		    179, 8, 13, 1, 14, 1, 14, 1, 14, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 
-		    1, 15, 1, 15, 3, 15, 191, 8, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 
-		    1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 
-		    15, 5, 15, 208, 8, 15, 10, 15, 12, 15, 211, 9, 15, 1, 16, 1, 16, 1, 
-		    16, 1, 16, 1, 16, 1, 16, 1, 16, 3, 16, 220, 8, 16, 1, 17, 1, 17, 1, 
-		    17, 5, 17, 225, 8, 17, 10, 17, 12, 17, 228, 9, 17, 1, 18, 1, 18, 1, 
-		    18, 5, 18, 233, 8, 18, 10, 18, 12, 18, 236, 9, 18, 1, 19, 1, 19, 3, 
-		    19, 240, 8, 19, 1, 20, 1, 20, 1, 20, 1, 20, 1, 20, 3, 20, 247, 8, 
-		    20, 1, 20, 0, 1, 30, 21, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 
-		    24, 26, 28, 30, 32, 34, 36, 38, 40, 0, 7, 1, 0, 39, 40, 1, 0, 14, 
-		    15, 1, 0, 16, 18, 1, 0, 19, 20, 1, 0, 21, 22, 1, 0, 23, 26, 1, 0, 
-		    27, 28, 270, 0, 42, 1, 0, 0, 0, 2, 45, 1, 0, 0, 0, 4, 59, 1, 0, 0, 
-		    0, 6, 61, 1, 0, 0, 0, 8, 88, 1, 0, 0, 0, 10, 90, 1, 0, 0, 0, 12, 99, 
-		    1, 0, 0, 0, 14, 101, 1, 0, 0, 0, 16, 122, 1, 0, 0, 0, 18, 124, 1, 
-		    0, 0, 0, 20, 137, 1, 0, 0, 0, 22, 142, 1, 0, 0, 0, 24, 160, 1, 0, 
-		    0, 0, 26, 178, 1, 0, 0, 0, 28, 180, 1, 0, 0, 0, 30, 190, 1, 0, 0, 
-		    0, 32, 219, 1, 0, 0, 0, 34, 221, 1, 0, 0, 0, 36, 229, 1, 0, 0, 0, 
-		    38, 239, 1, 0, 0, 0, 40, 246, 1, 0, 0, 0, 42, 43, 3, 2, 1, 0, 43, 
-		    44, 5, 0, 0, 1, 44, 1, 1, 0, 0, 0, 45, 46, 5, 29, 0, 0, 46, 47, 5, 
-		    30, 0, 0, 47, 48, 5, 1, 0, 0, 48, 49, 5, 2, 0, 0, 49, 50, 3, 10, 5, 
-		    0, 50, 3, 1, 0, 0, 0, 51, 60, 3, 24, 12, 0, 52, 60, 3, 26, 13, 0, 
-		    53, 60, 3, 14, 7, 0, 54, 60, 3, 16, 8, 0, 55, 60, 3, 12, 6, 0, 56, 
-		    60, 3, 8, 4, 0, 57, 60, 3, 6, 3, 0, 58, 60, 3, 18, 9, 0, 59, 51, 1, 
-		    0, 0, 0, 59, 52, 1, 0, 0, 0, 59, 53, 1, 0, 0, 0, 59, 54, 1, 0, 0, 
-		    0, 59, 55, 1, 0, 0, 0, 59, 56, 1, 0, 0, 0, 59, 57, 1, 0, 0, 0, 59, 
-		    58, 1, 0, 0, 0, 60, 5, 1, 0, 0, 0, 61, 62, 5, 42, 0, 0, 62, 63, 5, 
-		    1, 0, 0, 63, 64, 3, 36, 18, 0, 64, 65, 5, 2, 0, 0, 65, 7, 1, 0, 0, 
-		    0, 66, 67, 5, 46, 0, 0, 67, 68, 5, 1, 0, 0, 68, 69, 3, 30, 15, 0, 
-		    69, 70, 5, 2, 0, 0, 70, 89, 1, 0, 0, 0, 71, 72, 5, 45, 0, 0, 72, 73, 
-		    5, 1, 0, 0, 73, 89, 5, 2, 0, 0, 74, 75, 5, 44, 0, 0, 75, 76, 5, 1, 
-		    0, 0, 76, 77, 3, 30, 15, 0, 77, 78, 5, 2, 0, 0, 78, 89, 1, 0, 0, 0, 
-		    79, 80, 5, 43, 0, 0, 80, 81, 5, 1, 0, 0, 81, 82, 3, 30, 15, 0, 82, 
-		    83, 5, 3, 0, 0, 83, 84, 3, 30, 15, 0, 84, 85, 5, 3, 0, 0, 85, 86, 
-		    3, 30, 15, 0, 86, 87, 5, 2, 0, 0, 87, 89, 1, 0, 0, 0, 88, 66, 1, 0, 
-		    0, 0, 88, 71, 1, 0, 0, 0, 88, 74, 1, 0, 0, 0, 88, 79, 1, 0, 0, 0, 
-		    89, 9, 1, 0, 0, 0, 90, 94, 5, 4, 0, 0, 91, 93, 3, 4, 2, 0, 92, 91, 
-		    1, 0, 0, 0, 93, 96, 1, 0, 0, 0, 94, 92, 1, 0, 0, 0, 94, 95, 1, 0, 
-		    0, 0, 95, 97, 1, 0, 0, 0, 96, 94, 1, 0, 0, 0, 97, 98, 5, 5, 0, 0, 
-		    98, 11, 1, 0, 0, 0, 99, 100, 7, 0, 0, 0, 100, 13, 1, 0, 0, 0, 101, 
-		    102, 5, 33, 0, 0, 102, 103, 3, 30, 15, 0, 103, 106, 3, 10, 5, 0, 104, 
-		    105, 5, 34, 0, 0, 105, 107, 3, 10, 5, 0, 106, 104, 1, 0, 0, 0, 106, 
-		    107, 1, 0, 0, 0, 107, 15, 1, 0, 0, 0, 108, 109, 5, 38, 0, 0, 109, 
-		    110, 3, 24, 12, 0, 110, 111, 5, 6, 0, 0, 111, 112, 3, 30, 15, 0, 112, 
-		    113, 5, 6, 0, 0, 113, 114, 3, 28, 14, 0, 114, 115, 3, 10, 5, 0, 115, 
-		    123, 1, 0, 0, 0, 116, 117, 5, 38, 0, 0, 117, 118, 3, 30, 15, 0, 118, 
-		    119, 3, 10, 5, 0, 119, 123, 1, 0, 0, 0, 120, 121, 5, 38, 0, 0, 121, 
-		    123, 3, 10, 5, 0, 122, 108, 1, 0, 0, 0, 122, 116, 1, 0, 0, 0, 122, 
-		    120, 1, 0, 0, 0, 123, 17, 1, 0, 0, 0, 124, 125, 5, 37, 0, 0, 125, 
-		    126, 3, 30, 15, 0, 126, 128, 5, 4, 0, 0, 127, 129, 3, 20, 10, 0, 128, 
-		    127, 1, 0, 0, 0, 129, 130, 1, 0, 0, 0, 130, 128, 1, 0, 0, 0, 130, 
-		    131, 1, 0, 0, 0, 131, 133, 1, 0, 0, 0, 132, 134, 3, 22, 11, 0, 133, 
-		    132, 1, 0, 0, 0, 133, 134, 1, 0, 0, 0, 134, 135, 1, 0, 0, 0, 135, 
-		    136, 5, 5, 0, 0, 136, 19, 1, 0, 0, 0, 137, 138, 5, 36, 0, 0, 138, 
-		    139, 3, 36, 18, 0, 139, 140, 5, 7, 0, 0, 140, 141, 3, 4, 2, 0, 141, 
-		    21, 1, 0, 0, 0, 142, 143, 5, 35, 0, 0, 143, 144, 5, 7, 0, 0, 144, 
-		    145, 3, 4, 2, 0, 145, 23, 1, 0, 0, 0, 146, 147, 3, 38, 19, 0, 147, 
-		    148, 3, 34, 17, 0, 148, 149, 3, 40, 20, 0, 149, 150, 5, 8, 0, 0, 150, 
-		    151, 3, 36, 18, 0, 151, 161, 1, 0, 0, 0, 152, 153, 3, 38, 19, 0, 153, 
-		    154, 3, 34, 17, 0, 154, 155, 3, 40, 20, 0, 155, 161, 1, 0, 0, 0, 156, 
-		    157, 3, 34, 17, 0, 157, 158, 5, 9, 0, 0, 158, 159, 3, 36, 18, 0, 159, 
-		    161, 1, 0, 0, 0, 160, 146, 1, 0, 0, 0, 160, 152, 1, 0, 0, 0, 160, 
-		    156, 1, 0, 0, 0, 161, 25, 1, 0, 0, 0, 162, 163, 5, 58, 0, 0, 163, 
-		    164, 5, 8, 0, 0, 164, 179, 3, 30, 15, 0, 165, 166, 5, 58, 0, 0, 166, 
-		    167, 5, 10, 0, 0, 167, 179, 3, 30, 15, 0, 168, 169, 5, 58, 0, 0, 169, 
-		    170, 5, 11, 0, 0, 170, 179, 3, 30, 15, 0, 171, 172, 5, 58, 0, 0, 172, 
-		    173, 5, 12, 0, 0, 173, 179, 3, 30, 15, 0, 174, 175, 5, 58, 0, 0, 175, 
-		    176, 5, 13, 0, 0, 176, 179, 3, 30, 15, 0, 177, 179, 3, 28, 14, 0, 
-		    178, 162, 1, 0, 0, 0, 178, 165, 1, 0, 0, 0, 178, 168, 1, 0, 0, 0, 
-		    178, 171, 1, 0, 0, 0, 178, 174, 1, 0, 0, 0, 178, 177, 1, 0, 0, 0, 
-		    179, 27, 1, 0, 0, 0, 180, 181, 5, 58, 0, 0, 181, 182, 7, 1, 0, 0, 
-		    182, 29, 1, 0, 0, 0, 183, 184, 6, 15, -1, 0, 184, 185, 5, 1, 0, 0, 
-		    185, 186, 3, 30, 15, 0, 186, 187, 5, 2, 0, 0, 187, 191, 1, 0, 0, 0, 
-		    188, 191, 3, 32, 16, 0, 189, 191, 3, 8, 4, 0, 190, 183, 1, 0, 0, 0, 
-		    190, 188, 1, 0, 0, 0, 190, 189, 1, 0, 0, 0, 191, 209, 1, 0, 0, 0, 
-		    192, 193, 10, 8, 0, 0, 193, 194, 7, 2, 0, 0, 194, 208, 3, 30, 15, 
-		    9, 195, 196, 10, 7, 0, 0, 196, 197, 7, 3, 0, 0, 197, 208, 3, 30, 15, 
-		    8, 198, 199, 10, 6, 0, 0, 199, 200, 7, 4, 0, 0, 200, 208, 3, 30, 15, 
-		    7, 201, 202, 10, 5, 0, 0, 202, 203, 7, 5, 0, 0, 203, 208, 3, 30, 15, 
-		    6, 204, 205, 10, 4, 0, 0, 205, 206, 7, 6, 0, 0, 206, 208, 3, 30, 15, 
-		    5, 207, 192, 1, 0, 0, 0, 207, 195, 1, 0, 0, 0, 207, 198, 1, 0, 0, 
-		    0, 207, 201, 1, 0, 0, 0, 207, 204, 1, 0, 0, 0, 208, 211, 1, 0, 0, 
-		    0, 209, 207, 1, 0, 0, 0, 209, 210, 1, 0, 0, 0, 210, 31, 1, 0, 0, 0, 
-		    211, 209, 1, 0, 0, 0, 212, 220, 5, 52, 0, 0, 213, 220, 5, 53, 0, 0, 
-		    214, 220, 5, 58, 0, 0, 215, 220, 5, 55, 0, 0, 216, 220, 5, 56, 0, 
-		    0, 217, 220, 5, 57, 0, 0, 218, 220, 5, 54, 0, 0, 219, 212, 1, 0, 0, 
-		    0, 219, 213, 1, 0, 0, 0, 219, 214, 1, 0, 0, 0, 219, 215, 1, 0, 0, 
-		    0, 219, 216, 1, 0, 0, 0, 219, 217, 1, 0, 0, 0, 219, 218, 1, 0, 0, 
-		    0, 220, 33, 1, 0, 0, 0, 221, 226, 5, 58, 0, 0, 222, 223, 5, 3, 0, 
-		    0, 223, 225, 5, 58, 0, 0, 224, 222, 1, 0, 0, 0, 225, 228, 1, 0, 0, 
-		    0, 226, 224, 1, 0, 0, 0, 226, 227, 1, 0, 0, 0, 227, 35, 1, 0, 0, 0, 
-		    228, 226, 1, 0, 0, 0, 229, 234, 3, 30, 15, 0, 230, 231, 5, 3, 0, 0, 
-		    231, 233, 3, 30, 15, 0, 232, 230, 1, 0, 0, 0, 233, 236, 1, 0, 0, 0, 
-		    234, 232, 1, 0, 0, 0, 234, 235, 1, 0, 0, 0, 235, 37, 1, 0, 0, 0, 236, 
-		    234, 1, 0, 0, 0, 237, 240, 5, 31, 0, 0, 238, 240, 5, 32, 0, 0, 239, 
-		    237, 1, 0, 0, 0, 239, 238, 1, 0, 0, 0, 240, 39, 1, 0, 0, 0, 241, 247, 
-		    5, 47, 0, 0, 242, 247, 5, 48, 0, 0, 243, 247, 5, 49, 0, 0, 244, 247, 
-		    5, 50, 0, 0, 245, 247, 5, 51, 0, 0, 246, 241, 1, 0, 0, 0, 246, 242, 
-		    1, 0, 0, 0, 246, 243, 1, 0, 0, 0, 246, 244, 1, 0, 0, 0, 246, 245, 
-		    1, 0, 0, 0, 247, 41, 1, 0, 0, 0, 17, 59, 88, 94, 106, 122, 130, 133, 
-		    160, 178, 190, 207, 209, 219, 226, 234, 239, 246];
+		    7, 19, 2, 20, 7, 20, 2, 21, 7, 21, 2, 22, 7, 22, 2, 23, 7, 23, 2, 
+		    24, 7, 24, 2, 25, 7, 25, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 
+		    1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 
+		    3, 2, 71, 8, 2, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 4, 1, 4, 1, 4, 1, 
+		    4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 
+		    4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 3, 4, 100, 8, 4, 1, 5, 
+		    1, 5, 5, 5, 104, 8, 5, 10, 5, 12, 5, 107, 9, 5, 1, 5, 1, 5, 1, 6, 
+		    1, 6, 1, 7, 1, 7, 1, 7, 1, 7, 1, 7, 3, 7, 118, 8, 7, 1, 8, 1, 8, 1, 
+		    8, 1, 8, 1, 8, 1, 8, 1, 8, 1, 8, 1, 8, 1, 8, 1, 8, 1, 8, 1, 8, 1, 
+		    8, 3, 8, 134, 8, 8, 1, 9, 1, 9, 1, 9, 1, 9, 4, 9, 140, 8, 9, 11, 9, 
+		    12, 9, 141, 1, 9, 3, 9, 145, 8, 9, 1, 9, 1, 9, 1, 10, 1, 10, 1, 10, 
+		    1, 10, 1, 10, 1, 11, 1, 11, 1, 11, 1, 11, 1, 12, 1, 12, 1, 12, 1, 
+		    12, 1, 12, 1, 12, 1, 12, 1, 12, 1, 12, 1, 12, 1, 12, 1, 12, 1, 12, 
+		    1, 12, 3, 12, 172, 8, 12, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 
+		    1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 3, 13, 188, 
+		    8, 13, 1, 14, 1, 14, 1, 14, 1, 14, 1, 14, 1, 14, 5, 14, 196, 8, 14, 
+		    10, 14, 12, 14, 199, 9, 14, 1, 15, 1, 15, 3, 15, 203, 8, 15, 1, 15, 
+		    1, 15, 1, 16, 1, 16, 1, 16, 5, 16, 210, 8, 16, 10, 16, 12, 16, 213, 
+		    9, 16, 1, 17, 1, 17, 3, 17, 217, 8, 17, 1, 18, 1, 18, 1, 18, 1, 18, 
+		    1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 
+		    18, 1, 18, 1, 18, 3, 18, 235, 8, 18, 1, 19, 1, 19, 1, 19, 1, 20, 1, 
+		    20, 1, 20, 1, 20, 1, 20, 1, 20, 1, 20, 3, 20, 247, 8, 20, 1, 20, 1, 
+		    20, 1, 20, 1, 20, 1, 20, 1, 20, 1, 20, 1, 20, 1, 20, 1, 20, 1, 20, 
+		    1, 20, 1, 20, 1, 20, 1, 20, 5, 20, 264, 8, 20, 10, 20, 12, 20, 267, 
+		    9, 20, 1, 21, 1, 21, 1, 21, 1, 21, 1, 21, 1, 21, 1, 21, 3, 21, 276, 
+		    8, 21, 1, 22, 1, 22, 1, 22, 5, 22, 281, 8, 22, 10, 22, 12, 22, 284, 
+		    9, 22, 1, 23, 1, 23, 1, 23, 5, 23, 289, 8, 23, 10, 23, 12, 23, 292, 
+		    9, 23, 1, 24, 1, 24, 3, 24, 296, 8, 24, 1, 25, 1, 25, 1, 25, 1, 25, 
+		    1, 25, 3, 25, 303, 8, 25, 1, 25, 0, 1, 40, 26, 0, 2, 4, 6, 8, 10, 
+		    12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 
+		    46, 48, 50, 0, 7, 1, 0, 41, 42, 1, 0, 16, 17, 1, 0, 18, 20, 1, 0, 
+		    21, 22, 1, 0, 23, 24, 1, 0, 25, 28, 1, 0, 29, 30, 327, 0, 52, 1, 0, 
+		    0, 0, 2, 55, 1, 0, 0, 0, 4, 70, 1, 0, 0, 0, 6, 72, 1, 0, 0, 0, 8, 
+		    99, 1, 0, 0, 0, 10, 101, 1, 0, 0, 0, 12, 110, 1, 0, 0, 0, 14, 112, 
+		    1, 0, 0, 0, 16, 133, 1, 0, 0, 0, 18, 135, 1, 0, 0, 0, 20, 148, 1, 
+		    0, 0, 0, 22, 153, 1, 0, 0, 0, 24, 171, 1, 0, 0, 0, 26, 187, 1, 0, 
+		    0, 0, 28, 189, 1, 0, 0, 0, 30, 200, 1, 0, 0, 0, 32, 206, 1, 0, 0, 
+		    0, 34, 216, 1, 0, 0, 0, 36, 234, 1, 0, 0, 0, 38, 236, 1, 0, 0, 0, 
+		    40, 246, 1, 0, 0, 0, 42, 275, 1, 0, 0, 0, 44, 277, 1, 0, 0, 0, 46, 
+		    285, 1, 0, 0, 0, 48, 295, 1, 0, 0, 0, 50, 302, 1, 0, 0, 0, 52, 53, 
+		    3, 2, 1, 0, 53, 54, 5, 0, 0, 1, 54, 1, 1, 0, 0, 0, 55, 56, 5, 31, 
+		    0, 0, 56, 57, 5, 32, 0, 0, 57, 58, 5, 1, 0, 0, 58, 59, 5, 2, 0, 0, 
+		    59, 60, 3, 10, 5, 0, 60, 3, 1, 0, 0, 0, 61, 71, 3, 24, 12, 0, 62, 
+		    71, 3, 36, 18, 0, 63, 71, 3, 14, 7, 0, 64, 71, 3, 16, 8, 0, 65, 71, 
+		    3, 12, 6, 0, 66, 71, 3, 8, 4, 0, 67, 71, 3, 6, 3, 0, 68, 71, 3, 18, 
+		    9, 0, 69, 71, 3, 26, 13, 0, 70, 61, 1, 0, 0, 0, 70, 62, 1, 0, 0, 0, 
+		    70, 63, 1, 0, 0, 0, 70, 64, 1, 0, 0, 0, 70, 65, 1, 0, 0, 0, 70, 66, 
+		    1, 0, 0, 0, 70, 67, 1, 0, 0, 0, 70, 68, 1, 0, 0, 0, 70, 69, 1, 0, 
+		    0, 0, 71, 5, 1, 0, 0, 0, 72, 73, 5, 44, 0, 0, 73, 74, 5, 1, 0, 0, 
+		    74, 75, 3, 46, 23, 0, 75, 76, 5, 2, 0, 0, 76, 7, 1, 0, 0, 0, 77, 78, 
+		    5, 48, 0, 0, 78, 79, 5, 1, 0, 0, 79, 80, 3, 40, 20, 0, 80, 81, 5, 
+		    2, 0, 0, 81, 100, 1, 0, 0, 0, 82, 83, 5, 47, 0, 0, 83, 84, 5, 1, 0, 
+		    0, 84, 100, 5, 2, 0, 0, 85, 86, 5, 46, 0, 0, 86, 87, 5, 1, 0, 0, 87, 
+		    88, 3, 40, 20, 0, 88, 89, 5, 2, 0, 0, 89, 100, 1, 0, 0, 0, 90, 91, 
+		    5, 45, 0, 0, 91, 92, 5, 1, 0, 0, 92, 93, 3, 40, 20, 0, 93, 94, 5, 
+		    3, 0, 0, 94, 95, 3, 40, 20, 0, 95, 96, 5, 3, 0, 0, 96, 97, 3, 40, 
+		    20, 0, 97, 98, 5, 2, 0, 0, 98, 100, 1, 0, 0, 0, 99, 77, 1, 0, 0, 0, 
+		    99, 82, 1, 0, 0, 0, 99, 85, 1, 0, 0, 0, 99, 90, 1, 0, 0, 0, 100, 9, 
+		    1, 0, 0, 0, 101, 105, 5, 4, 0, 0, 102, 104, 3, 4, 2, 0, 103, 102, 
+		    1, 0, 0, 0, 104, 107, 1, 0, 0, 0, 105, 103, 1, 0, 0, 0, 105, 106, 
+		    1, 0, 0, 0, 106, 108, 1, 0, 0, 0, 107, 105, 1, 0, 0, 0, 108, 109, 
+		    5, 5, 0, 0, 109, 11, 1, 0, 0, 0, 110, 111, 7, 0, 0, 0, 111, 13, 1, 
+		    0, 0, 0, 112, 113, 5, 35, 0, 0, 113, 114, 3, 40, 20, 0, 114, 117, 
+		    3, 10, 5, 0, 115, 116, 5, 36, 0, 0, 116, 118, 3, 10, 5, 0, 117, 115, 
+		    1, 0, 0, 0, 117, 118, 1, 0, 0, 0, 118, 15, 1, 0, 0, 0, 119, 120, 5, 
+		    40, 0, 0, 120, 121, 3, 24, 12, 0, 121, 122, 5, 6, 0, 0, 122, 123, 
+		    3, 40, 20, 0, 123, 124, 5, 6, 0, 0, 124, 125, 3, 38, 19, 0, 125, 126, 
+		    3, 10, 5, 0, 126, 134, 1, 0, 0, 0, 127, 128, 5, 40, 0, 0, 128, 129, 
+		    3, 40, 20, 0, 129, 130, 3, 10, 5, 0, 130, 134, 1, 0, 0, 0, 131, 132, 
+		    5, 40, 0, 0, 132, 134, 3, 10, 5, 0, 133, 119, 1, 0, 0, 0, 133, 127, 
+		    1, 0, 0, 0, 133, 131, 1, 0, 0, 0, 134, 17, 1, 0, 0, 0, 135, 136, 5, 
+		    39, 0, 0, 136, 137, 3, 40, 20, 0, 137, 139, 5, 4, 0, 0, 138, 140, 
+		    3, 20, 10, 0, 139, 138, 1, 0, 0, 0, 140, 141, 1, 0, 0, 0, 141, 139, 
+		    1, 0, 0, 0, 141, 142, 1, 0, 0, 0, 142, 144, 1, 0, 0, 0, 143, 145, 
+		    3, 22, 11, 0, 144, 143, 1, 0, 0, 0, 144, 145, 1, 0, 0, 0, 145, 146, 
+		    1, 0, 0, 0, 146, 147, 5, 5, 0, 0, 147, 19, 1, 0, 0, 0, 148, 149, 5, 
+		    38, 0, 0, 149, 150, 3, 46, 23, 0, 150, 151, 5, 7, 0, 0, 151, 152, 
+		    3, 4, 2, 0, 152, 21, 1, 0, 0, 0, 153, 154, 5, 37, 0, 0, 154, 155, 
+		    5, 7, 0, 0, 155, 156, 3, 4, 2, 0, 156, 23, 1, 0, 0, 0, 157, 158, 3, 
+		    48, 24, 0, 158, 159, 3, 44, 22, 0, 159, 160, 3, 50, 25, 0, 160, 161, 
+		    5, 8, 0, 0, 161, 162, 3, 46, 23, 0, 162, 172, 1, 0, 0, 0, 163, 164, 
+		    3, 48, 24, 0, 164, 165, 3, 44, 22, 0, 165, 166, 3, 50, 25, 0, 166, 
+		    172, 1, 0, 0, 0, 167, 168, 3, 44, 22, 0, 168, 169, 5, 9, 0, 0, 169, 
+		    170, 3, 46, 23, 0, 170, 172, 1, 0, 0, 0, 171, 157, 1, 0, 0, 0, 171, 
+		    163, 1, 0, 0, 0, 171, 167, 1, 0, 0, 0, 172, 25, 1, 0, 0, 0, 173, 174, 
+		    5, 33, 0, 0, 174, 175, 5, 60, 0, 0, 175, 176, 3, 28, 14, 0, 176, 177, 
+		    3, 50, 25, 0, 177, 178, 5, 8, 0, 0, 178, 179, 3, 28, 14, 0, 179, 180, 
+		    3, 50, 25, 0, 180, 181, 3, 30, 15, 0, 181, 188, 1, 0, 0, 0, 182, 183, 
+		    5, 33, 0, 0, 183, 184, 5, 60, 0, 0, 184, 185, 3, 28, 14, 0, 185, 186, 
+		    3, 50, 25, 0, 186, 188, 1, 0, 0, 0, 187, 173, 1, 0, 0, 0, 187, 182, 
+		    1, 0, 0, 0, 188, 27, 1, 0, 0, 0, 189, 190, 5, 10, 0, 0, 190, 191, 
+		    5, 54, 0, 0, 191, 197, 5, 11, 0, 0, 192, 193, 5, 10, 0, 0, 193, 194, 
+		    5, 54, 0, 0, 194, 196, 5, 11, 0, 0, 195, 192, 1, 0, 0, 0, 196, 199, 
+		    1, 0, 0, 0, 197, 195, 1, 0, 0, 0, 197, 198, 1, 0, 0, 0, 198, 29, 1, 
+		    0, 0, 0, 199, 197, 1, 0, 0, 0, 200, 202, 5, 4, 0, 0, 201, 203, 3, 
+		    32, 16, 0, 202, 201, 1, 0, 0, 0, 202, 203, 1, 0, 0, 0, 203, 204, 1, 
+		    0, 0, 0, 204, 205, 5, 5, 0, 0, 205, 31, 1, 0, 0, 0, 206, 211, 3, 34, 
+		    17, 0, 207, 208, 5, 3, 0, 0, 208, 210, 3, 34, 17, 0, 209, 207, 1, 
+		    0, 0, 0, 210, 213, 1, 0, 0, 0, 211, 209, 1, 0, 0, 0, 211, 212, 1, 
+		    0, 0, 0, 212, 33, 1, 0, 0, 0, 213, 211, 1, 0, 0, 0, 214, 217, 3, 40, 
+		    20, 0, 215, 217, 3, 30, 15, 0, 216, 214, 1, 0, 0, 0, 216, 215, 1, 
+		    0, 0, 0, 217, 35, 1, 0, 0, 0, 218, 219, 5, 60, 0, 0, 219, 220, 5, 
+		    8, 0, 0, 220, 235, 3, 40, 20, 0, 221, 222, 5, 60, 0, 0, 222, 223, 
+		    5, 12, 0, 0, 223, 235, 3, 40, 20, 0, 224, 225, 5, 60, 0, 0, 225, 226, 
+		    5, 13, 0, 0, 226, 235, 3, 40, 20, 0, 227, 228, 5, 60, 0, 0, 228, 229, 
+		    5, 14, 0, 0, 229, 235, 3, 40, 20, 0, 230, 231, 5, 60, 0, 0, 231, 232, 
+		    5, 15, 0, 0, 232, 235, 3, 40, 20, 0, 233, 235, 3, 38, 19, 0, 234, 
+		    218, 1, 0, 0, 0, 234, 221, 1, 0, 0, 0, 234, 224, 1, 0, 0, 0, 234, 
+		    227, 1, 0, 0, 0, 234, 230, 1, 0, 0, 0, 234, 233, 1, 0, 0, 0, 235, 
+		    37, 1, 0, 0, 0, 236, 237, 5, 60, 0, 0, 237, 238, 7, 1, 0, 0, 238, 
+		    39, 1, 0, 0, 0, 239, 240, 6, 20, -1, 0, 240, 241, 5, 1, 0, 0, 241, 
+		    242, 3, 40, 20, 0, 242, 243, 5, 2, 0, 0, 243, 247, 1, 0, 0, 0, 244, 
+		    247, 3, 42, 21, 0, 245, 247, 3, 8, 4, 0, 246, 239, 1, 0, 0, 0, 246, 
+		    244, 1, 0, 0, 0, 246, 245, 1, 0, 0, 0, 247, 265, 1, 0, 0, 0, 248, 
+		    249, 10, 8, 0, 0, 249, 250, 7, 2, 0, 0, 250, 264, 3, 40, 20, 9, 251, 
+		    252, 10, 7, 0, 0, 252, 253, 7, 3, 0, 0, 253, 264, 3, 40, 20, 8, 254, 
+		    255, 10, 6, 0, 0, 255, 256, 7, 4, 0, 0, 256, 264, 3, 40, 20, 7, 257, 
+		    258, 10, 5, 0, 0, 258, 259, 7, 5, 0, 0, 259, 264, 3, 40, 20, 6, 260, 
+		    261, 10, 4, 0, 0, 261, 262, 7, 6, 0, 0, 262, 264, 3, 40, 20, 5, 263, 
+		    248, 1, 0, 0, 0, 263, 251, 1, 0, 0, 0, 263, 254, 1, 0, 0, 0, 263, 
+		    257, 1, 0, 0, 0, 263, 260, 1, 0, 0, 0, 264, 267, 1, 0, 0, 0, 265, 
+		    263, 1, 0, 0, 0, 265, 266, 1, 0, 0, 0, 266, 41, 1, 0, 0, 0, 267, 265, 
+		    1, 0, 0, 0, 268, 276, 5, 54, 0, 0, 269, 276, 5, 55, 0, 0, 270, 276, 
+		    5, 60, 0, 0, 271, 276, 5, 57, 0, 0, 272, 276, 5, 58, 0, 0, 273, 276, 
+		    5, 59, 0, 0, 274, 276, 5, 56, 0, 0, 275, 268, 1, 0, 0, 0, 275, 269, 
+		    1, 0, 0, 0, 275, 270, 1, 0, 0, 0, 275, 271, 1, 0, 0, 0, 275, 272, 
+		    1, 0, 0, 0, 275, 273, 1, 0, 0, 0, 275, 274, 1, 0, 0, 0, 276, 43, 1, 
+		    0, 0, 0, 277, 282, 5, 60, 0, 0, 278, 279, 5, 3, 0, 0, 279, 281, 5, 
+		    60, 0, 0, 280, 278, 1, 0, 0, 0, 281, 284, 1, 0, 0, 0, 282, 280, 1, 
+		    0, 0, 0, 282, 283, 1, 0, 0, 0, 283, 45, 1, 0, 0, 0, 284, 282, 1, 0, 
+		    0, 0, 285, 290, 3, 40, 20, 0, 286, 287, 5, 3, 0, 0, 287, 289, 3, 40, 
+		    20, 0, 288, 286, 1, 0, 0, 0, 289, 292, 1, 0, 0, 0, 290, 288, 1, 0, 
+		    0, 0, 290, 291, 1, 0, 0, 0, 291, 47, 1, 0, 0, 0, 292, 290, 1, 0, 0, 
+		    0, 293, 296, 5, 33, 0, 0, 294, 296, 5, 34, 0, 0, 295, 293, 1, 0, 0, 
+		    0, 295, 294, 1, 0, 0, 0, 296, 49, 1, 0, 0, 0, 297, 303, 5, 49, 0, 
+		    0, 298, 303, 5, 50, 0, 0, 299, 303, 5, 51, 0, 0, 300, 303, 5, 52, 
+		    0, 0, 301, 303, 5, 53, 0, 0, 302, 297, 1, 0, 0, 0, 302, 298, 1, 0, 
+		    0, 0, 302, 299, 1, 0, 0, 0, 302, 300, 1, 0, 0, 0, 302, 301, 1, 0, 
+		    0, 0, 303, 51, 1, 0, 0, 0, 22, 70, 99, 105, 117, 133, 141, 144, 171, 
+		    187, 197, 202, 211, 216, 234, 246, 263, 265, 275, 282, 290, 295, 302];
 		protected static $atn;
 		protected static $decisionToDFA;
 		protected static $sharedContextCache;
@@ -269,9 +300,9 @@ namespace {
 
 		    try {
 		        $this->enterOuterAlt($localContext, 1);
-		        $this->setState(42);
+		        $this->setState(52);
 		        $this->program();
-		        $this->setState(43);
+		        $this->setState(53);
 		        $this->match(self::EOF);
 		    } catch (RecognitionException $exception) {
 		        $localContext->exception = $exception;
@@ -295,15 +326,15 @@ namespace {
 
 		    try {
 		        $this->enterOuterAlt($localContext, 1);
-		        $this->setState(45);
+		        $this->setState(55);
 		        $this->match(self::FUNC);
-		        $this->setState(46);
+		        $this->setState(56);
 		        $this->match(self::MAIN);
-		        $this->setState(47);
+		        $this->setState(57);
 		        $this->match(self::T__0);
-		        $this->setState(48);
+		        $this->setState(58);
 		        $this->match(self::T__1);
-		        $this->setState(49);
+		        $this->setState(59);
 		        $this->block();
 		    } catch (RecognitionException $exception) {
 		        $localContext->exception = $exception;
@@ -326,56 +357,62 @@ namespace {
 		    $this->enterRule($localContext, 4, self::RULE_stmts);
 
 		    try {
-		        $this->setState(59);
+		        $this->setState(70);
 		        $this->errorHandler->sync($this);
 
 		        switch ($this->getInterpreter()->adaptivePredict($this->input, 0, $this->ctx)) {
 		        	case 1:
 		        	    $this->enterOuterAlt($localContext, 1);
-		        	    $this->setState(51);
+		        	    $this->setState(61);
 		        	    $this->dec();
 		        	break;
 
 		        	case 2:
 		        	    $this->enterOuterAlt($localContext, 2);
-		        	    $this->setState(52);
+		        	    $this->setState(62);
 		        	    $this->asg();
 		        	break;
 
 		        	case 3:
 		        	    $this->enterOuterAlt($localContext, 3);
-		        	    $this->setState(53);
+		        	    $this->setState(63);
 		        	    $this->ifStmt();
 		        	break;
 
 		        	case 4:
 		        	    $this->enterOuterAlt($localContext, 4);
-		        	    $this->setState(54);
+		        	    $this->setState(64);
 		        	    $this->forStmt();
 		        	break;
 
 		        	case 5:
 		        	    $this->enterOuterAlt($localContext, 5);
-		        	    $this->setState(55);
+		        	    $this->setState(65);
 		        	    $this->inst();
 		        	break;
 
 		        	case 6:
 		        	    $this->enterOuterAlt($localContext, 6);
-		        	    $this->setState(56);
+		        	    $this->setState(66);
 		        	    $this->reserved();
 		        	break;
 
 		        	case 7:
 		        	    $this->enterOuterAlt($localContext, 7);
-		        	    $this->setState(57);
+		        	    $this->setState(67);
 		        	    $this->pri();
 		        	break;
 
 		        	case 8:
 		        	    $this->enterOuterAlt($localContext, 8);
-		        	    $this->setState(58);
+		        	    $this->setState(68);
 		        	    $this->switchStmt();
+		        	break;
+
+		        	case 9:
+		        	    $this->enterOuterAlt($localContext, 9);
+		        	    $this->setState(69);
+		        	    $this->arraydec();
 		        	break;
 		        }
 		    } catch (RecognitionException $exception) {
@@ -401,13 +438,13 @@ namespace {
 		    try {
 		        $localContext = new Context\PrintlnContext($localContext);
 		        $this->enterOuterAlt($localContext, 1);
-		        $this->setState(61);
+		        $this->setState(72);
 		        $this->match(self::PRINT);
-		        $this->setState(62);
+		        $this->setState(73);
 		        $this->match(self::T__0);
-		        $this->setState(63);
+		        $this->setState(74);
 		        $this->lval();
-		        $this->setState(64);
+		        $this->setState(75);
 		        $this->match(self::T__1);
 		    } catch (RecognitionException $exception) {
 		        $localContext->exception = $exception;
@@ -430,65 +467,65 @@ namespace {
 		    $this->enterRule($localContext, 8, self::RULE_reserved);
 
 		    try {
-		        $this->setState(88);
+		        $this->setState(99);
 		        $this->errorHandler->sync($this);
 
 		        switch ($this->input->LA(1)) {
 		            case self::TYPEOF:
 		            	$localContext = new Context\TypeOContext($localContext);
 		            	$this->enterOuterAlt($localContext, 1);
-		            	$this->setState(66);
+		            	$this->setState(77);
 		            	$this->match(self::TYPEOF);
-		            	$this->setState(67);
+		            	$this->setState(78);
 		            	$this->match(self::T__0);
-		            	$this->setState(68);
+		            	$this->setState(79);
 		            	$this->recursiveExpr(0);
-		            	$this->setState(69);
+		            	$this->setState(80);
 		            	$this->match(self::T__1);
 		            	break;
 
 		            case self::NOW:
 		            	$localContext = new Context\NowFuncContext($localContext);
 		            	$this->enterOuterAlt($localContext, 2);
-		            	$this->setState(71);
+		            	$this->setState(82);
 		            	$this->match(self::NOW);
-		            	$this->setState(72);
+		            	$this->setState(83);
 		            	$this->match(self::T__0);
-		            	$this->setState(73);
+		            	$this->setState(84);
 		            	$this->match(self::T__1);
 		            	break;
 
 		            case self::LEN:
 		            	$localContext = new Context\LenFuncContext($localContext);
 		            	$this->enterOuterAlt($localContext, 3);
-		            	$this->setState(74);
+		            	$this->setState(85);
 		            	$this->match(self::LEN);
-		            	$this->setState(75);
+		            	$this->setState(86);
 		            	$this->match(self::T__0);
-		            	$this->setState(76);
+		            	$this->setState(87);
 		            	$this->recursiveExpr(0);
-		            	$this->setState(77);
+		            	$this->setState(88);
 		            	$this->match(self::T__1);
 		            	break;
 
 		            case self::SUBSTR:
 		            	$localContext = new Context\SubSContext($localContext);
 		            	$this->enterOuterAlt($localContext, 4);
-		            	$this->setState(79);
+		            	$this->setState(90);
 		            	$this->match(self::SUBSTR);
-		            	$this->setState(80);
+		            	$this->setState(91);
 		            	$this->match(self::T__0);
-		            	$this->setState(81);
+		            	$this->setState(92);
 		            	$this->recursiveExpr(0);
-		            	$this->setState(82);
+		            	$this->setState(93);
 		            	$this->match(self::T__2);
-		            	$this->setState(83);
+		            	$this->setState(94);
 		            	$this->recursiveExpr(0);
-		            	$this->setState(84);
+		            	$this->setState(95);
 		            	$this->match(self::T__2);
-		            	$this->setState(85);
+		            	$this->setState(96);
 		            	$this->recursiveExpr(0);
-		            	$this->setState(86);
+		            	$this->setState(97);
 		            	$this->match(self::T__1);
 		            	break;
 
@@ -517,20 +554,20 @@ namespace {
 
 		    try {
 		        $this->enterOuterAlt($localContext, 1);
-		        $this->setState(90);
+		        $this->setState(101);
 		        $this->match(self::T__3);
-		        $this->setState(94);
+		        $this->setState(105);
 		        $this->errorHandler->sync($this);
 
 		        $_la = $this->input->LA(1);
-		        while (((($_la) & ~0x3f) === 0 && ((1 << $_la) & 288368792210243584) !== 0)) {
-		        	$this->setState(91);
+		        while (((($_la) & ~0x3f) === 0 && ((1 << $_la) & 1153475168840974336) !== 0)) {
+		        	$this->setState(102);
 		        	$this->stmts();
-		        	$this->setState(96);
+		        	$this->setState(107);
 		        	$this->errorHandler->sync($this);
 		        	$_la = $this->input->LA(1);
 		        }
-		        $this->setState(97);
+		        $this->setState(108);
 		        $this->match(self::T__4);
 		    } catch (RecognitionException $exception) {
 		        $localContext->exception = $exception;
@@ -554,7 +591,7 @@ namespace {
 
 		    try {
 		        $this->enterOuterAlt($localContext, 1);
-		        $this->setState(99);
+		        $this->setState(110);
 
 		        $_la = $this->input->LA(1);
 
@@ -590,20 +627,20 @@ namespace {
 
 		    try {
 		        $this->enterOuterAlt($localContext, 1);
-		        $this->setState(101);
+		        $this->setState(112);
 		        $this->match(self::IF);
-		        $this->setState(102);
+		        $this->setState(113);
 		        $this->recursiveExpr(0);
-		        $this->setState(103);
+		        $this->setState(114);
 		        $this->block();
-		        $this->setState(106);
+		        $this->setState(117);
 		        $this->errorHandler->sync($this);
 		        $_la = $this->input->LA(1);
 
 		        if ($_la === self::ELSE) {
-		        	$this->setState(104);
+		        	$this->setState(115);
 		        	$this->match(self::ELSE);
-		        	$this->setState(105);
+		        	$this->setState(116);
 		        	$this->block();
 		        }
 		    } catch (RecognitionException $exception) {
@@ -627,46 +664,46 @@ namespace {
 		    $this->enterRule($localContext, 16, self::RULE_forStmt);
 
 		    try {
-		        $this->setState(122);
+		        $this->setState(133);
 		        $this->errorHandler->sync($this);
 
 		        switch ($this->getInterpreter()->adaptivePredict($this->input, 4, $this->ctx)) {
 		        	case 1:
 		        	    $localContext = new Context\LongForContext($localContext);
 		        	    $this->enterOuterAlt($localContext, 1);
-		        	    $this->setState(108);
+		        	    $this->setState(119);
 		        	    $this->match(self::FOR);
-		        	    $this->setState(109);
+		        	    $this->setState(120);
 		        	    $this->dec();
-		        	    $this->setState(110);
+		        	    $this->setState(121);
 		        	    $this->match(self::T__5);
-		        	    $this->setState(111);
+		        	    $this->setState(122);
 		        	    $this->recursiveExpr(0);
-		        	    $this->setState(112);
+		        	    $this->setState(123);
 		        	    $this->match(self::T__5);
-		        	    $this->setState(113);
+		        	    $this->setState(124);
 		        	    $this->incdec();
-		        	    $this->setState(114);
+		        	    $this->setState(125);
 		        	    $this->block();
 		        	break;
 
 		        	case 2:
 		        	    $localContext = new Context\MidForContext($localContext);
 		        	    $this->enterOuterAlt($localContext, 2);
-		        	    $this->setState(116);
+		        	    $this->setState(127);
 		        	    $this->match(self::FOR);
-		        	    $this->setState(117);
+		        	    $this->setState(128);
 		        	    $this->recursiveExpr(0);
-		        	    $this->setState(118);
+		        	    $this->setState(129);
 		        	    $this->block();
 		        	break;
 
 		        	case 3:
 		        	    $localContext = new Context\ShortForContext($localContext);
 		        	    $this->enterOuterAlt($localContext, 3);
-		        	    $this->setState(120);
+		        	    $this->setState(131);
 		        	    $this->match(self::FOR);
-		        	    $this->setState(121);
+		        	    $this->setState(132);
 		        	    $this->block();
 		        	break;
 		        }
@@ -692,32 +729,32 @@ namespace {
 
 		    try {
 		        $this->enterOuterAlt($localContext, 1);
-		        $this->setState(124);
+		        $this->setState(135);
 		        $this->match(self::SWITCH);
-		        $this->setState(125);
+		        $this->setState(136);
 		        $this->recursiveExpr(0);
-		        $this->setState(126);
+		        $this->setState(137);
 		        $this->match(self::T__3);
-		        $this->setState(128); 
+		        $this->setState(139); 
 		        $this->errorHandler->sync($this);
 
 		        $_la = $this->input->LA(1);
 		        do {
-		        	$this->setState(127);
+		        	$this->setState(138);
 		        	$this->caseClause();
-		        	$this->setState(130); 
+		        	$this->setState(141); 
 		        	$this->errorHandler->sync($this);
 		        	$_la = $this->input->LA(1);
 		        } while ($_la === self::CASE);
-		        $this->setState(133);
+		        $this->setState(144);
 		        $this->errorHandler->sync($this);
 		        $_la = $this->input->LA(1);
 
 		        if ($_la === self::DEFAULT) {
-		        	$this->setState(132);
+		        	$this->setState(143);
 		        	$this->defaultClause();
 		        }
-		        $this->setState(135);
+		        $this->setState(146);
 		        $this->match(self::T__4);
 		    } catch (RecognitionException $exception) {
 		        $localContext->exception = $exception;
@@ -741,13 +778,13 @@ namespace {
 
 		    try {
 		        $this->enterOuterAlt($localContext, 1);
-		        $this->setState(137);
+		        $this->setState(148);
 		        $this->match(self::CASE);
-		        $this->setState(138);
+		        $this->setState(149);
 		        $this->lval();
-		        $this->setState(139);
+		        $this->setState(150);
 		        $this->match(self::T__6);
-		        $this->setState(140);
+		        $this->setState(151);
 		        $this->stmts();
 		    } catch (RecognitionException $exception) {
 		        $localContext->exception = $exception;
@@ -771,11 +808,11 @@ namespace {
 
 		    try {
 		        $this->enterOuterAlt($localContext, 1);
-		        $this->setState(142);
+		        $this->setState(153);
 		        $this->match(self::DEFAULT);
-		        $this->setState(143);
+		        $this->setState(154);
 		        $this->match(self::T__6);
-		        $this->setState(144);
+		        $this->setState(155);
 		        $this->stmts();
 		    } catch (RecognitionException $exception) {
 		        $localContext->exception = $exception;
@@ -798,46 +835,270 @@ namespace {
 		    $this->enterRule($localContext, 24, self::RULE_dec);
 
 		    try {
-		        $this->setState(160);
+		        $this->setState(171);
 		        $this->errorHandler->sync($this);
 
 		        switch ($this->getInterpreter()->adaptivePredict($this->input, 7, $this->ctx)) {
 		        	case 1:
 		        	    $localContext = new Context\DeclvContext($localContext);
 		        	    $this->enterOuterAlt($localContext, 1);
-		        	    $this->setState(146);
+		        	    $this->setState(157);
 		        	    $this->pre();
-		        	    $this->setState(147);
+		        	    $this->setState(158);
 		        	    $this->lid();
-		        	    $this->setState(148);
+		        	    $this->setState(159);
 		        	    $this->type();
-		        	    $this->setState(149);
+		        	    $this->setState(160);
 		        	    $this->match(self::T__7);
-		        	    $this->setState(150);
+		        	    $this->setState(161);
 		        	    $this->lval();
 		        	break;
 
 		        	case 2:
 		        	    $localContext = new Context\DeclContext($localContext);
 		        	    $this->enterOuterAlt($localContext, 2);
-		        	    $this->setState(152);
+		        	    $this->setState(163);
 		        	    $this->pre();
-		        	    $this->setState(153);
+		        	    $this->setState(164);
 		        	    $this->lid();
-		        	    $this->setState(154);
+		        	    $this->setState(165);
 		        	    $this->type();
 		        	break;
 
 		        	case 3:
 		        	    $localContext = new Context\SdecContext($localContext);
 		        	    $this->enterOuterAlt($localContext, 3);
-		        	    $this->setState(156);
+		        	    $this->setState(167);
 		        	    $this->lid();
-		        	    $this->setState(157);
+		        	    $this->setState(168);
 		        	    $this->match(self::T__8);
-		        	    $this->setState(158);
+		        	    $this->setState(169);
 		        	    $this->lval();
 		        	break;
+		        }
+		    } catch (RecognitionException $exception) {
+		        $localContext->exception = $exception;
+		        $this->errorHandler->reportError($this, $exception);
+		        $this->errorHandler->recover($this, $exception);
+		    } finally {
+		        $this->exitRule();
+		    }
+
+		    return $localContext;
+		}
+
+		/**
+		 * @throws RecognitionException
+		 */
+		public function arraydec(): Context\ArraydecContext
+		{
+		    $localContext = new Context\ArraydecContext($this->ctx, $this->getState());
+
+		    $this->enterRule($localContext, 26, self::RULE_arraydec);
+
+		    try {
+		        $this->setState(187);
+		        $this->errorHandler->sync($this);
+
+		        switch ($this->getInterpreter()->adaptivePredict($this->input, 8, $this->ctx)) {
+		        	case 1:
+		        	    $localContext = new Context\LongArrayDecContext($localContext);
+		        	    $this->enterOuterAlt($localContext, 1);
+		        	    $this->setState(173);
+		        	    $this->match(self::PVAR);
+		        	    $this->setState(174);
+		        	    $this->match(self::ID);
+		        	    $this->setState(175);
+		        	    $this->larray();
+		        	    $this->setState(176);
+		        	    $this->type();
+		        	    $this->setState(177);
+		        	    $this->match(self::T__7);
+		        	    $this->setState(178);
+		        	    $this->larray();
+		        	    $this->setState(179);
+		        	    $this->type();
+		        	    $this->setState(180);
+		        	    $this->arrayValue();
+		        	break;
+
+		        	case 2:
+		        	    $localContext = new Context\ShortArrayDecContext($localContext);
+		        	    $this->enterOuterAlt($localContext, 2);
+		        	    $this->setState(182);
+		        	    $this->match(self::PVAR);
+		        	    $this->setState(183);
+		        	    $this->match(self::ID);
+		        	    $this->setState(184);
+		        	    $this->larray();
+		        	    $this->setState(185);
+		        	    $this->type();
+		        	break;
+		        }
+		    } catch (RecognitionException $exception) {
+		        $localContext->exception = $exception;
+		        $this->errorHandler->reportError($this, $exception);
+		        $this->errorHandler->recover($this, $exception);
+		    } finally {
+		        $this->exitRule();
+		    }
+
+		    return $localContext;
+		}
+
+		/**
+		 * @throws RecognitionException
+		 */
+		public function larray(): Context\LarrayContext
+		{
+		    $localContext = new Context\LarrayContext($this->ctx, $this->getState());
+
+		    $this->enterRule($localContext, 28, self::RULE_larray);
+
+		    try {
+		        $this->enterOuterAlt($localContext, 1);
+		        $this->setState(189);
+		        $this->match(self::T__9);
+		        $this->setState(190);
+		        $this->match(self::NUM);
+		        $this->setState(191);
+		        $this->match(self::T__10);
+		        $this->setState(197);
+		        $this->errorHandler->sync($this);
+
+		        $_la = $this->input->LA(1);
+		        while ($_la === self::T__9) {
+		        	$this->setState(192);
+		        	$this->match(self::T__9);
+		        	$this->setState(193);
+		        	$this->match(self::NUM);
+		        	$this->setState(194);
+		        	$this->match(self::T__10);
+		        	$this->setState(199);
+		        	$this->errorHandler->sync($this);
+		        	$_la = $this->input->LA(1);
+		        }
+		    } catch (RecognitionException $exception) {
+		        $localContext->exception = $exception;
+		        $this->errorHandler->reportError($this, $exception);
+		        $this->errorHandler->recover($this, $exception);
+		    } finally {
+		        $this->exitRule();
+		    }
+
+		    return $localContext;
+		}
+
+		/**
+		 * @throws RecognitionException
+		 */
+		public function arrayValue(): Context\ArrayValueContext
+		{
+		    $localContext = new Context\ArrayValueContext($this->ctx, $this->getState());
+
+		    $this->enterRule($localContext, 30, self::RULE_arrayValue);
+
+		    try {
+		        $this->enterOuterAlt($localContext, 1);
+		        $this->setState(200);
+		        $this->match(self::T__3);
+		        $this->setState(202);
+		        $this->errorHandler->sync($this);
+		        $_la = $this->input->LA(1);
+
+		        if (((($_la) & ~0x3f) === 0 && ((1 << $_la) & 2288356376285544466) !== 0)) {
+		        	$this->setState(201);
+		        	$this->arrayElements();
+		        }
+		        $this->setState(204);
+		        $this->match(self::T__4);
+		    } catch (RecognitionException $exception) {
+		        $localContext->exception = $exception;
+		        $this->errorHandler->reportError($this, $exception);
+		        $this->errorHandler->recover($this, $exception);
+		    } finally {
+		        $this->exitRule();
+		    }
+
+		    return $localContext;
+		}
+
+		/**
+		 * @throws RecognitionException
+		 */
+		public function arrayElements(): Context\ArrayElementsContext
+		{
+		    $localContext = new Context\ArrayElementsContext($this->ctx, $this->getState());
+
+		    $this->enterRule($localContext, 32, self::RULE_arrayElements);
+
+		    try {
+		        $this->enterOuterAlt($localContext, 1);
+		        $this->setState(206);
+		        $this->arrayElement();
+		        $this->setState(211);
+		        $this->errorHandler->sync($this);
+
+		        $_la = $this->input->LA(1);
+		        while ($_la === self::T__2) {
+		        	$this->setState(207);
+		        	$this->match(self::T__2);
+		        	$this->setState(208);
+		        	$this->arrayElement();
+		        	$this->setState(213);
+		        	$this->errorHandler->sync($this);
+		        	$_la = $this->input->LA(1);
+		        }
+		    } catch (RecognitionException $exception) {
+		        $localContext->exception = $exception;
+		        $this->errorHandler->reportError($this, $exception);
+		        $this->errorHandler->recover($this, $exception);
+		    } finally {
+		        $this->exitRule();
+		    }
+
+		    return $localContext;
+		}
+
+		/**
+		 * @throws RecognitionException
+		 */
+		public function arrayElement(): Context\ArrayElementContext
+		{
+		    $localContext = new Context\ArrayElementContext($this->ctx, $this->getState());
+
+		    $this->enterRule($localContext, 34, self::RULE_arrayElement);
+
+		    try {
+		        $this->setState(216);
+		        $this->errorHandler->sync($this);
+
+		        switch ($this->input->LA(1)) {
+		            case self::T__0:
+		            case self::SUBSTR:
+		            case self::LEN:
+		            case self::NOW:
+		            case self::TYPEOF:
+		            case self::NUM:
+		            case self::FLOAT:
+		            case self::NIL:
+		            case self::BOOLE:
+		            case self::STRING:
+		            case self::RUNE:
+		            case self::ID:
+		            	$this->enterOuterAlt($localContext, 1);
+		            	$this->setState(214);
+		            	$this->recursiveExpr(0);
+		            	break;
+
+		            case self::T__3:
+		            	$this->enterOuterAlt($localContext, 2);
+		            	$this->setState(215);
+		            	$this->arrayValue();
+		            	break;
+
+		        default:
+		        	throw new NoViableAltException($this);
 		        }
 		    } catch (RecognitionException $exception) {
 		        $localContext->exception = $exception;
@@ -857,72 +1118,72 @@ namespace {
 		{
 		    $localContext = new Context\AsgContext($this->ctx, $this->getState());
 
-		    $this->enterRule($localContext, 26, self::RULE_asg);
+		    $this->enterRule($localContext, 36, self::RULE_asg);
 
 		    try {
-		        $this->setState(178);
+		        $this->setState(234);
 		        $this->errorHandler->sync($this);
 
-		        switch ($this->getInterpreter()->adaptivePredict($this->input, 8, $this->ctx)) {
+		        switch ($this->getInterpreter()->adaptivePredict($this->input, 13, $this->ctx)) {
 		        	case 1:
 		        	    $localContext = new Context\AsigContext($localContext);
 		        	    $this->enterOuterAlt($localContext, 1);
-		        	    $this->setState(162);
+		        	    $this->setState(218);
 		        	    $this->match(self::ID);
-		        	    $this->setState(163);
+		        	    $this->setState(219);
 		        	    $this->match(self::T__7);
-		        	    $this->setState(164);
+		        	    $this->setState(220);
 		        	    $this->recursiveExpr(0);
 		        	break;
 
 		        	case 2:
 		        	    $localContext = new Context\PlusAsigContext($localContext);
 		        	    $this->enterOuterAlt($localContext, 2);
-		        	    $this->setState(165);
+		        	    $this->setState(221);
 		        	    $this->match(self::ID);
-		        	    $this->setState(166);
-		        	    $this->match(self::T__9);
-		        	    $this->setState(167);
+		        	    $this->setState(222);
+		        	    $this->match(self::T__11);
+		        	    $this->setState(223);
 		        	    $this->recursiveExpr(0);
 		        	break;
 
 		        	case 3:
 		        	    $localContext = new Context\MinusAsigContext($localContext);
 		        	    $this->enterOuterAlt($localContext, 3);
-		        	    $this->setState(168);
+		        	    $this->setState(224);
 		        	    $this->match(self::ID);
-		        	    $this->setState(169);
-		        	    $this->match(self::T__10);
-		        	    $this->setState(170);
+		        	    $this->setState(225);
+		        	    $this->match(self::T__12);
+		        	    $this->setState(226);
 		        	    $this->recursiveExpr(0);
 		        	break;
 
 		        	case 4:
 		        	    $localContext = new Context\MultAsigContext($localContext);
 		        	    $this->enterOuterAlt($localContext, 4);
-		        	    $this->setState(171);
+		        	    $this->setState(227);
 		        	    $this->match(self::ID);
-		        	    $this->setState(172);
-		        	    $this->match(self::T__11);
-		        	    $this->setState(173);
+		        	    $this->setState(228);
+		        	    $this->match(self::T__13);
+		        	    $this->setState(229);
 		        	    $this->recursiveExpr(0);
 		        	break;
 
 		        	case 5:
 		        	    $localContext = new Context\DivAsigContext($localContext);
 		        	    $this->enterOuterAlt($localContext, 5);
-		        	    $this->setState(174);
+		        	    $this->setState(230);
 		        	    $this->match(self::ID);
-		        	    $this->setState(175);
-		        	    $this->match(self::T__12);
-		        	    $this->setState(176);
+		        	    $this->setState(231);
+		        	    $this->match(self::T__14);
+		        	    $this->setState(232);
 		        	    $this->recursiveExpr(0);
 		        	break;
 
 		        	case 6:
 		        	    $localContext = new Context\IndeContext($localContext);
 		        	    $this->enterOuterAlt($localContext, 6);
-		        	    $this->setState(177);
+		        	    $this->setState(233);
 		        	    $this->incdec();
 		        	break;
 		        }
@@ -944,18 +1205,18 @@ namespace {
 		{
 		    $localContext = new Context\IncdecContext($this->ctx, $this->getState());
 
-		    $this->enterRule($localContext, 28, self::RULE_incdec);
+		    $this->enterRule($localContext, 38, self::RULE_incdec);
 
 		    try {
 		        $this->enterOuterAlt($localContext, 1);
-		        $this->setState(180);
+		        $this->setState(236);
 		        $this->match(self::ID);
-		        $this->setState(181);
+		        $this->setState(237);
 
 		        $localContext->op = $this->input->LT(1);
 		        $_la = $this->input->LA(1);
 
-		        if (!($_la === self::T__13 || $_la === self::T__14)) {
+		        if (!($_la === self::T__15 || $_la === self::T__16)) {
 		        	    $localContext->op = $this->errorHandler->recoverInline($this);
 		        } else {
 		        	if ($this->input->LA(1) === Token::EOF) {
@@ -993,12 +1254,12 @@ namespace {
 			$parentState = $this->getState();
 			$localContext = new Context\ExprContext($this->ctx, $parentState);
 			$previousContext = $localContext;
-			$startState = 30;
-			$this->enterRecursionRule($localContext, 30, self::RULE_expr, $precedence);
+			$startState = 40;
+			$this->enterRecursionRule($localContext, 40, self::RULE_expr, $precedence);
 
 			try {
 				$this->enterOuterAlt($localContext, 1);
-				$this->setState(190);
+				$this->setState(246);
 				$this->errorHandler->sync($this);
 
 				switch ($this->input->LA(1)) {
@@ -1007,11 +1268,11 @@ namespace {
 				    	$this->ctx = $localContext;
 				    	$previousContext = $localContext;
 
-				    	$this->setState(184);
+				    	$this->setState(240);
 				    	$this->match(self::T__0);
-				    	$this->setState(185);
+				    	$this->setState(241);
 				    	$this->recursiveExpr(0);
-				    	$this->setState(186);
+				    	$this->setState(242);
 				    	$this->match(self::T__1);
 				    	break;
 
@@ -1025,7 +1286,7 @@ namespace {
 				    	$localContext = new Context\VaContext($localContext);
 				    	$this->ctx = $localContext;
 				    	$previousContext = $localContext;
-				    	$this->setState(188);
+				    	$this->setState(244);
 				    	$this->vals();
 				    	break;
 
@@ -1036,7 +1297,7 @@ namespace {
 				    	$localContext = new Context\ReContext($localContext);
 				    	$this->ctx = $localContext;
 				    	$previousContext = $localContext;
-				    	$this->setState(189);
+				    	$this->setState(245);
 				    	$this->reserved();
 				    	break;
 
@@ -1044,10 +1305,10 @@ namespace {
 					throw new NoViableAltException($this);
 				}
 				$this->ctx->stop = $this->input->LT(-1);
-				$this->setState(209);
+				$this->setState(265);
 				$this->errorHandler->sync($this);
 
-				$alt = $this->getInterpreter()->adaptivePredict($this->input, 11, $this->ctx);
+				$alt = $this->getInterpreter()->adaptivePredict($this->input, 16, $this->ctx);
 
 				while ($alt !== 2 && $alt !== ATN::INVALID_ALT_NUMBER) {
 					if ($alt === 1) {
@@ -1056,24 +1317,24 @@ namespace {
 						}
 
 						$previousContext = $localContext;
-						$this->setState(207);
+						$this->setState(263);
 						$this->errorHandler->sync($this);
 
-						switch ($this->getInterpreter()->adaptivePredict($this->input, 10, $this->ctx)) {
+						switch ($this->getInterpreter()->adaptivePredict($this->input, 15, $this->ctx)) {
 							case 1:
 							    $localContext = new Context\MulDivModContext(new Context\ExprContext($parentContext, $parentState));
 							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
-							    $this->setState(192);
+							    $this->setState(248);
 
 							    if (!($this->precpred($this->ctx, 8))) {
 							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 8)");
 							    }
-							    $this->setState(193);
+							    $this->setState(249);
 
 							    $localContext->op = $this->input->LT(1);
 							    $_la = $this->input->LA(1);
 
-							    if (!(((($_la) & ~0x3f) === 0 && ((1 << $_la) & 458752) !== 0))) {
+							    if (!(((($_la) & ~0x3f) === 0 && ((1 << $_la) & 1835008) !== 0))) {
 							    	    $localContext->op = $this->errorHandler->recoverInline($this);
 							    } else {
 							    	if ($this->input->LA(1) === Token::EOF) {
@@ -1083,46 +1344,19 @@ namespace {
 							    	$this->errorHandler->reportMatch($this);
 							    	$this->consume();
 							    }
-							    $this->setState(194);
+							    $this->setState(250);
 							    $this->recursiveExpr(9);
 							break;
 
 							case 2:
 							    $localContext = new Context\AddSubContext(new Context\ExprContext($parentContext, $parentState));
 							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
-							    $this->setState(195);
+							    $this->setState(251);
 
 							    if (!($this->precpred($this->ctx, 7))) {
 							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 7)");
 							    }
-							    $this->setState(196);
-
-							    $localContext->op = $this->input->LT(1);
-							    $_la = $this->input->LA(1);
-
-							    if (!($_la === self::T__18 || $_la === self::T__19)) {
-							    	    $localContext->op = $this->errorHandler->recoverInline($this);
-							    } else {
-							    	if ($this->input->LA(1) === Token::EOF) {
-							    	    $this->matchedEOF = true;
-							        }
-
-							    	$this->errorHandler->reportMatch($this);
-							    	$this->consume();
-							    }
-							    $this->setState(197);
-							    $this->recursiveExpr(8);
-							break;
-
-							case 3:
-							    $localContext = new Context\EqNotEqContext(new Context\ExprContext($parentContext, $parentState));
-							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
-							    $this->setState(198);
-
-							    if (!($this->precpred($this->ctx, 6))) {
-							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 6)");
-							    }
-							    $this->setState(199);
+							    $this->setState(252);
 
 							    $localContext->op = $this->input->LT(1);
 							    $_la = $this->input->LA(1);
@@ -1137,24 +1371,51 @@ namespace {
 							    	$this->errorHandler->reportMatch($this);
 							    	$this->consume();
 							    }
-							    $this->setState(200);
+							    $this->setState(253);
+							    $this->recursiveExpr(8);
+							break;
+
+							case 3:
+							    $localContext = new Context\EqNotEqContext(new Context\ExprContext($parentContext, $parentState));
+							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
+							    $this->setState(254);
+
+							    if (!($this->precpred($this->ctx, 6))) {
+							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 6)");
+							    }
+							    $this->setState(255);
+
+							    $localContext->op = $this->input->LT(1);
+							    $_la = $this->input->LA(1);
+
+							    if (!($_la === self::T__22 || $_la === self::T__23)) {
+							    	    $localContext->op = $this->errorHandler->recoverInline($this);
+							    } else {
+							    	if ($this->input->LA(1) === Token::EOF) {
+							    	    $this->matchedEOF = true;
+							        }
+
+							    	$this->errorHandler->reportMatch($this);
+							    	$this->consume();
+							    }
+							    $this->setState(256);
 							    $this->recursiveExpr(7);
 							break;
 
 							case 4:
 							    $localContext = new Context\MoreLessEqContext(new Context\ExprContext($parentContext, $parentState));
 							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
-							    $this->setState(201);
+							    $this->setState(257);
 
 							    if (!($this->precpred($this->ctx, 5))) {
 							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 5)");
 							    }
-							    $this->setState(202);
+							    $this->setState(258);
 
 							    $localContext->op = $this->input->LT(1);
 							    $_la = $this->input->LA(1);
 
-							    if (!(((($_la) & ~0x3f) === 0 && ((1 << $_la) & 125829120) !== 0))) {
+							    if (!(((($_la) & ~0x3f) === 0 && ((1 << $_la) & 503316480) !== 0))) {
 							    	    $localContext->op = $this->errorHandler->recoverInline($this);
 							    } else {
 							    	if ($this->input->LA(1) === Token::EOF) {
@@ -1164,24 +1425,24 @@ namespace {
 							    	$this->errorHandler->reportMatch($this);
 							    	$this->consume();
 							    }
-							    $this->setState(203);
+							    $this->setState(259);
 							    $this->recursiveExpr(6);
 							break;
 
 							case 5:
 							    $localContext = new Context\AndOrContext(new Context\ExprContext($parentContext, $parentState));
 							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
-							    $this->setState(204);
+							    $this->setState(260);
 
 							    if (!($this->precpred($this->ctx, 4))) {
 							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 4)");
 							    }
-							    $this->setState(205);
+							    $this->setState(261);
 
 							    $localContext->op = $this->input->LT(1);
 							    $_la = $this->input->LA(1);
 
-							    if (!($_la === self::T__26 || $_la === self::T__27)) {
+							    if (!($_la === self::T__28 || $_la === self::T__29)) {
 							    	    $localContext->op = $this->errorHandler->recoverInline($this);
 							    } else {
 							    	if ($this->input->LA(1) === Token::EOF) {
@@ -1191,16 +1452,16 @@ namespace {
 							    	$this->errorHandler->reportMatch($this);
 							    	$this->consume();
 							    }
-							    $this->setState(206);
+							    $this->setState(262);
 							    $this->recursiveExpr(5);
 							break;
 						} 
 					}
 
-					$this->setState(211);
+					$this->setState(267);
 					$this->errorHandler->sync($this);
 
-					$alt = $this->getInterpreter()->adaptivePredict($this->input, 11, $this->ctx);
+					$alt = $this->getInterpreter()->adaptivePredict($this->input, 16, $this->ctx);
 				}
 			} catch (RecognitionException $exception) {
 				$localContext->exception = $exception;
@@ -1220,59 +1481,59 @@ namespace {
 		{
 		    $localContext = new Context\ValsContext($this->ctx, $this->getState());
 
-		    $this->enterRule($localContext, 32, self::RULE_vals);
+		    $this->enterRule($localContext, 42, self::RULE_vals);
 
 		    try {
-		        $this->setState(219);
+		        $this->setState(275);
 		        $this->errorHandler->sync($this);
 
 		        switch ($this->input->LA(1)) {
 		            case self::NUM:
 		            	$localContext = new Context\NumContext($localContext);
 		            	$this->enterOuterAlt($localContext, 1);
-		            	$this->setState(212);
+		            	$this->setState(268);
 		            	$this->match(self::NUM);
 		            	break;
 
 		            case self::FLOAT:
 		            	$localContext = new Context\FloatContext($localContext);
 		            	$this->enterOuterAlt($localContext, 2);
-		            	$this->setState(213);
+		            	$this->setState(269);
 		            	$this->match(self::FLOAT);
 		            	break;
 
 		            case self::ID:
 		            	$localContext = new Context\IdExprContext($localContext);
 		            	$this->enterOuterAlt($localContext, 3);
-		            	$this->setState(214);
+		            	$this->setState(270);
 		            	$this->match(self::ID);
 		            	break;
 
 		            case self::BOOLE:
 		            	$localContext = new Context\BooleContext($localContext);
 		            	$this->enterOuterAlt($localContext, 4);
-		            	$this->setState(215);
+		            	$this->setState(271);
 		            	$this->match(self::BOOLE);
 		            	break;
 
 		            case self::STRING:
 		            	$localContext = new Context\StringContext($localContext);
 		            	$this->enterOuterAlt($localContext, 5);
-		            	$this->setState(216);
+		            	$this->setState(272);
 		            	$this->match(self::STRING);
 		            	break;
 
 		            case self::RUNE:
 		            	$localContext = new Context\RuneContext($localContext);
 		            	$this->enterOuterAlt($localContext, 6);
-		            	$this->setState(217);
+		            	$this->setState(273);
 		            	$this->match(self::RUNE);
 		            	break;
 
 		            case self::NIL:
 		            	$localContext = new Context\NilContext($localContext);
 		            	$this->enterOuterAlt($localContext, 7);
-		            	$this->setState(218);
+		            	$this->setState(274);
 		            	$this->match(self::NIL);
 		            	break;
 
@@ -1297,22 +1558,22 @@ namespace {
 		{
 		    $localContext = new Context\LidContext($this->ctx, $this->getState());
 
-		    $this->enterRule($localContext, 34, self::RULE_lid);
+		    $this->enterRule($localContext, 44, self::RULE_lid);
 
 		    try {
 		        $this->enterOuterAlt($localContext, 1);
-		        $this->setState(221);
+		        $this->setState(277);
 		        $this->match(self::ID);
-		        $this->setState(226);
+		        $this->setState(282);
 		        $this->errorHandler->sync($this);
 
 		        $_la = $this->input->LA(1);
 		        while ($_la === self::T__2) {
-		        	$this->setState(222);
+		        	$this->setState(278);
 		        	$this->match(self::T__2);
-		        	$this->setState(223);
+		        	$this->setState(279);
 		        	$this->match(self::ID);
-		        	$this->setState(228);
+		        	$this->setState(284);
 		        	$this->errorHandler->sync($this);
 		        	$_la = $this->input->LA(1);
 		        }
@@ -1334,22 +1595,22 @@ namespace {
 		{
 		    $localContext = new Context\LvalContext($this->ctx, $this->getState());
 
-		    $this->enterRule($localContext, 36, self::RULE_lval);
+		    $this->enterRule($localContext, 46, self::RULE_lval);
 
 		    try {
 		        $this->enterOuterAlt($localContext, 1);
-		        $this->setState(229);
+		        $this->setState(285);
 		        $this->recursiveExpr(0);
-		        $this->setState(234);
+		        $this->setState(290);
 		        $this->errorHandler->sync($this);
 
 		        $_la = $this->input->LA(1);
 		        while ($_la === self::T__2) {
-		        	$this->setState(230);
+		        	$this->setState(286);
 		        	$this->match(self::T__2);
-		        	$this->setState(231);
+		        	$this->setState(287);
 		        	$this->recursiveExpr(0);
-		        	$this->setState(236);
+		        	$this->setState(292);
 		        	$this->errorHandler->sync($this);
 		        	$_la = $this->input->LA(1);
 		        }
@@ -1371,24 +1632,24 @@ namespace {
 		{
 		    $localContext = new Context\PreContext($this->ctx, $this->getState());
 
-		    $this->enterRule($localContext, 38, self::RULE_pre);
+		    $this->enterRule($localContext, 48, self::RULE_pre);
 
 		    try {
-		        $this->setState(239);
+		        $this->setState(295);
 		        $this->errorHandler->sync($this);
 
 		        switch ($this->input->LA(1)) {
 		            case self::PVAR:
 		            	$localContext = new Context\VarContext($localContext);
 		            	$this->enterOuterAlt($localContext, 1);
-		            	$this->setState(237);
+		            	$this->setState(293);
 		            	$this->match(self::PVAR);
 		            	break;
 
 		            case self::PCONST:
 		            	$localContext = new Context\ConstContext($localContext);
 		            	$this->enterOuterAlt($localContext, 2);
-		            	$this->setState(238);
+		            	$this->setState(294);
 		            	$this->match(self::PCONST);
 		            	break;
 
@@ -1413,45 +1674,45 @@ namespace {
 		{
 		    $localContext = new Context\TypeContext($this->ctx, $this->getState());
 
-		    $this->enterRule($localContext, 40, self::RULE_type);
+		    $this->enterRule($localContext, 50, self::RULE_type);
 
 		    try {
-		        $this->setState(246);
+		        $this->setState(302);
 		        $this->errorHandler->sync($this);
 
 		        switch ($this->input->LA(1)) {
 		            case self::PINT:
 		            	$localContext = new Context\PintContext($localContext);
 		            	$this->enterOuterAlt($localContext, 1);
-		            	$this->setState(241);
+		            	$this->setState(297);
 		            	$this->match(self::PINT);
 		            	break;
 
 		            case self::PFLOAT:
 		            	$localContext = new Context\PfloatContext($localContext);
 		            	$this->enterOuterAlt($localContext, 2);
-		            	$this->setState(242);
+		            	$this->setState(298);
 		            	$this->match(self::PFLOAT);
 		            	break;
 
 		            case self::PBOOL:
 		            	$localContext = new Context\PbooleContext($localContext);
 		            	$this->enterOuterAlt($localContext, 3);
-		            	$this->setState(243);
+		            	$this->setState(299);
 		            	$this->match(self::PBOOL);
 		            	break;
 
 		            case self::PSTRING:
 		            	$localContext = new Context\PstringContext($localContext);
 		            	$this->enterOuterAlt($localContext, 4);
-		            	$this->setState(244);
+		            	$this->setState(300);
 		            	$this->match(self::PSTRING);
 		            	break;
 
 		            case self::PRUNE:
 		            	$localContext = new Context\PruneContext($localContext);
 		            	$this->enterOuterAlt($localContext, 5);
-		            	$this->setState(245);
+		            	$this->setState(301);
 		            	$this->match(self::PRUNE);
 		            	break;
 
@@ -1472,7 +1733,7 @@ namespace {
 		public function sempred(?RuleContext $localContext, int $ruleIndex, int $predicateIndex): bool
 		{
 			switch ($ruleIndex) {
-					case 15:
+					case 20:
 						return $this->sempredExpr($localContext, $predicateIndex);
 
 				default:
@@ -1661,6 +1922,11 @@ namespace Context {
 	    public function switchStmt(): ?SwitchStmtContext
 	    {
 	    	return $this->getTypedRuleContext(SwitchStmtContext::class, 0);
+	    }
+
+	    public function arraydec(): ?ArraydecContext
+	    {
+	    	return $this->getTypedRuleContext(ArraydecContext::class, 0);
 	    }
 
 		public function enterRule(ParseTreeListener $listener): void
@@ -2584,6 +2850,333 @@ namespace Context {
 		{
 			if ($visitor instanceof GrammarVisitor) {
 			    return $visitor->visitDecl($this);
+		    }
+
+			return $visitor->visitChildren($this);
+		}
+	} 
+
+	class ArraydecContext extends ParserRuleContext
+	{
+		public function __construct(?ParserRuleContext $parent, ?int $invokingState = null)
+		{
+			parent::__construct($parent, $invokingState);
+		}
+
+		public function getRuleIndex(): int
+		{
+		    return GrammarParser::RULE_arraydec;
+	    }
+	 
+		public function copyFrom(ParserRuleContext $context): void
+		{
+			parent::copyFrom($context);
+
+		}
+	}
+
+	class ShortArrayDecContext extends ArraydecContext
+	{
+		public function __construct(ArraydecContext $context)
+		{
+		    parent::__construct($context);
+
+		    $this->copyFrom($context);
+	    }
+
+	    public function PVAR(): ?TerminalNode
+	    {
+	        return $this->getToken(GrammarParser::PVAR, 0);
+	    }
+
+	    public function ID(): ?TerminalNode
+	    {
+	        return $this->getToken(GrammarParser::ID, 0);
+	    }
+
+	    public function larray(): ?LarrayContext
+	    {
+	    	return $this->getTypedRuleContext(LarrayContext::class, 0);
+	    }
+
+	    public function type(): ?TypeContext
+	    {
+	    	return $this->getTypedRuleContext(TypeContext::class, 0);
+	    }
+
+		public function enterRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->enterShortArrayDec($this);
+		    }
+		}
+
+		public function exitRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->exitShortArrayDec($this);
+		    }
+		}
+
+		public function accept(ParseTreeVisitor $visitor): mixed
+		{
+			if ($visitor instanceof GrammarVisitor) {
+			    return $visitor->visitShortArrayDec($this);
+		    }
+
+			return $visitor->visitChildren($this);
+		}
+	}
+
+	class LongArrayDecContext extends ArraydecContext
+	{
+		public function __construct(ArraydecContext $context)
+		{
+		    parent::__construct($context);
+
+		    $this->copyFrom($context);
+	    }
+
+	    public function PVAR(): ?TerminalNode
+	    {
+	        return $this->getToken(GrammarParser::PVAR, 0);
+	    }
+
+	    public function ID(): ?TerminalNode
+	    {
+	        return $this->getToken(GrammarParser::ID, 0);
+	    }
+
+	    /**
+	     * @return array<LarrayContext>|LarrayContext|null
+	     */
+	    public function larray(?int $index = null)
+	    {
+	    	if ($index === null) {
+	    		return $this->getTypedRuleContexts(LarrayContext::class);
+	    	}
+
+	        return $this->getTypedRuleContext(LarrayContext::class, $index);
+	    }
+
+	    /**
+	     * @return array<TypeContext>|TypeContext|null
+	     */
+	    public function type(?int $index = null)
+	    {
+	    	if ($index === null) {
+	    		return $this->getTypedRuleContexts(TypeContext::class);
+	    	}
+
+	        return $this->getTypedRuleContext(TypeContext::class, $index);
+	    }
+
+	    public function arrayValue(): ?ArrayValueContext
+	    {
+	    	return $this->getTypedRuleContext(ArrayValueContext::class, 0);
+	    }
+
+		public function enterRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->enterLongArrayDec($this);
+		    }
+		}
+
+		public function exitRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->exitLongArrayDec($this);
+		    }
+		}
+
+		public function accept(ParseTreeVisitor $visitor): mixed
+		{
+			if ($visitor instanceof GrammarVisitor) {
+			    return $visitor->visitLongArrayDec($this);
+		    }
+
+			return $visitor->visitChildren($this);
+		}
+	} 
+
+	class LarrayContext extends ParserRuleContext
+	{
+		public function __construct(?ParserRuleContext $parent, ?int $invokingState = null)
+		{
+			parent::__construct($parent, $invokingState);
+		}
+
+		public function getRuleIndex(): int
+		{
+		    return GrammarParser::RULE_larray;
+	    }
+
+	    /**
+	     * @return array<TerminalNode>|TerminalNode|null
+	     */
+	    public function NUM(?int $index = null)
+	    {
+	    	if ($index === null) {
+	    		return $this->getTokens(GrammarParser::NUM);
+	    	}
+
+	        return $this->getToken(GrammarParser::NUM, $index);
+	    }
+
+		public function enterRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->enterLarray($this);
+		    }
+		}
+
+		public function exitRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->exitLarray($this);
+		    }
+		}
+
+		public function accept(ParseTreeVisitor $visitor): mixed
+		{
+			if ($visitor instanceof GrammarVisitor) {
+			    return $visitor->visitLarray($this);
+		    }
+
+			return $visitor->visitChildren($this);
+		}
+	} 
+
+	class ArrayValueContext extends ParserRuleContext
+	{
+		public function __construct(?ParserRuleContext $parent, ?int $invokingState = null)
+		{
+			parent::__construct($parent, $invokingState);
+		}
+
+		public function getRuleIndex(): int
+		{
+		    return GrammarParser::RULE_arrayValue;
+	    }
+
+	    public function arrayElements(): ?ArrayElementsContext
+	    {
+	    	return $this->getTypedRuleContext(ArrayElementsContext::class, 0);
+	    }
+
+		public function enterRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->enterArrayValue($this);
+		    }
+		}
+
+		public function exitRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->exitArrayValue($this);
+		    }
+		}
+
+		public function accept(ParseTreeVisitor $visitor): mixed
+		{
+			if ($visitor instanceof GrammarVisitor) {
+			    return $visitor->visitArrayValue($this);
+		    }
+
+			return $visitor->visitChildren($this);
+		}
+	} 
+
+	class ArrayElementsContext extends ParserRuleContext
+	{
+		public function __construct(?ParserRuleContext $parent, ?int $invokingState = null)
+		{
+			parent::__construct($parent, $invokingState);
+		}
+
+		public function getRuleIndex(): int
+		{
+		    return GrammarParser::RULE_arrayElements;
+	    }
+
+	    /**
+	     * @return array<ArrayElementContext>|ArrayElementContext|null
+	     */
+	    public function arrayElement(?int $index = null)
+	    {
+	    	if ($index === null) {
+	    		return $this->getTypedRuleContexts(ArrayElementContext::class);
+	    	}
+
+	        return $this->getTypedRuleContext(ArrayElementContext::class, $index);
+	    }
+
+		public function enterRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->enterArrayElements($this);
+		    }
+		}
+
+		public function exitRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->exitArrayElements($this);
+		    }
+		}
+
+		public function accept(ParseTreeVisitor $visitor): mixed
+		{
+			if ($visitor instanceof GrammarVisitor) {
+			    return $visitor->visitArrayElements($this);
+		    }
+
+			return $visitor->visitChildren($this);
+		}
+	} 
+
+	class ArrayElementContext extends ParserRuleContext
+	{
+		public function __construct(?ParserRuleContext $parent, ?int $invokingState = null)
+		{
+			parent::__construct($parent, $invokingState);
+		}
+
+		public function getRuleIndex(): int
+		{
+		    return GrammarParser::RULE_arrayElement;
+	    }
+
+	    public function expr(): ?ExprContext
+	    {
+	    	return $this->getTypedRuleContext(ExprContext::class, 0);
+	    }
+
+	    public function arrayValue(): ?ArrayValueContext
+	    {
+	    	return $this->getTypedRuleContext(ArrayValueContext::class, 0);
+	    }
+
+		public function enterRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->enterArrayElement($this);
+		    }
+		}
+
+		public function exitRule(ParseTreeListener $listener): void
+		{
+			if ($listener instanceof GrammarListener) {
+			    $listener->exitArrayElement($this);
+		    }
+		}
+
+		public function accept(ParseTreeVisitor $visitor): mixed
+		{
+			if ($visitor instanceof GrammarVisitor) {
+			    return $visitor->visitArrayElement($this);
 		    }
 
 			return $visitor->visitChildren($this);

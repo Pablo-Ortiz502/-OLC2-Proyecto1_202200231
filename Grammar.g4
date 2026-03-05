@@ -12,7 +12,8 @@ stmts:
 	| inst
 	| reserved
 	| pri
-	| switchStmt;
+	| switchStmt
+	| arraydec;
 
 pri: PRINT '(' lval ')' # Println;
 
@@ -42,6 +43,15 @@ dec:
 	pre lid type '=' lval	# Declv
 	| pre lid type			# Decl
 	| lid ':=' lval			# Sdec;
+
+arraydec:
+	PVAR ID larray type '=' larray type arrayValue	# LongArrayDec
+	| PVAR ID larray type							# ShortArrayDec;
+
+larray: '[' NUM ']' ('[' NUM ']')*;
+arrayValue: '{' arrayElements? '}';
+arrayElements: arrayElement (',' arrayElement)*;
+arrayElement: expr | arrayValue;
 
 asg:
 	ID '=' expr		# Asig

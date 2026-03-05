@@ -203,6 +203,62 @@ interface GrammarVisitor extends ParseTreeVisitor
 	public function visitSdec(Context\SdecContext $context);
 
 	/**
+	 * Visit a parse tree produced by the `LongArrayDec` labeled alternative
+	 * in {@see GrammarParser::arraydec()}.
+	 *
+	 * @param Context\LongArrayDecContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitLongArrayDec(Context\LongArrayDecContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `ShortArrayDec` labeled alternative
+	 * in {@see GrammarParser::arraydec()}.
+	 *
+	 * @param Context\ShortArrayDecContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitShortArrayDec(Context\ShortArrayDecContext $context);
+
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::larray()}.
+	 *
+	 * @param Context\LarrayContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitLarray(Context\LarrayContext $context);
+
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::arrayValue()}.
+	 *
+	 * @param Context\ArrayValueContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitArrayValue(Context\ArrayValueContext $context);
+
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::arrayElements()}.
+	 *
+	 * @param Context\ArrayElementsContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitArrayElements(Context\ArrayElementsContext $context);
+
+	/**
+	 * Visit a parse tree produced by {@see GrammarParser::arrayElement()}.
+	 *
+	 * @param Context\ArrayElementContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitArrayElement(Context\ArrayElementContext $context);
+
+	/**
 	 * Visit a parse tree produced by the `Asig` labeled alternative
 	 * in {@see GrammarParser::asg()}.
 	 *
