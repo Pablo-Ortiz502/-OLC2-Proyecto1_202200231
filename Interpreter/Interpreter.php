@@ -388,21 +388,6 @@ class Interpreter extends GrammarBaseVisitor
         return $result;
     }
 
-    private function getEtiqArray($arr)
-    {
-        if (!is_array($arr)) {
-            return $this->getEtiqArray($arr);
-        }
-
-        $result = [];
-
-        foreach ($arr as $k => $v) {
-            $result[$k] = $this->getEtiqArray($v);
-        }
-
-        return $result;
-    }
-
 
 
     //-------funciones visit-------------------------------------------------------
@@ -1359,6 +1344,7 @@ class Interpreter extends GrammarBaseVisitor
         if ($this->declare($name, [])) {
             $this->syCount++;
         }
+
 
         $scopeLevel = count($this->scopes) - 1;
         $currentScope = &$this->scopes[$scopeLevel]["symbols"];
