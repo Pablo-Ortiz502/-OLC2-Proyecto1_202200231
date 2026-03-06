@@ -1,22 +1,12 @@
 func main() {
-  for var i int32 = 0; i < 3; i++ {
-    y := 5
-    if i == 2 {
-        y = 2
-        break
-    }
-  }
-  x := 0
-  for x<10{
-    x += 1
-  }
-  g := 0
-  for{
-    g ++
-    fmt.Println(g)
-    if g >4{
-      break
-    }
-  }
-
+var m [2][2]int32 = [2][2]int32{ 
+    {1, 2}, 
+    {3, 4}, 
+} 
+ 
+for i := 0; i < 2; i++ { 
+    for j := 0; j < 2; j++ { 
+        fmt.Println(m[i][j]) 
+    } 
+} 
 }

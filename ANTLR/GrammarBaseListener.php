@@ -307,6 +307,19 @@ class GrammarBaseListener implements GrammarListener
 	 *
 	 * The default implementation does nothing.
 	 */
+	public function enterLarrayexp(Context\LarrayexpContext $context): void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitLarrayexp(Context\LarrayexpContext $context): void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
 	public function enterLarray(Context\LarrayContext $context): void {}
 
 	/**
@@ -354,6 +367,19 @@ class GrammarBaseListener implements GrammarListener
 	 * The default implementation does nothing.
 	 */
 	public function exitArrayElement(Context\ArrayElementContext $context): void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function enterArrayAsig(Context\ArrayAsigContext $context): void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitArrayAsig(Context\ArrayAsigContext $context): void {}
 	/**
 	 * {@inheritdoc}
 	 *
@@ -575,6 +601,19 @@ class GrammarBaseListener implements GrammarListener
 	 * The default implementation does nothing.
 	 */
 	public function exitFloat(Context\FloatContext $context): void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function enterArrayVal(Context\ArrayValContext $context): void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitArrayVal(Context\ArrayValContext $context): void {}
 	/**
 	 * {@inheritdoc}
 	 *

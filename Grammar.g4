@@ -48,18 +48,21 @@ arraydec:
 	PVAR ID larray type '=' larray type arrayValue	# LongArrayDec
 	| PVAR ID larray type							# ShortArrayDec;
 
+larrayexp: '[' expr ']' ('[' expr ']')*;
 larray: '[' NUM ']' ('[' NUM ']')*;
+
 arrayValue: '{' arrayElements? '}';
 arrayElements: arrayElement (',' arrayElement)*;
 arrayElement: expr | arrayValue;
 
 asg:
-	ID '=' expr		# Asig
-	| ID '+=' expr	# PlusAsig
-	| ID '-=' expr	# MinusAsig
-	| ID '*=' expr	# MultAsig
-	| ID '/=' expr	# DivAsig
-	| incdec		# Inde;
+	ID larrayexp '=' expr	# ArrayAsig
+	| ID '=' expr			# Asig
+	| ID '+=' expr			# PlusAsig
+	| ID '-=' expr			# MinusAsig
+	| ID '*=' expr			# MultAsig
+	| ID '/=' expr			# DivAsig
+	| incdec				# Inde;
 
 incdec: ID op = ('++' | '--');
 
@@ -74,13 +77,14 @@ expr:
 	| reserved									# re;
 
 vals:
-	NUM			# Num
-	| FLOAT		# Float
-	| ID		# IdExpr
-	| BOOLE		# Boole
-	| STRING	# String
-	| RUNE		# Rune
-	| NIL		# Nil;
+	NUM				# Num
+	| FLOAT			# Float
+	| ID larrayexp	# ArrayVal
+	| ID			# IdExpr
+	| BOOLE			# Boole
+	| STRING		# String
+	| RUNE			# Rune
+	| NIL			# Nil;
 
 lid: ID (',' ID)*;
 

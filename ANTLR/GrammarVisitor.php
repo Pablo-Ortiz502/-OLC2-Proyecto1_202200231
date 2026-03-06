@@ -223,6 +223,15 @@ interface GrammarVisitor extends ParseTreeVisitor
 	public function visitShortArrayDec(Context\ShortArrayDecContext $context);
 
 	/**
+	 * Visit a parse tree produced by {@see GrammarParser::larrayexp()}.
+	 *
+	 * @param Context\LarrayexpContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitLarrayexp(Context\LarrayexpContext $context);
+
+	/**
 	 * Visit a parse tree produced by {@see GrammarParser::larray()}.
 	 *
 	 * @param Context\LarrayContext $context The parse tree.
@@ -257,6 +266,16 @@ interface GrammarVisitor extends ParseTreeVisitor
 	 * @return mixed The visitor result.
 	 */
 	public function visitArrayElement(Context\ArrayElementContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `ArrayAsig` labeled alternative
+	 * in {@see GrammarParser::asg()}.
+	 *
+	 * @param Context\ArrayAsigContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitArrayAsig(Context\ArrayAsigContext $context);
 
 	/**
 	 * Visit a parse tree produced by the `Asig` labeled alternative
@@ -426,6 +445,16 @@ interface GrammarVisitor extends ParseTreeVisitor
 	 * @return mixed The visitor result.
 	 */
 	public function visitFloat(Context\FloatContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `ArrayVal` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 *
+	 * @param Context\ArrayValContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitArrayVal(Context\ArrayValContext $context);
 
 	/**
 	 * Visit a parse tree produced by the `IdExpr` labeled alternative

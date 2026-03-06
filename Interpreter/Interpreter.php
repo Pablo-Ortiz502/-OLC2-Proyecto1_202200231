@@ -29,7 +29,9 @@ use Context\PruneContext;
 use Context\SContext;
 use Context\IfStmtContext;
 use Context\AndOrContext;
+use Context\ArrayAsigContext;
 use Context\ArrayElementContext;
+use Context\ArrayValContext;
 use Context\ArrayValueContext;
 use Context\EqNotEqContext;
 use Context\MoreLessEqContext;
@@ -1259,6 +1261,33 @@ class Interpreter extends GrammarBaseVisitor
 
     //------------------------arrays-----------------------------------
 
+    function getArrayValue(array $arr, array $indexes)
+    {
+        $valor = $arr;
+
+        foreach ($indexes as $index) {
+            $valor = $valor[$index];
+        }
+
+        return $valor;
+    }
+    function setArrayVAlue(array &$arr, array $indices, $valor)
+    {
+        $ref = &$arr;
+
+        foreach ($indices as $i => $indice) {
+            if (!is_array($ref) || !array_key_exists($indice, $ref)) {
+                throw new Exception("Índice fuera de rango: $indice");
+            }
+
+            if ($i === count($indices) - 1) {
+                $ref[$indice] = $valor;
+            } else {
+                $ref = &$ref[$indice];
+            }
+        }
+    }
+
     public function visitArrayValue(ArrayValueContext $context)
     {
         $result = [];
@@ -1345,6 +1374,11 @@ class Interpreter extends GrammarBaseVisitor
             $this->syCount++;
         }
 
+        $temp = [];
+        for ($i = 0; $i < count($leftDims); $i++) {
+            $temp[] = $leftDims[$i]->gettext(0);
+        }
+
 
         $scopeLevel = count($this->scopes) - 1;
         $currentScope = &$this->scopes[$scopeLevel]["symbols"];
@@ -1352,6 +1386,7 @@ class Interpreter extends GrammarBaseVisitor
             "kind" => "var",
             "type"  => $type1,
             "val"   => $value,
+            "dimen" => $temp,
             "etiq"  => "array"
         ];
 
@@ -1390,10 +1425,7 @@ class Interpreter extends GrammarBaseVisitor
             $temp[] = $leftDims[$i]->gettext(0);
         }
 
-
         $value =  $this->generateArray($temp, $type);
-        print_r($value);
-
 
 
         $scopeLevel = count($this->scopes) - 1;
@@ -1402,6 +1434,7 @@ class Interpreter extends GrammarBaseVisitor
             "kind" => "var",
             "type"  => $type,
             "val"   => $value,
+            "dimen" => $temp,
             "etiq"  => "array"
         ];
 
@@ -1414,6 +1447,127 @@ class Interpreter extends GrammarBaseVisitor
             "etiq"      => $this->arrayToString($value)
         ];
     }
+
+    public function visitArrayVal(ArrayValContext $context)
+    {
+        $name = $context->ID()->getText();
+        $dim = $context->larrayexp()->expr();
+        $symbol = &$this->resolveRef($name);
+
+        if ($symbol === null) {
+            $this->addError(
+                "La variable '$name' no ha sido declarada",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+        $n = count($symbol["dimen"]);
+        $values = $symbol["val"];
+
+        $temp = [];
+        for ($i = 0; $i < count($dim); $i++) {
+            $v = $this->visit($dim[$i]);
+            if (!is_int($v)) {
+                $this->addError(
+                    "Las dimensiones deben ser numeros enteros",
+                    $dim[$i]->getStart()
+                );
+                return null;
+            }
+            $temp[] = $v;
+        }
+
+
+        if ($n !== count($temp)) {
+            $this->addError(
+                "El array '$name' nececita '$n' dimensiones",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        for ($i = 0; $i < $n; $i++) {
+            if ($temp[$i] >= $symbol["dimen"][$i]) {
+                $this->addError(
+                    "Indices fuera de limites del array '$name'",
+                    $context->ID()->getSymbol()
+                );
+                return null;
+            }
+        }
+
+
+
+        $result = $this->getArrayValue($values, $temp);
+
+        return $result;
+    }
+
+    public function visitArrayAsig(ArrayAsigContext $context)
+    {
+        $name = $context->ID()->getText();
+        $dim = $context->larrayexp()->expr();
+        $symbol = &$this->resolveRef($name);
+
+        if ($symbol === null) {
+            $this->addError(
+                "La variable '$name' no ha sido declarada",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+        $n = count($symbol["dimen"]);
+
+        $temp = [];
+        for ($i = 0; $i < count($dim); $i++) {
+            $v = $this->visit($dim[$i]);
+            if (!is_int($v)) {
+                $this->addError(
+                    "Las dimensiones deben ser numeros enteros",
+                    $dim[$i]->getStart()
+                );
+                return null;
+            }
+            $temp[] = $v;
+        }
+
+        if ($n !== count($temp)) {
+            $this->addError(
+                "El array '$name' nececita '$n' dimensiones",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        for ($i = 0; $i < $n; $i++) {
+            if ($temp[$i] >= $symbol["dimen"][$i]) {
+                $this->addError(
+                    "Indices fuera de limites del array '$name'",
+                    $context->ID()->getSymbol()
+                );
+                return null;
+            }
+        }
+
+
+        $val = $this->visit($context->expr());
+        $type = $symbol["type"];
+        if (!$this->validateType($type, $val)) {
+            $this->addError(
+                "Asifnacion de tipos incompatibles en '$name'",
+                $context->expr()->getStart()
+            );
+            return null;
+        }
+
+
+
+        $this->setArrayValue($symbol["val"], $temp, $val);
+
+        $scopeLevel = $this->getCurrentScopeLevelOf($name);
+        $this->symbolTable[$scopeLevel][$name]["etiq"] = $this->arrayToString($symbol["val"]);
+    }
+
 
     // ---------------- Expresiones ----------------
 

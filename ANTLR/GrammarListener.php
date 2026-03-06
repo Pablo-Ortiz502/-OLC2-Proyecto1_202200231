@@ -258,6 +258,16 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitShortArrayDec(Context\ShortArrayDecContext $context): void;
 	/**
+	 * Enter a parse tree produced by {@see GrammarParser::larrayexp()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterLarrayexp(Context\LarrayexpContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::larrayexp()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitLarrayexp(Context\LarrayexpContext $context): void;
+	/**
 	 * Enter a parse tree produced by {@see GrammarParser::larray()}.
 	 * @param $context The parse tree.
 	 */
@@ -297,6 +307,18 @@ interface GrammarListener extends ParseTreeListener {
 	 * @param $context The parse tree.
 	 */
 	public function exitArrayElement(Context\ArrayElementContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `ArrayAsig`
+	 * labeled alternative in {@see GrammarParser::asg()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterArrayAsig(Context\ArrayAsigContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `ArrayAsig` labeled alternative
+	 * in {@see GrammarParser::asg()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitArrayAsig(Context\ArrayAsigContext $context): void;
 	/**
 	 * Enter a parse tree produced by the `Asig`
 	 * labeled alternative in {@see GrammarParser::asg()}.
@@ -499,6 +521,18 @@ interface GrammarListener extends ParseTreeListener {
 	 * @param $context The parse tree.
 	 */
 	public function exitFloat(Context\FloatContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `ArrayVal`
+	 * labeled alternative in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterArrayVal(Context\ArrayValContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `ArrayVal` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitArrayVal(Context\ArrayValContext $context): void;
 	/**
 	 * Enter a parse tree produced by the `IdExpr`
 	 * labeled alternative in {@see GrammarParser::vals()}.
