@@ -2034,6 +2034,9 @@ class Interpreter extends GrammarBaseVisitor
             }
             try {
                 $this->visit($function["val"]);
+            } catch (ReturnException $e) {
+                return $e->value;
+            } finally {
                 foreach ($this->symbolTable as &$scope) {
                     foreach ($scope as $name => &$symbol) {
                         $var = &$this->resolveRef($name);
@@ -2044,14 +2047,14 @@ class Interpreter extends GrammarBaseVisitor
                         }
                     }
                 }
-            } catch (ReturnException $e) {
-                return $e->value;
-            } finally {
                 $this->exitScope();
             }
         } else {
             try {
                 $this->visit($function["val"]);
+            } catch (ReturnException $e) {
+                return $e->value;
+            } finally {
                 foreach ($this->symbolTable as &$scope) {
                     foreach ($scope as $name => &$symbol) {
                         $var = &$this->resolveRef($name);
@@ -2062,9 +2065,6 @@ class Interpreter extends GrammarBaseVisitor
                         }
                     }
                 }
-            } catch (ReturnException $e) {
-                return $e->value;
-            } finally {
                 $this->exitScope();
             }
         }
