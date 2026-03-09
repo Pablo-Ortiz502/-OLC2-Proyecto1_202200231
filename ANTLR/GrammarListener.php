@@ -32,6 +32,86 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitProgram(Context\ProgramContext $context): void;
 	/**
+	 * Enter a parse tree produced by the `MultFunc`
+	 * labeled alternative in {@see GrammarParser::functiondec()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterMultFunc(Context\MultFuncContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `MultFunc` labeled alternative
+	 * in {@see GrammarParser::functiondec()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitMultFunc(Context\MultFuncContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `SimpleFunc`
+	 * labeled alternative in {@see GrammarParser::functiondec()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterSimpleFunc(Context\SimpleFuncContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `SimpleFunc` labeled alternative
+	 * in {@see GrammarParser::functiondec()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitSimpleFunc(Context\SimpleFuncContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `method`
+	 * labeled alternative in {@see GrammarParser::functiondec()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterMethod(Context\MethodContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `method` labeled alternative
+	 * in {@see GrammarParser::functiondec()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitMethod(Context\MethodContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::paramlist()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterParamlist(Context\ParamlistContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::paramlist()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitParamlist(Context\ParamlistContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `FuncParamDec`
+	 * labeled alternative in {@see GrammarParser::param()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterFuncParamDec(Context\FuncParamDecContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `FuncParamDec` labeled alternative
+	 * in {@see GrammarParser::param()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitFuncParamDec(Context\FuncParamDecContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `FuncArrayDec`
+	 * labeled alternative in {@see GrammarParser::param()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterFuncArrayDec(Context\FuncArrayDecContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `FuncArrayDec` labeled alternative
+	 * in {@see GrammarParser::param()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitFuncArrayDec(Context\FuncArrayDecContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::typelist()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterTypelist(Context\TypelistContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::typelist()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitTypelist(Context\TypelistContext $context): void;
+	/**
 	 * Enter a parse tree produced by {@see GrammarParser::stmts()}.
 	 * @param $context The parse tree.
 	 */
@@ -121,6 +201,16 @@ interface GrammarListener extends ParseTreeListener {
 	 * @param $context The parse tree.
 	 */
 	public function exitInst(Context\InstContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::returnStmt()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterReturnStmt(Context\ReturnStmtContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::returnStmt()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitReturnStmt(Context\ReturnStmtContext $context): void;
 	/**
 	 * Enter a parse tree produced by {@see GrammarParser::ifStmt()}.
 	 * @param $context The parse tree.
@@ -522,6 +612,18 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitFloat(Context\FloatContext $context): void;
 	/**
+	 * Enter a parse tree produced by the `fc`
+	 * labeled alternative in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterFc(Context\FcContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `fc` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitFc(Context\FcContext $context): void;
+	/**
 	 * Enter a parse tree produced by the `ArrayVal`
 	 * labeled alternative in {@see GrammarParser::vals()}.
 	 * @param $context The parse tree.
@@ -594,6 +696,18 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitNil(Context\NilContext $context): void;
 	/**
+	 * Enter a parse tree produced by the `FunReturn`
+	 * labeled alternative in {@see GrammarParser::funcCall()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterFunReturn(Context\FunReturnContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `FunReturn` labeled alternative
+	 * in {@see GrammarParser::funcCall()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitFunReturn(Context\FunReturnContext $context): void;
+	/**
 	 * Enter a parse tree produced by {@see GrammarParser::lid()}.
 	 * @param $context The parse tree.
 	 */
@@ -603,6 +717,26 @@ interface GrammarListener extends ParseTreeListener {
 	 * @param $context The parse tree.
 	 */
 	public function exitLid(Context\LidContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::par()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterPar(Context\ParContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::par()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitPar(Context\ParContext $context): void;
+	/**
+	 * Enter a parse tree produced by {@see GrammarParser::lvalpar()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterLvalpar(Context\LvalparContext $context): void;
+	/**
+	 * Exit a parse tree produced by {@see GrammarParser::lvalpar()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitLvalpar(Context\LvalparContext $context): void;
 	/**
 	 * Enter a parse tree produced by {@see GrammarParser::lval()}.
 	 * @param $context The parse tree.
@@ -697,4 +831,16 @@ interface GrammarListener extends ParseTreeListener {
 	 * @param $context The parse tree.
 	 */
 	public function exitPrune(Context\PruneContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `funArrayType`
+	 * labeled alternative in {@see GrammarParser::type()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterFunArrayType(Context\FunArrayTypeContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `funArrayType` labeled alternative
+	 * in {@see GrammarParser::type()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitFunArrayType(Context\FunArrayTypeContext $context): void;
 }

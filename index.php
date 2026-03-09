@@ -27,17 +27,23 @@
         if (!empty($input)) {
 
             try {
+                $interpreter = new Interpreter();
                 $stream = InputStream::fromString($input);
+                $errorListener = new ErrorListener($interpreter);
 
                 $lexer = new GrammarLexer($stream);
-                $tokens = new CommonTokenStream($lexer);
-                $parser = new GrammarParser($tokens);
+                $lexer->removeErrorListeners();
+                $lexer->addErrorListener($errorListener);
 
+                $tokens = new CommonTokenStream($lexer);
+
+                $parser = new GrammarParser($tokens);
+                $parser->removeErrorListeners();
+                $parser->addErrorListener($errorListener);
 
                 $tree = $parser->s();
 
 
-                $interpreter = new Interpreter();
                 $interpreter->visit($tree);
 
 

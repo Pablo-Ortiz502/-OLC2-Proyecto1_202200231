@@ -37,6 +37,10 @@ use Context\EqNotEqContext;
 use Context\MoreLessEqContext;
 use Context\ProgramContext;
 use Context\BlockContext;
+use Context\FunArrayTypeContext;
+use Context\FuncArrayDecContext;
+use Context\FuncParamDecContext;
+use Context\FunReturnContext;
 use Context\IncDecContext;
 use Context\LongForContext;
 use Context\InstContext;
@@ -47,13 +51,28 @@ use Context\TypeOContext;
 use Context\NowFuncContext;
 use Context\LenFuncContext;
 use Context\LongArrayDecContext;
+use Context\MethodContext;
+use Context\MultFuncContext;
+use Context\ParContext;
+use Context\ReturnStmtContext;
 use Context\ShortArrayDecContext;
+use Context\SimpleFuncContext;
 use Context\SubSContext;
 use Context\SwitchStmtContext;
-use LDAP\Result;
+
+use function PHPSTORM_META\type;
 
 class BreakException extends \Exception {}
 class ContinueException extends \Exception {}
+class ReturnException extends \Exception
+{
+    public $value;
+
+    public function __construct($value)
+    {
+        $this->value = $value;
+    }
+}
 
 class Interpreter extends GrammarBaseVisitor
 {
@@ -63,6 +82,7 @@ class Interpreter extends GrammarBaseVisitor
 
     private array $scopes = [];
     private int $inLoop = 0;
+    private int $inFunc = 0;
     private int $erCount = 0;
     private int $syCount = 0;
     private int $ifCount = 0;
@@ -134,11 +154,12 @@ class Interpreter extends GrammarBaseVisitor
             "boole"   => is_bool($value) || is_null($value),
             "string"  => is_string($value) || is_null($value),
             "rune"    => is_string($value) || is_null($value) || strlen($value) === 1,
+            "array"   => is_array($value),
             default   => false
         };
     }
 
-    private function addError(string $desc, $token, string $type = "Semantico"): void
+    public function addError(string $desc, $token, string $type = "Semantico"): void
     {
         $this->erCount++;
         $this->errorTable[] = [
@@ -172,6 +193,10 @@ class Interpreter extends GrammarBaseVisitor
             return "string";
         }
 
+        if (is_array("array")) {
+            return "array";
+        }
+
         return null;
     }
     private function getEtiquete($value): ?string
@@ -193,6 +218,10 @@ class Interpreter extends GrammarBaseVisitor
 
         if (is_string($value)) {
             return $value;
+        }
+
+        if (is_array($value)) {
+            return $this->arrayToString($value);
         }
 
         if (is_null($value)) {
@@ -222,7 +251,7 @@ class Interpreter extends GrammarBaseVisitor
     {
         switch ($type) {
             case "string":
-                return "" / "";
+                return '" "';
             case "boole":
                 return "false";
             case "float32":
@@ -396,8 +425,26 @@ class Interpreter extends GrammarBaseVisitor
     public function visitS(SContext $context)
     {
         $this->enterScope("Global");
+        $f0 = $context->functiondec(0);
+        $f1 = $context->functiondec(1);
+
+        if ($f0 !== null && is_array($f0)) {
+            for ($i = 0; $i < count($f0); $i++) {
+                $this->visit($f0[$i]);
+            }
+        } else if ($f0 !== null) {
+            $this->visit($f0);
+        }
+        if ($f1 !== null && is_array($f1)) {
+            for ($i = 0; $i < count($f1); $i++) {
+                $this->visit($f1[$i]);
+            }
+        } else if ($f1 !== null) {
+            $this->visit($f1);
+        }
 
         $this->visit($context->program());
+
 
         return null;
     }
@@ -485,7 +532,7 @@ class Interpreter extends GrammarBaseVisitor
         return "const";
     }
 
-    //----------------------------funciones---------------------
+    //----------------------------funciones nativas---------------------
 
     public function visitPrintln(PrintlnContext $context)
     {
@@ -501,6 +548,9 @@ class Interpreter extends GrammarBaseVisitor
 
         for ($i = 0; $i < count($vals); $i++) {
             $result = $this->visit($vals[$i]);
+            if (is_array($result)) {
+                $result = $this->arrayToString($result);
+            }
             $this->console .= " " . $result;
         }
         $this->console .= "\n";
@@ -522,14 +572,17 @@ class Interpreter extends GrammarBaseVisitor
     {
         $result = $this->visit($context->expr());
 
-        if (!is_string($result)) { // cambiar cuando se agreguen los arrays
-            $this->addError(
-                "La len() solo hacepta Strings",
-                $context->expr()->getStart()
-            );
-            return null;
+        if (is_string($result)) {
+            return strlen($result);
         }
-        return strlen($result);
+        if (is_array($result)) {
+            return count($result);
+        }
+        $this->addError(
+            "len() solo acepta strings o arrays",
+            $context->expr()->getStart()
+        );
+        return null;
     }
 
     public function visitSubS(SubSContext $context)
@@ -831,6 +884,7 @@ class Interpreter extends GrammarBaseVisitor
         $symbol["etiq"] = $this->getEtiquete($value);
         $scopeLevel = $this->getCurrentScopeLevelOf($name);
 
+        $this->symbolTable[$scopeLevel][$name]["val"] = $value;
         $this->symbolTable[$scopeLevel][$name]["etiq"] = $symbol["etiq"];
 
 
@@ -866,6 +920,8 @@ class Interpreter extends GrammarBaseVisitor
 
         $symbol["etiq"] = $this->getEtiquete($symbol["val"]);
         $scopeLevel = $this->getCurrentScopeLevelOf($name);
+
+        $this->symbolTable[$scopeLevel][$name]["val"] = $symbol["val"];
         $this->symbolTable[$scopeLevel][$name]["etiq"] =  $symbol["etiq"];
 
         return null;
@@ -915,6 +971,7 @@ class Interpreter extends GrammarBaseVisitor
         $symbol["etiq"] = $this->getEtiquete($v);
 
         $scopeLevel = $this->getCurrentScopeLevelOf($name);
+        $this->symbolTable[$scopeLevel][$name]["val"] = $v;
         $this->symbolTable[$scopeLevel][$name]["etiq"] = $symbol["etiq"];
         return null;
     }
@@ -963,6 +1020,7 @@ class Interpreter extends GrammarBaseVisitor
         $symbol["etiq"] = $this->getEtiquete($v);
 
         $scopeLevel = $this->getCurrentScopeLevelOf($name);
+        $this->symbolTable[$scopeLevel][$name]["val"] = $v;
         $this->symbolTable[$scopeLevel][$name]["etiq"] = $symbol["etiq"];
         return null;
 
@@ -1013,6 +1071,7 @@ class Interpreter extends GrammarBaseVisitor
         $symbol["etiq"] = $this->getEtiquete($v);
 
         $scopeLevel = $this->getCurrentScopeLevelOf($name);
+        $this->symbolTable[$scopeLevel][$name]["val"] = $v;
         $this->symbolTable[$scopeLevel][$name]["etiq"] = $symbol["etiq"];
 
         return null;
@@ -1070,6 +1129,7 @@ class Interpreter extends GrammarBaseVisitor
         $symbol["etiq"] = $this->getEtiquete($v);
 
         $scopeLevel = $this->getCurrentScopeLevelOf($name);
+        $this->symbolTable[$scopeLevel][$name]["val"] = $v;
         $this->symbolTable[$scopeLevel][$name]["etiq"] = $symbol["etiq"];
 
         return null;
@@ -1085,6 +1145,7 @@ class Interpreter extends GrammarBaseVisitor
         $type = $this->visit($context->type());
 
         if (count($ids) != count($vals)) {
+
             $this->addError(
                 "Cantidad de identificadores y valores no coincide",
                 $ids[0]->getSymbol()
@@ -1136,11 +1197,13 @@ class Interpreter extends GrammarBaseVisitor
                 "etiq" => $etiq
             ];
 
+
             $this->symbolTable[$scopeLevel][$name] = [
                 "ScopeName" => $this->scopes[$scopeLevel]["name"],
                 "n" => $this->syCount,
                 "type"      => $type,
                 "kind"      => $kind,
+                "val"       => $value,
                 "etiq"      => $etiq
             ];
         }
@@ -1196,6 +1259,7 @@ class Interpreter extends GrammarBaseVisitor
                 "n" => $this->syCount,
                 "type"      => $type,
                 "kind"      => $kind,
+                "val"       => $value,
                 "etiq"      => $etiq
             ];
         }
@@ -1207,7 +1271,6 @@ class Interpreter extends GrammarBaseVisitor
     {
         $ids  = $context->lid()->ID();
         $vals = $context->lval()->expr();
-
         if (count($ids) != count($vals)) {
             $this->addError(
                 "Cantidad de identificadores y valores no coincide",
@@ -1220,6 +1283,8 @@ class Interpreter extends GrammarBaseVisitor
         $currentScope = &$this->scopes[$scopeLevel]["symbols"];
 
         for ($i = 0; $i < count($ids); $i++) {
+
+
 
             $name  = $ids[$i]->getText();
             $value = $this->visit($vals[$i]);
@@ -1251,6 +1316,7 @@ class Interpreter extends GrammarBaseVisitor
                 "n" => $this->syCount,
                 "type"      => $type,
                 "kind"      => "var",
+                "val"       => $value,
                 "etiq"      => $etiq,
             ];
         }
@@ -1325,6 +1391,14 @@ class Interpreter extends GrammarBaseVisitor
         $leftDims = $context->larray(0)->NUM();
         $rightDims = $context->larray(1)->NUM();
 
+        if (!$this->declare($name, []) && $this->inLoop === 0) {
+            $this->addError(
+                "Identificador '$name' ya fue declarado en este scope",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
 
         if (count($leftDims) !== count($rightDims)) {
             $this->addError(
@@ -1395,6 +1469,7 @@ class Interpreter extends GrammarBaseVisitor
             "n" => $this->syCount,
             "type"      => "array " . $type1,
             "kind"      => "var",
+            "val"       => $value,
             "etiq"      => $this->arrayToString($value)
         ];
     }
@@ -1407,13 +1482,14 @@ class Interpreter extends GrammarBaseVisitor
 
 
 
-        if (isset($currentScope[$name]) && $this->inLoop === 0) {
+        if (!$this->declare($name, []) && $this->inLoop === 0) {
             $this->addError(
                 "Identificador '$name' ya fue declarado en este scope",
                 $context->ID()->getSymbol()
             );
             return null;
         }
+
 
 
         if ($this->declare($name, [])) {
@@ -1444,6 +1520,7 @@ class Interpreter extends GrammarBaseVisitor
             "n" => $this->syCount,
             "type"      => "array " . $type,
             "kind"      => "var",
+            "val"       => $value,
             "etiq"      => $this->arrayToString($value)
         ];
     }
@@ -1495,9 +1572,6 @@ class Interpreter extends GrammarBaseVisitor
                 return null;
             }
         }
-
-
-
         $result = $this->getArrayValue($values, $temp);
 
         return $result;
@@ -1560,12 +1634,457 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-
-
         $this->setArrayValue($symbol["val"], $temp, $val);
 
         $scopeLevel = $this->getCurrentScopeLevelOf($name);
+        $this->symbolTable[$scopeLevel][$name]["val"] = $symbol["val"];
         $this->symbolTable[$scopeLevel][$name]["etiq"] = $this->arrayToString($symbol["val"]);
+    }
+
+
+
+    //------------------------funciones------------------------------
+
+
+    public function visitReturnStmt(ReturnStmtContext $context)
+    {
+        $val = $context->expr();
+        if ($context->expr() !== null) {
+            $val = $this->visit($val);
+        }
+
+        throw new ReturnException($val);
+    }
+
+    public function visitFuncParamDec(FuncParamDecContext $context)
+    {
+        $ids  = $context->lid()->ID();
+        $type = $this->visit($context->type());
+        $value = $this->getDefaulValue($type);
+        for ($i = 0; $i < count($ids); $i++) {
+
+            $name = $ids[$i]->getText();
+
+            if (!$this->declare($name, []) && $this->inLoop === 0) {
+                $this->addError(
+                    "Identificador '$name' ya fue declarado en este scope",
+                    $ids[$i]->getSymbol()
+                );
+                return null;
+            }
+
+            if ($this->declare($name, [])) {
+                $this->syCount++;
+            }
+
+            $scopeLevel = count($this->scopes) - 1;
+            $currentScope = &$this->scopes[$scopeLevel]["symbols"];
+            $etiq = $this->getDefaultEtiquet($type);
+
+            $currentScope[$name] = [
+                "kind" => "var",
+                "type" => $type,
+                "val"  => $value,
+                "etiq" => $etiq
+            ];
+
+            $this->symbolTable[$scopeLevel][$name] = [
+                "ScopeName" => $this->scopes[$scopeLevel]["name"],
+                "n" => $this->syCount,
+                "type"      => $type,
+                "kind"      => "var",
+                "val"       => $value,
+                "etiq"      => $etiq
+            ];
+        }
+
+        return null;
+    }
+
+
+    public function visitFuncArrayDec(FuncArrayDecContext $context)
+    {
+        $name = $context->ID()->getText();
+        $type = $this->visit($context->type());
+        $leftDims = $context->larray()->NUM();
+
+        if (!$this->declare($name, [])) {
+            $this->addError(
+                "La funcion '$name' ya fue declarada",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        } else {
+            $this->syCount++;
+        }
+
+        $temp = [];
+        for ($i = 0; $i < count($leftDims); $i++) {
+            $temp[] = $leftDims[$i]->gettext(0);
+        }
+
+        $value =  $this->generateArray($temp, $type);
+
+
+        $scopeLevel = count($this->scopes) - 1;
+        $currentScope = &$this->scopes[$scopeLevel]["symbols"];
+        $currentScope[$name] = [
+            "kind" => "Func",
+            "type"  => $type,
+            "val"   => $value,
+            "dimen" => $temp,
+        ];
+
+
+        $this->symbolTable[$scopeLevel][$name] = [
+            "ScopeName" => $this->scopes[$scopeLevel]["name"],
+            "n" => $this->syCount,
+            "type"      => "array " . $type,
+            "kind"      => "var",
+            "val"       => $value,
+            "etiq"      => $this->arrayToString($value)
+        ];
+    }
+
+    public function visitMethod(MethodContext $context)
+    {
+        $scopeLevel = count($this->scopes) - 1;
+        if ($scopeLevel !== 0) {
+            $this->addError(
+                "No se pueden declarar funciones dentro del main",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+
+        $name = $context->ID()->getText();
+        if (!$this->declare($name . "function", [])) {
+            $this->addError(
+                "La funcion '$name' ya fue declarada",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        } else {
+            $this->syCount++;
+        }
+
+        $params = null;
+        if ($context->paramlist()) {
+            $params = $context->paramlist()->param();
+        }
+        $block = $context->block();
+
+        $scopeLevel = count($this->scopes) - 1;
+        $currentScope = &$this->scopes[0]["symbols"];
+
+        $currentScope[$name . "function"] = [
+            "kind" => "Func",
+            "type"  => null,
+            "val"   => $block,
+            "dimen" => null,
+            "params" => $params,
+        ];
+
+        $this->symbolTable[$scopeLevel][$name] = [
+            "ScopeName" => $this->scopes[$scopeLevel]["name"],
+            "n" => $this->syCount,
+            "type"      => 'Metodo',
+            "kind"      => "funcion",
+            "val"       => "sentencias",
+            "etiq"      => 'funciones'
+        ];
+    }
+
+    public function visitFunArrayType(FunArrayTypeContext $context)
+    {
+        $vals = $context->larray()->NUM();
+        $temp = [];
+        $type = $this->visit($context->type());
+        for ($i = 0; $i < count($vals); $i++) {
+            $temp[$i] = $vals[$i]->getText();
+        }
+        return [$temp, $type];
+    }
+
+
+    public function visitSimpleFunc(SimpleFuncContext $context)
+    {
+
+        $scopeLevel = count($this->scopes) - 1;
+        if ($scopeLevel !== 0) {
+            $this->addError(
+                "No se pueden declarar funciones dentro del main",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+        $name = $context->ID()->getText();
+        if (!$this->declare($name . "function", [])) {
+            $this->addError(
+                "La funcion '$name' ya fue declarada",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        } else {
+            $this->syCount++;
+        }
+
+        $params = null;
+        if ($context->paramlist()) {
+            $params = $context->paramlist()->param();
+        }
+        $block = $context->block();
+
+        $type = $this->visit($context->type());
+        $etiq = $type;
+        $dimen = null;
+
+        if (is_array($type)) {
+            $etiq = $type[1] . " " . $this->arrayToString($type[0]);
+            $dimen = $type[0];
+        }
+
+
+        $currentScope = &$this->scopes[0]["symbols"];
+
+        $currentScope[$name . "function"] = [
+            "kind" => "Func",
+            "type"  => "funcion",
+            "val"   => $block,
+            "dimen" => $dimen,
+            "params" => $params,
+        ];
+
+        $this->symbolTable[0][$name] = [
+            "ScopeName" => $this->scopes[0]["name"],
+            "n" => $this->syCount,
+            "type"      => $etiq,
+            "kind"      => "funcion",
+            "val"       => "sentencias",
+            "etiq"      => 'funciones'
+        ];
+    }
+
+    public function visitMultFunc(MultFuncContext $context)
+    {
+        $scopeLevel = count($this->scopes) - 1;
+        if ($scopeLevel !== 0) {
+            $this->addError(
+                "No se pueden declarar funciones dentro del main",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        $name = $context->ID()->getText();
+        if (!$this->declare($name . "function", [])) {
+            $this->addError(
+                "La funcion '$name' ya fue declarada",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        } else {
+            $this->syCount++;
+        }
+
+        $params = null;
+        if ($context->paramlist()) {
+            $params = $context->paramlist()->param();
+        }
+        $block = $context->block();
+
+        $types = $context->typelist()->type();
+        $type  = [];
+        $dimen = [];
+        for ($i = 0; $i < count($types); $i++) {
+            $t = $this->visit(($types[$i]));
+            if (is_array($t)) {
+                $t = $t[1] . " " . $this->arrayToString($t[0]);
+                $dimen[] = $t[0];
+            }
+            $type[$i] = $t;
+        }
+
+        if (count($dimen) === 0) {
+            $dimen = null;
+        }
+
+        $etiq = $this->arrayToString($type);
+
+        $currentScope = &$this->scopes[0]["symbols"];
+
+        $currentScope[$name . "function"] = [
+            "kind" => "Func",
+            "type"  => "funcion",
+            "val"   => $block,
+            "dimen" => $dimen,
+            "params" => $params,
+        ];
+
+        $this->symbolTable[0][$name] = [
+            "ScopeName" => $this->scopes[0]["name"],
+            "n" => $this->syCount,
+            "type"      => $etiq,
+            "kind"      => "Multifuncion",
+            "val"       => "sentencias",
+            "etiq"      => 'funciones'
+        ];
+    }
+
+    public function visitFunReturn(FunReturnContext $context)
+    {
+        $name = $context->ID()->getText();
+        $function = &$this->resolveRef($name . "function");
+        if ($function === null) {
+            $this->addError(
+                "La funcion '$name' No ha sido declarada",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+        $vals = null;
+        if ($context->lvalpar() !== null) {
+            $vals = $context->lvalpar()->par(); // viene de la llamada
+        }
+        $params = $function["params"];
+
+        if (($params === null && $vals !== null)) {
+            $this->addError(
+                "En la funcion '$name' no tiene parametros",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+        if (($params !== null && $vals === null)) {
+            $this->addError(
+                "En la funcion '$name' nececita parametros",
+                $context->ID()->getSymbol()
+            );
+            return null;
+        }
+
+
+        if ($params !== null && $vals !== null) {
+            if (count($params) !== count($vals)) {
+                $this->addError(
+                    "En la funcion '$name' no coinciden el numero de parametros",
+                    $context->ID()->getSymbol()
+                );
+                return null;
+            }
+
+            $temp = [];
+            for ($i = 0; $i < count($vals); $i++) {
+
+                $ref = $vals[$i]->ref;
+
+                if ($ref !== null) {
+                    $name = $vals[$i]->ID()->getText();
+                    $symbol = &$this->resolveRef($name);
+                    $temp[] = [
+                        "val" => &$symbol["val"],
+                        "ref" => true
+                    ];
+                } else {
+                    $temp[] = [
+                        "val" => $this->visit($vals[$i]),
+                        "ref" => false
+                    ];
+                }
+            }
+
+            $this->enterScope($name . "func");
+            $scopeLevel = count($this->scopes) - 1;
+            $currentScope = &$this->scopes[$scopeLevel]["symbols"];
+
+
+            for ($i = 0; $i < count($params); $i++) {
+                $this->visit($params[$i]);
+            }
+
+            $k = 0;
+
+            foreach ($currentScope as &$Symbol) {
+                if (!$this->validateType($Symbol["type"], $temp[$k]["val"])) {
+                    $this->addError(
+                        "Tipo incompatible en '$name'",
+                        $context->ID()->getSymbol()
+                    );
+                    $this->exitScope();
+                    return null;
+                }
+
+                if ($temp[$k]["ref"]) {
+                    $Symbol["val"] = &$temp[$k]["val"];
+                } else {
+                    $Symbol["val"] = $temp[$k]["val"];
+                }
+                $Symbol["etiq"] = $this->getEtiquete($Symbol["val"]);
+
+                $k++;
+            }
+
+            $k = 0;
+            foreach ($this->symbolTable[$scopeLevel] as &$symbol) {
+                $symbol["val"]  = $temp[$k]["val"];
+                $symbol["etiq"] = $this->getEtiquete($temp[$k]["val"]);
+                $k++;
+            }
+            try {
+                $this->visit($function["val"]);
+                foreach ($this->symbolTable as &$scope) {
+                    foreach ($scope as $name => &$symbol) {
+                        $var = &$this->resolveRef($name);
+                        if ($var !== null) {
+                            $val = $var["val"];
+                            $symbol["val"] = $val;
+                            $symbol["etiq"] = $this->getEtiquete($val);
+                        }
+                    }
+                }
+            } catch (ReturnException $e) {
+                return $e->value;
+            } finally {
+                $this->exitScope();
+            }
+        } else {
+            try {
+                $this->visit($function["val"]);
+                foreach ($this->symbolTable as &$scope) {
+                    foreach ($scope as $name => &$symbol) {
+                        $var = &$this->resolveRef($name);
+                        if ($var !== null) {
+                            $val = $var["val"];
+                            $symbol["val"] = $val;
+                            $symbol["etiq"] = $this->getEtiquete($val);
+                        }
+                    }
+                }
+            } catch (ReturnException $e) {
+                return $e->value;
+            } finally {
+                $this->exitScope();
+            }
+        }
+    }
+
+    public function visitPar(ParContext $context)
+    {
+        $name = $context->ID();
+
+        if ($name !== null) {
+            $name = $name->getText();
+            $symbol = $this->resolveRef($name);
+            return $symbol["val"];
+        }
+
+        if ($context->expr() !== null) {
+            return $this->visit($context->expr());
+        }
+
+        return null;
     }
 
 
@@ -1696,7 +2215,6 @@ class Interpreter extends GrammarBaseVisitor
         $name = $context->ID()->getText();
 
         $symbol = $this->resolve($name);
-
         if ($symbol === null) {
             $this->addError(
                 "La variable '$name' no ha sido declarada",

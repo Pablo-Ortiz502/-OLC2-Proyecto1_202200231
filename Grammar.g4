@@ -1,8 +1,18 @@
 grammar Grammar;
 
-s: program EOF;
+s: functiondec* program functiondec* EOF;
 
 program: FUNC MAIN '(' ')' block;
+
+functiondec:
+	FUNC ID '(' paramlist? ')' typelist block	# MultFunc
+	| FUNC ID '(' paramlist? ')' type block		# SimpleFunc
+	| FUNC ID '(' paramlist? ')' block			# method;
+paramlist: param (',' param)*;
+param:
+	ref = '*'? lid type			# FuncParamDec
+	| ref = '*'? ID larray type	# FuncArrayDec;
+typelist: '(' type (',' type)+ ')';
 
 stmts:
 	dec
@@ -13,7 +23,9 @@ stmts:
 	| reserved
 	| pri
 	| switchStmt
-	| arraydec;
+	| arraydec
+	| returnStmt
+	| funcCall;
 
 pri: PRINT '(' lval ')' # Println;
 
@@ -25,6 +37,7 @@ reserved:
 
 block: '{' stmts* '}';
 inst: BREAK | CONTINUE;
+returnStmt: RETURN expr;
 
 ifStmt: IF expr block (ELSE block)?;
 
@@ -34,9 +47,7 @@ forStmt:
 	| FOR block							# ShortFor;
 
 switchStmt: SWITCH expr '{' caseClause+ defaultClause? '}';
-
 caseClause: CASE lval ':' stmts;
-
 defaultClause: DEFAULT ':' stmts;
 
 dec:
@@ -47,10 +58,8 @@ dec:
 arraydec:
 	PVAR ID larray type '=' larray type arrayValue	# LongArrayDec
 	| PVAR ID larray type							# ShortArrayDec;
-
 larrayexp: '[' expr ']' ('[' expr ']')*;
 larray: '[' NUM ']' ('[' NUM ']')*;
-
 arrayValue: '{' arrayElements? '}';
 arrayElements: arrayElement (',' arrayElement)*;
 arrayElement: expr | arrayValue;
@@ -79,6 +88,7 @@ expr:
 vals:
 	NUM				# Num
 	| FLOAT			# Float
+	| funcCall		# fc
 	| ID larrayexp	# ArrayVal
 	| ID			# IdExpr
 	| BOOLE			# Boole
@@ -86,18 +96,23 @@ vals:
 	| RUNE			# Rune
 	| NIL			# Nil;
 
-lid: ID (',' ID)*;
+funcCall: ID '(' lvalpar? ')' # FunReturn;
 
+lid: ID (',' ID)*;
+par: ref = '*'? ID | expr;
+
+lvalpar: par (',' par)*;
 lval: expr (',' expr)*;
 
 pre: PVAR # Var | PCONST # Const;
 
 type:
-	PINT		# Pint
-	| PFLOAT	# Pfloat
-	| PBOOL		# Pboole
-	| PSTRING	# Pstring
-	| PRUNE		# Prune;
+	PINT			# Pint
+	| PFLOAT		# Pfloat
+	| PBOOL			# Pboole
+	| PSTRING		# Pstring
+	| PRUNE			# Prune
+	| larray type	# funArrayType;
 
 FUNC: 'func';
 MAIN: 'main';
@@ -134,3 +149,4 @@ ID: [_\p{L}] [_\p{L}\p{Nd}]*;
 LINE_COMMENT: '//' ~[\r\n]* -> skip;
 BLOCK_COMMENT: '/*' .*? '*/' -> skip;
 WS: [ \t\r\n]+ -> skip;
+ERROR_CHAR: .;

@@ -1,12 +1,16 @@
 func main() {
-var m [2][2]int32 = [2][2]int32{ 
-    {1, 2}, 
-    {3, 4}, 
+
+}
+
+func dividir(a int32, b int32) (int32, boole) { 
+    if b == 0 { 
+        return 0, false 
+    } 
+    return a / b, true 
 } 
- 
-for i := 0; i < 2; i++ { 
-    for j := 0; j < 2; j++ { 
-        fmt.Println(m[i][j]) 
+func main() { 
+    resultado, ok := dividir(10, 2) 
+    if ok { 
+        fmt.Println(resultado) 
     } 
 } 
-}
