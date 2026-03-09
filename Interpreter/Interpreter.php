@@ -60,7 +60,6 @@ use Context\SimpleFuncContext;
 use Context\SubSContext;
 use Context\SwitchStmtContext;
 
-use function PHPSTORM_META\type;
 
 class BreakException extends \Exception {}
 class ContinueException extends \Exception {}
@@ -151,7 +150,7 @@ class Interpreter extends GrammarBaseVisitor
         return match ($type) {
             "int32"   => is_int($value) || is_null($value),
             "float32" => is_float($value) || is_null($value),
-            "boole"   => is_bool($value) || is_null($value),
+            "bool"   => is_bool($value) || is_null($value),
             "string"  => is_string($value) || is_null($value),
             "rune"    => is_string($value) || is_null($value) || strlen($value) === 1,
             "array"   => is_array($value),
@@ -182,7 +181,7 @@ class Interpreter extends GrammarBaseVisitor
         }
 
         if (is_bool($value)) {
-            return "boole";
+            return "bool";
         }
 
         if (is_string($value) && strlen($value) === 1) {
@@ -235,7 +234,7 @@ class Interpreter extends GrammarBaseVisitor
         switch ($type) {
             case "string":
                 return "";
-            case "boole":
+            case "bool":
                 return false;
             case "float32":
                 return 0.0;
@@ -252,7 +251,7 @@ class Interpreter extends GrammarBaseVisitor
         switch ($type) {
             case "string":
                 return '" "';
-            case "boole":
+            case "bool":
                 return "false";
             case "float32":
                 return "0.0";
@@ -509,7 +508,7 @@ class Interpreter extends GrammarBaseVisitor
 
     public function visitPboole(PbooleContext $context)
     {
-        return "boole";
+        return "bool";
     }
 
     public function visitPstring(PstringContext $context)
@@ -663,7 +662,7 @@ class Interpreter extends GrammarBaseVisitor
     {
         $condition = $this->visit($context->expr());
 
-        if ($this->getTypeFromValue($condition) !== "boole") {
+        if ($this->getTypeFromValue($condition) !== "bool") {
             $this->addError(
                 "La condición del if debe ser booleana",
                 $context->expr()->getStart()

@@ -134,7 +134,7 @@ NOW: 'now';
 TYPEOF: 'typeOf';
 PINT: 'int32';
 PFLOAT: 'float32';
-PBOOL: 'boole';
+PBOOL: 'bool';
 PSTRING: 'string';
 PRUNE: 'rune';
 

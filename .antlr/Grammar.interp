@@ -51,7 +51,7 @@ null
 'typeOf'
 'int32'
 'float32'
-'boole'
+'bool'
 'string'
 'rune'
 null

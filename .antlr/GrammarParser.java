@@ -54,8 +54,7 @@ public class GrammarParser extends Parser {
 			"'&&'", "'||'", "'&'", "'func'", "'main'", "'var'", "'const'", "'if'", 
 			"'else'", "'default'", "'case'", "'switch'", "'for'", "'break'", "'continue'", 
 			"'return'", "'fmt.Println'", "'substr'", "'len'", "'now'", "'typeOf'", 
-			"'int32'", "'float32'", "'boole'", "'string'", "'rune'", null, null, 
-			"'nil'"
+			"'int32'", "'float32'", "'bool'", "'string'", "'rune'", null, null, "'nil'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
