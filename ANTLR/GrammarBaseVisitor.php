@@ -85,7 +85,7 @@ class GrammarBaseVisitor extends AbstractParseTreeVisitor implements GrammarVisi
 	 * The default implementation returns the result of calling
 	 * {@see self::visitChildren()} on `context`.
 	 */
-	public function visitFuncParamDec(Context\FuncParamDecContext $context)
+	public function visitFuncArrayDec(Context\FuncArrayDecContext $context)
 	{
 	    return $this->visitChildren($context);
 	}
@@ -96,7 +96,7 @@ class GrammarBaseVisitor extends AbstractParseTreeVisitor implements GrammarVisi
 	 * The default implementation returns the result of calling
 	 * {@see self::visitChildren()} on `context`.
 	 */
-	public function visitFuncArrayDec(Context\FuncArrayDecContext $context)
+	public function visitFuncParamDec(Context\FuncParamDecContext $context)
 	{
 	    return $this->visitChildren($context);
 	}

@@ -103,7 +103,7 @@ namespace {
 		    2, 108, 8, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 3, 2, 
 		    118, 8, 2, 1, 2, 1, 2, 3, 2, 122, 8, 2, 1, 3, 1, 3, 1, 3, 5, 3, 127, 
 		    8, 3, 10, 3, 12, 3, 130, 9, 3, 1, 4, 1, 4, 3, 4, 134, 8, 4, 1, 4, 
-		    1, 4, 1, 4, 1, 4, 3, 4, 140, 8, 4, 1, 4, 1, 4, 1, 4, 3, 4, 145, 8, 
+		    1, 4, 1, 4, 1, 4, 1, 4, 3, 4, 141, 8, 4, 1, 4, 1, 4, 3, 4, 145, 8, 
 		    4, 1, 5, 1, 5, 1, 5, 1, 5, 4, 5, 151, 8, 5, 11, 5, 12, 5, 152, 1, 
 		    5, 1, 5, 1, 6, 1, 6, 1, 6, 1, 6, 1, 6, 1, 6, 1, 6, 1, 6, 1, 6, 1, 
 		    6, 1, 6, 3, 6, 168, 8, 6, 1, 7, 1, 7, 1, 7, 1, 7, 1, 7, 1, 8, 1, 8, 
@@ -174,21 +174,21 @@ namespace {
 		    103, 1, 0, 0, 0, 121, 113, 1, 0, 0, 0, 122, 5, 1, 0, 0, 0, 123, 128, 
 		    3, 8, 4, 0, 124, 125, 5, 3, 0, 0, 125, 127, 3, 8, 4, 0, 126, 124, 
 		    1, 0, 0, 0, 127, 130, 1, 0, 0, 0, 128, 126, 1, 0, 0, 0, 128, 129, 
-		    1, 0, 0, 0, 129, 7, 1, 0, 0, 0, 130, 128, 1, 0, 0, 0, 131, 133, 3, 
-		    60, 30, 0, 132, 134, 5, 4, 0, 0, 133, 132, 1, 0, 0, 0, 133, 134, 1, 
-		    0, 0, 0, 134, 135, 1, 0, 0, 0, 135, 136, 3, 70, 35, 0, 136, 145, 1, 
-		    0, 0, 0, 137, 139, 5, 61, 0, 0, 138, 140, 5, 4, 0, 0, 139, 138, 1, 
-		    0, 0, 0, 139, 140, 1, 0, 0, 0, 140, 141, 1, 0, 0, 0, 141, 142, 3, 
-		    38, 19, 0, 142, 143, 3, 70, 35, 0, 143, 145, 1, 0, 0, 0, 144, 131, 
-		    1, 0, 0, 0, 144, 137, 1, 0, 0, 0, 145, 9, 1, 0, 0, 0, 146, 147, 5, 
+		    1, 0, 0, 0, 129, 7, 1, 0, 0, 0, 130, 128, 1, 0, 0, 0, 131, 133, 5, 
+		    61, 0, 0, 132, 134, 5, 4, 0, 0, 133, 132, 1, 0, 0, 0, 133, 134, 1, 
+		    0, 0, 0, 134, 135, 1, 0, 0, 0, 135, 136, 3, 38, 19, 0, 136, 137, 3, 
+		    70, 35, 0, 137, 145, 1, 0, 0, 0, 138, 140, 3, 60, 30, 0, 139, 141, 
+		    5, 4, 0, 0, 140, 139, 1, 0, 0, 0, 140, 141, 1, 0, 0, 0, 141, 142, 
+		    1, 0, 0, 0, 142, 143, 3, 70, 35, 0, 143, 145, 1, 0, 0, 0, 144, 131, 
+		    1, 0, 0, 0, 144, 138, 1, 0, 0, 0, 145, 9, 1, 0, 0, 0, 146, 147, 5, 
 		    1, 0, 0, 147, 150, 3, 70, 35, 0, 148, 149, 5, 3, 0, 0, 149, 151, 3, 
 		    70, 35, 0, 150, 148, 1, 0, 0, 0, 151, 152, 1, 0, 0, 0, 152, 150, 1, 
 		    0, 0, 0, 152, 153, 1, 0, 0, 0, 153, 154, 1, 0, 0, 0, 154, 155, 5, 
 		    2, 0, 0, 155, 11, 1, 0, 0, 0, 156, 168, 3, 34, 17, 0, 157, 168, 3, 
 		    48, 24, 0, 158, 168, 3, 24, 12, 0, 159, 168, 3, 26, 13, 0, 160, 168, 
 		    3, 20, 10, 0, 161, 168, 3, 16, 8, 0, 162, 168, 3, 14, 7, 0, 163, 168, 
-		    3, 28, 14, 0, 164, 168, 3, 46, 23, 0, 165, 168, 3, 22, 11, 0, 166, 
-		    168, 3, 58, 29, 0, 167, 156, 1, 0, 0, 0, 167, 157, 1, 0, 0, 0, 167, 
+		    3, 28, 14, 0, 164, 168, 3, 58, 29, 0, 165, 168, 3, 46, 23, 0, 166, 
+		    168, 3, 22, 11, 0, 167, 156, 1, 0, 0, 0, 167, 157, 1, 0, 0, 0, 167, 
 		    158, 1, 0, 0, 0, 167, 159, 1, 0, 0, 0, 167, 160, 1, 0, 0, 0, 167, 
 		    161, 1, 0, 0, 0, 167, 162, 1, 0, 0, 0, 167, 163, 1, 0, 0, 0, 167, 
 		    164, 1, 0, 0, 0, 167, 165, 1, 0, 0, 0, 167, 166, 1, 0, 0, 0, 168, 
@@ -305,7 +305,7 @@ namespace {
 		    35, 0, 452, 454, 1, 0, 0, 0, 453, 445, 1, 0, 0, 0, 453, 446, 1, 0, 
 		    0, 0, 453, 447, 1, 0, 0, 0, 453, 448, 1, 0, 0, 0, 453, 449, 1, 0, 
 		    0, 0, 453, 450, 1, 0, 0, 0, 454, 71, 1, 0, 0, 0, 38, 75, 82, 97, 107, 
-		    117, 121, 128, 133, 139, 144, 152, 167, 196, 202, 217, 233, 241, 244, 
+		    117, 121, 128, 133, 140, 144, 152, 167, 196, 202, 217, 233, 241, 244, 
 		    269, 280, 291, 296, 305, 310, 326, 349, 361, 378, 380, 397, 406, 415, 
 		    419, 423, 430, 438, 443, 453];
 		protected static $atn;
@@ -603,10 +603,10 @@ namespace {
 
 		        switch ($this->getInterpreter()->adaptivePredict($this->input, 9, $this->ctx)) {
 		        	case 1:
-		        	    $localContext = new Context\FuncParamDecContext($localContext);
+		        	    $localContext = new Context\FuncArrayDecContext($localContext);
 		        	    $this->enterOuterAlt($localContext, 1);
 		        	    $this->setState(131);
-		        	    $this->lid();
+		        	    $this->match(self::ID);
 		        	    $this->setState(133);
 		        	    $this->errorHandler->sync($this);
 		        	    $_la = $this->input->LA(1);
@@ -616,24 +616,24 @@ namespace {
 		        	    	$localContext->ref = $this->match(self::T__3);
 		        	    }
 		        	    $this->setState(135);
+		        	    $this->larray();
+		        	    $this->setState(136);
 		        	    $this->type();
 		        	break;
 
 		        	case 2:
-		        	    $localContext = new Context\FuncArrayDecContext($localContext);
+		        	    $localContext = new Context\FuncParamDecContext($localContext);
 		        	    $this->enterOuterAlt($localContext, 2);
-		        	    $this->setState(137);
-		        	    $this->match(self::ID);
-		        	    $this->setState(139);
+		        	    $this->setState(138);
+		        	    $this->lid();
+		        	    $this->setState(140);
 		        	    $this->errorHandler->sync($this);
 		        	    $_la = $this->input->LA(1);
 
 		        	    if ($_la === self::T__3) {
-		        	    	$this->setState(138);
+		        	    	$this->setState(139);
 		        	    	$localContext->ref = $this->match(self::T__3);
 		        	    }
-		        	    $this->setState(141);
-		        	    $this->larray();
 		        	    $this->setState(142);
 		        	    $this->type();
 		        	break;
@@ -755,19 +755,19 @@ namespace {
 		        	case 9:
 		        	    $this->enterOuterAlt($localContext, 9);
 		        	    $this->setState(164);
-		        	    $this->dec();
+		        	    $this->funcCall();
 		        	break;
 
 		        	case 10:
 		        	    $this->enterOuterAlt($localContext, 10);
 		        	    $this->setState(165);
-		        	    $this->returnStmt();
+		        	    $this->dec();
 		        	break;
 
 		        	case 11:
 		        	    $this->enterOuterAlt($localContext, 11);
 		        	    $this->setState(166);
-		        	    $this->funcCall();
+		        	    $this->returnStmt();
 		        	break;
 		        }
 		    } catch (RecognitionException $exception) {
@@ -2966,6 +2966,11 @@ namespace Context {
 	    	return $this->getTypedRuleContext(SwitchStmtContext::class, 0);
 	    }
 
+	    public function funcCall(): ?FuncCallContext
+	    {
+	    	return $this->getTypedRuleContext(FuncCallContext::class, 0);
+	    }
+
 	    public function dec(): ?DecContext
 	    {
 	    	return $this->getTypedRuleContext(DecContext::class, 0);
@@ -2974,11 +2979,6 @@ namespace Context {
 	    public function returnStmt(): ?ReturnStmtContext
 	    {
 	    	return $this->getTypedRuleContext(ReturnStmtContext::class, 0);
-	    }
-
-	    public function funcCall(): ?FuncCallContext
-	    {
-	    	return $this->getTypedRuleContext(FuncCallContext::class, 0);
 	    }
 
 		public function enterRule(ParseTreeListener $listener): void

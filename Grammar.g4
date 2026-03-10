@@ -10,8 +10,8 @@ functiondec:
 	| FUNC ID '(' paramlist? ')' block			# method;
 paramlist: param (',' param)*;
 param:
-	lid ref = '*'? type			# FuncParamDec
-	| ID ref = '*'? larray type	# FuncArrayDec;
+	ID ref = '*'? larray type	# FuncArrayDec
+	| lid ref = '*'? type		# FuncParamDec;
 typelist: '(' type (',' type)+ ')';
 
 stmts:
@@ -23,9 +23,9 @@ stmts:
 	| reserved
 	| pri
 	| switchStmt
+	| funcCall
 	| dec
-	| returnStmt
-	| funcCall;
+	| returnStmt;
 
 pri: PRINT '(' lval ')' # Println;
 

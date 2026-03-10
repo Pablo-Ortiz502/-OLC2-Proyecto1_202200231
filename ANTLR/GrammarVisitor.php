@@ -69,16 +69,6 @@ interface GrammarVisitor extends ParseTreeVisitor
 	public function visitParamlist(Context\ParamlistContext $context);
 
 	/**
-	 * Visit a parse tree produced by the `FuncParamDec` labeled alternative
-	 * in {@see GrammarParser::param()}.
-	 *
-	 * @param Context\FuncParamDecContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitFuncParamDec(Context\FuncParamDecContext $context);
-
-	/**
 	 * Visit a parse tree produced by the `FuncArrayDec` labeled alternative
 	 * in {@see GrammarParser::param()}.
 	 *
@@ -87,6 +77,16 @@ interface GrammarVisitor extends ParseTreeVisitor
 	 * @return mixed The visitor result.
 	 */
 	public function visitFuncArrayDec(Context\FuncArrayDecContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `FuncParamDec` labeled alternative
+	 * in {@see GrammarParser::param()}.
+	 *
+	 * @param Context\FuncParamDecContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitFuncParamDec(Context\FuncParamDecContext $context);
 
 	/**
 	 * Visit a parse tree produced by {@see GrammarParser::typelist()}.

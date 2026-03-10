@@ -99,19 +99,6 @@ class GrammarBaseListener implements GrammarListener
 	 *
 	 * The default implementation does nothing.
 	 */
-	public function enterFuncParamDec(Context\FuncParamDecContext $context): void {}
-
-	/**
-	 * {@inheritdoc}
-	 *
-	 * The default implementation does nothing.
-	 */
-	public function exitFuncParamDec(Context\FuncParamDecContext $context): void {}
-	/**
-	 * {@inheritdoc}
-	 *
-	 * The default implementation does nothing.
-	 */
 	public function enterFuncArrayDec(Context\FuncArrayDecContext $context): void {}
 
 	/**
@@ -120,6 +107,19 @@ class GrammarBaseListener implements GrammarListener
 	 * The default implementation does nothing.
 	 */
 	public function exitFuncArrayDec(Context\FuncArrayDecContext $context): void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function enterFuncParamDec(Context\FuncParamDecContext $context): void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitFuncParamDec(Context\FuncParamDecContext $context): void {}
 	/**
 	 * {@inheritdoc}
 	 *

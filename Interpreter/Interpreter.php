@@ -88,6 +88,7 @@ class Interpreter extends GrammarBaseVisitor
     private int $syCount = 0;
     private int $ifCount = 0;
     private int $forCount = 0;
+    private int $retCount = 0;
     private int $elseCount = 0;
 
     private function enterScope(string $scopeName): void
@@ -147,7 +148,7 @@ class Interpreter extends GrammarBaseVisitor
         return $null;
     }
 
-    private function validateType(string $type, $value): bool
+    private function validateType($type, $value): bool
     {
         return match ($type) {
             "int32"   => is_int($value) || is_null($value),
@@ -194,7 +195,7 @@ class Interpreter extends GrammarBaseVisitor
             return "string";
         }
 
-        if (is_array("array")) {
+        if (is_array($value)) {
             return "array";
         }
 
@@ -1154,8 +1155,17 @@ class Interpreter extends GrammarBaseVisitor
         $kind = $context->pre()->getText();
         $type = $this->visit($context->type());
 
-        if (count($ids) != count($vals)) {
+        $t = [];
+        for ($i = 0; $i < count($vals); $i++) {
+            $t[$i] = $this->visit($vals[$i]);
+            if ($this->retCount > 0) {
+                $this->retCount--;
+            }
+        }
 
+        $temp = $this->procesar($t);
+
+        if (count($ids) !== count($temp)) {
             $this->addError(
                 "Cantidad de identificadores y valores no coincide",
                 $ids[0]->getSymbol()
@@ -1166,7 +1176,9 @@ class Interpreter extends GrammarBaseVisitor
         for ($i = 0; $i < count($ids); $i++) {
 
             $name  = $ids[$i]->getText();
-            $value = $this->visit($vals[$i]);
+            $value = $temp[$i];
+            print_r($this->retCount);
+
 
             if ($kind === "const" && is_null($value)) {
                 $this->addError(
@@ -1224,6 +1236,7 @@ class Interpreter extends GrammarBaseVisitor
 
     public function visitDecl(DeclContext $context)
     {
+
         $ids  = $context->lid()->ID();
         $kind = $context->pre()->getText();
         $type = $this->visit($context->type());
@@ -1308,9 +1321,13 @@ class Interpreter extends GrammarBaseVisitor
         $t = [];
         for ($i = 0; $i < count($vals); $i++) {
             $t[$i] = $this->visit($vals[$i]);
+            if ($this->retCount > 0) {
+                $this->retCount--;
+            }
         }
 
         $temp = $this->procesar($t);
+
         if (count($ids) !== count($temp)) {
             $this->addError(
                 "Cantidad de identificadores y valores no coincide",
@@ -1324,6 +1341,7 @@ class Interpreter extends GrammarBaseVisitor
 
         for ($i = 0; $i < count($ids); $i++) {
 
+
             $dimen = null;
             if (is_array($t[0]) && isset($t[0]['dimen'])) {
                 $dimen = $t[0]['dimen'];
@@ -1331,6 +1349,8 @@ class Interpreter extends GrammarBaseVisitor
 
             $name  = $ids[$i]->getText();
             $value = $temp[$i];
+
+
             $type  = $this->getTypeFromValue($value);
             $etiq  = $this->getEtiquete($value);
 
@@ -1579,6 +1599,7 @@ class Interpreter extends GrammarBaseVisitor
 
     public function visitShortArrayDec(ShortArrayDecContext $context)
     {
+
         $name = $context->ID()->getText();
         $type = $this->visit($context->type());
         $leftDims = $context->larray()->NUM();
@@ -1762,6 +1783,7 @@ class Interpreter extends GrammarBaseVisitor
             ];
         }
 
+        $this->retCount++;
         throw new ReturnException($temp);
     }
 
@@ -1816,7 +1838,6 @@ class Interpreter extends GrammarBaseVisitor
         $name = $context->ID()->getText();
         $type = $this->visit($context->type());
         $leftDims = $context->larray()->NUM();
-
         if (!$this->declare($name, [])) {
             $this->addError(
                 "La funcion '$name' ya fue declarada",
@@ -2201,9 +2222,21 @@ class Interpreter extends GrammarBaseVisitor
 
     public function visitAndOr(AndOrContext $context)
     {
-        $left  = $this->visit($context->expr(0));
-        $right = $this->visit($context->expr(1));
         $op    = $context->op->getText();
+        $left  = $this->visit($context->expr(0));
+        if (is_array($left) && $this->retCount === 1) {
+            $left = $left[0]["val"];
+        }
+        if (!$left && $op === "&&") {
+            return false;
+        }
+        if ($left && $op === "||") {
+            return true;
+        }
+        $right = $this->visit($context->expr(1));
+        if (is_array($right) && $this->retCount === 1) {
+            $right = $right[0]["val"];
+        }
 
         if (!(is_bool($right) && is_bool($left))) {
             $this->addError(
@@ -2213,8 +2246,9 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        if (!$left && $op === "&&") {
-            return false;
+
+        if ($left && $op === "||") {
+            return true;
         }
 
         return match ($op) {
@@ -2228,6 +2262,13 @@ class Interpreter extends GrammarBaseVisitor
         $left  = $this->visit($context->expr(0));
         $right = $this->visit($context->expr(1));
         $op    = $context->op->getText();
+
+        if (is_array($right) && $this->retCount === 1) {
+            $right = $right[0]["val"];
+        }
+        if (is_array($left) && $this->retCount === 1) {
+            $left = $left[0]["val"];
+        }
 
         if (is_null($left) || is_null($right)) {
             $this->addError(
@@ -2270,6 +2311,12 @@ class Interpreter extends GrammarBaseVisitor
         $left  = $this->visit($context->expr(0));
         $right = $this->visit($context->expr(1));
         $op    = $context->op->getText();
+        if (is_array($right) && $this->retCount === 1) {
+            $right = $right[0]["val"];
+        }
+        if (is_array($left) && $this->retCount === 1) {
+            $left = $left[0]["val"];
+        }
 
         if (is_null($left) || is_null($right)) {
             $this->addError(
@@ -2346,6 +2393,14 @@ class Interpreter extends GrammarBaseVisitor
         $right = $this->visit($context->expr(1));
         $op    = $context->op->getText();
 
+
+        if (is_array($right) && $this->retCount === 1) {
+            $right = $right[0]["val"];
+        }
+        if (is_array($left) && $this->retCount === 1) {
+            $left = $left[0]["val"];
+        }
+
         if (is_null($left) || is_null($right)) {
             $this->addError(
                 "No se puede operar nil",
@@ -2396,6 +2451,14 @@ class Interpreter extends GrammarBaseVisitor
         $left  = $this->visit($context->expr(0));
         $right = $this->visit($context->expr(1));
         $op    = $context->op->getText();
+
+        if (is_array($right) && $this->retCount === 1) {
+            $right = $right[0]["val"];
+        }
+        if (is_array($left) && $this->retCount === 1) {
+            $left = $left[0]["val"];
+        }
+
 
         if (is_null($left) || is_null($right)) {
             $this->addError(
