@@ -55,7 +55,7 @@ arraydec:
 	| PVAR ID larray type			# ShortArrayDec;
 larrayexp: '[' expr ']' ('[' expr ']')*;
 larray: '[' NUM ']' ('[' NUM ']')*;
-arrayValue: '{' arrayElements? '}';
+arrayValue: '{' arrayElements? (',')? '}';
 arrayElements: arrayElement (',' arrayElement)*;
 arrayElement: expr | arrayValue;
 

@@ -61,7 +61,7 @@ use Context\ShortArrayDecContext;
 use Context\SimpleFuncContext;
 use Context\SubSContext;
 use Context\SwitchStmtContext;
-
+use LDAP\Result;
 
 class BreakException extends \Exception {}
 class ContinueException extends \Exception {}
@@ -88,6 +88,7 @@ class Interpreter extends GrammarBaseVisitor
     private int $syCount = 0;
     private int $ifCount = 0;
     private int $forCount = 0;
+    private int $funcCount = 0;
     private int $retCount = 0;
     private int $elseCount = 0;
 
@@ -378,7 +379,8 @@ class Interpreter extends GrammarBaseVisitor
         $parts = [];
 
         foreach ($arr as $value) {
-            $parts[] =  $this->arrayToString($value);
+            $type = $this->getTypeFromValue($value);
+            $parts[] =  $this->arrayToString($this->getDefaultEtiquet($type));
         }
 
         return '{' . implode(',', $parts) . '}';
@@ -553,6 +555,13 @@ class Interpreter extends GrammarBaseVisitor
             if (is_array($result)) {
                 $result = $this->arrayToString($result);
             }
+            if (is_bool($result)) {
+                if ($result) {
+                    $result = "true";
+                } else {
+                    $result = "false";
+                }
+            }
             $this->console .= " " . $result;
         }
         $this->console .= "\n";
@@ -567,6 +576,7 @@ class Interpreter extends GrammarBaseVisitor
 
     public function visitNowFunc(NowFuncContext $context): string
     {
+        date_default_timezone_set('America/Guatemala');
         return date("Y-m-d H:i:s");
     }
 
@@ -761,6 +771,7 @@ class Interpreter extends GrammarBaseVisitor
                 $this->visit($context->block());
                 $this->visit($context->incdec());
             } catch (ContinueException $e) {
+                $this->visit($context->incdec());
                 continue;
             } catch (BreakException $e) {
                 $this->exitScope();
@@ -1154,6 +1165,7 @@ class Interpreter extends GrammarBaseVisitor
         $vals = $context->lval()->expr();
         $kind = $context->pre()->getText();
         $type = $this->visit($context->type());
+        $line = $context->lid()->getStart()->getLine();
 
         $t = [];
         for ($i = 0; $i < count($vals); $i++) {
@@ -1176,6 +1188,7 @@ class Interpreter extends GrammarBaseVisitor
         for ($i = 0; $i < count($ids); $i++) {
 
             $name  = $ids[$i]->getText();
+            $column = $ids[$i]->getSymbol()->getCharPositionInLine();
             $value = $temp[$i];
             print_r($this->retCount);
 
@@ -1226,7 +1239,9 @@ class Interpreter extends GrammarBaseVisitor
                 "type"      => $type,
                 "kind"      => $kind,
                 "val"       => $value,
-                "etiq"      => $etiq
+                "etiq"      => $etiq,
+                "line"      => $line,
+                "column"    => $column
             ];
         }
 
@@ -1241,10 +1256,12 @@ class Interpreter extends GrammarBaseVisitor
         $kind = $context->pre()->getText();
         $type = $this->visit($context->type());
         $value = $this->getDefaulValue($type);
+        $line = $context->lid()->getStart()->getLine();
 
         for ($i = 0; $i < count($ids); $i++) {
 
             $name = $ids[$i]->getText();
+            $column =  $ids[$i]->getSymbol()->getCharPositionInLine();
 
             if ($kind === "const") {
                 $this->addError(
@@ -1283,7 +1300,9 @@ class Interpreter extends GrammarBaseVisitor
                 "type"      => $type,
                 "kind"      => $kind,
                 "val"       => $value,
-                "etiq"      => $etiq
+                "etiq"      => $etiq,
+                "line"   => $line,
+                "column" => $column,
             ];
         }
 
@@ -1313,11 +1332,13 @@ class Interpreter extends GrammarBaseVisitor
         return ["val" => $value, "type" => "array", "dimen" => $temp];
     }
 
+
+
     public function visitSdec(SdecContext $context)
     {
         $ids  = $context->lid()->ID();
         $vals = $context->lval()->expr();
-
+        $line = $context->lid()->getStart()->getLine();
         $t = [];
         for ($i = 0; $i < count($vals); $i++) {
             $t[$i] = $this->visit($vals[$i]);
@@ -1348,6 +1369,7 @@ class Interpreter extends GrammarBaseVisitor
             }
 
             $name  = $ids[$i]->getText();
+            $column = $ids[$i]->getSymbol()->getCharPositionInLine();
             $value = $temp[$i];
 
 
@@ -1382,6 +1404,8 @@ class Interpreter extends GrammarBaseVisitor
                     "kind"      => "var",
                     "val"       => $value,
                     "etiq"      => $etiq,
+                    "line"   => $line,
+                    "column" => $column,
                 ];
             } else {
                 $currentScope[$name] = [
@@ -1398,7 +1422,10 @@ class Interpreter extends GrammarBaseVisitor
                     "type"      => "array " . $type,
                     "kind"      => "var",
                     "val"       => $value,
-                    "etiq"      => $this->arrayToString($value)
+                    "etiq"      => $this->arrayToString($value),
+                    "line"   => $line,
+                    "column" => $column,
+
                 ];
                 $this->arrCount--;
             }
@@ -1516,6 +1543,8 @@ class Interpreter extends GrammarBaseVisitor
     public function visitLongArrayDec(LongArrayDecContext $context)
     {
         $name = $context->ID()->getText();
+        $line = $context->ID()->getSymbol()->getLine();
+        $column = $context->ID()->getSymbol()->getCharPositionInLine();
         if (!$this->declare($name, []) && $this->inLoop === 0) {
             $this->addError(
                 "Identificador '$name' ya fue declarado en este scope",
@@ -1535,10 +1564,6 @@ class Interpreter extends GrammarBaseVisitor
         }
 
         $leftDims = $context->larray()->NUM();
-
-
-
-
 
         if (count($leftDims) !== count($rightDims)) {
             $this->addError(
@@ -1593,7 +1618,9 @@ class Interpreter extends GrammarBaseVisitor
             "type"      => "array " . $type1,
             "kind"      => "var",
             "val"       => $value,
-            "etiq"      => $this->arrayToString($value)
+            "etiq"      => $this->arrayToString($value),
+            "line"   => $line,
+            "column" => $column
         ];
     }
 
@@ -1603,7 +1630,8 @@ class Interpreter extends GrammarBaseVisitor
         $name = $context->ID()->getText();
         $type = $this->visit($context->type());
         $leftDims = $context->larray()->NUM();
-
+        $line = $context->ID()->getSymbol()->getLine();
+        $column = $context->ID()->getSymbol()->getCharPositionInLine();
 
 
         if (!$this->declare($name, []) && $this->inLoop === 0) {
@@ -1645,7 +1673,9 @@ class Interpreter extends GrammarBaseVisitor
             "type"      => "array " . $type,
             "kind"      => "var",
             "val"       => $value,
-            "etiq"      => $this->arrayToString($value)
+            "etiq"      => $this->arrayToString($value),
+            "line"   => $line,
+            "column" => $column
         ];
     }
 
@@ -1773,6 +1803,14 @@ class Interpreter extends GrammarBaseVisitor
 
     public function visitReturnStmt(ReturnStmtContext $context)
     {
+        if ($this->funcCount < 1) {
+            $this->addError(
+                "Return fuera de funcion",
+                $context->RETURN()->getSymbol()
+            );
+            return null;
+        }
+
         $val = $context->lval()->expr();
         $temp = [];
         for ($i = 0; $i < count($val); $i++) {
@@ -1792,10 +1830,12 @@ class Interpreter extends GrammarBaseVisitor
         $ids  = $context->lid()->ID();
         $type = $this->visit($context->type());
         $value = $this->getDefaulValue($type);
+        $line = $context->lid()->getStart()->getLine();
+
         for ($i = 0; $i < count($ids); $i++) {
 
             $name = $ids[$i]->getText();
-
+            $column = $ids[$i]->getSymbol()->getCharPositionInLine();
             if (!$this->declare($name, []) && $this->inLoop === 0) {
                 $this->addError(
                     "Identificador '$name' ya fue declarado en este scope",
@@ -1825,7 +1865,9 @@ class Interpreter extends GrammarBaseVisitor
                 "type"      => $type,
                 "kind"      => "var",
                 "val"       => $value,
-                "etiq"      => $etiq
+                "etiq"      => $etiq,
+                "line"   => $line,
+                "column" => $column
             ];
         }
 
@@ -1838,6 +1880,9 @@ class Interpreter extends GrammarBaseVisitor
         $name = $context->ID()->getText();
         $type = $this->visit($context->type());
         $leftDims = $context->larray()->NUM();
+        $line = $context->ID()->getSymbol()->getLine();
+        $column = $context->ID()->getSymbol()->getCharPositionInLine();
+
         if (!$this->declare($name, [])) {
             $this->addError(
                 "La funcion '$name' ya fue declarada",
@@ -1872,7 +1917,9 @@ class Interpreter extends GrammarBaseVisitor
             "type"      => "array " . $type,
             "kind"      => "var",
             "val"       => $value,
-            "etiq"      => $this->arrayToString($value)
+            "etiq"      => $this->arrayToString($value),
+            "line"   => $line,
+            "column" => $column
         ];
     }
 
@@ -1889,6 +1936,8 @@ class Interpreter extends GrammarBaseVisitor
 
 
         $name = $context->ID()->getText();
+        $line = $context->ID()->getSymbol()->getLine();
+        $column = $context->ID()->getSymbol()->getCharPositionInLine();
         if (!$this->declare($name . "function", [])) {
             $this->addError(
                 "La funcion '$name' ya fue declarada",
@@ -1922,7 +1971,9 @@ class Interpreter extends GrammarBaseVisitor
             "type"      => 'Metodo',
             "kind"      => "funcion",
             "val"       => "sentencias",
-            "etiq"      => 'funciones'
+            "etiq"      => 'funciones',
+            "line"   => $line,
+            "column" => $column
         ];
     }
 
@@ -1950,6 +2001,8 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
         $name = $context->ID()->getText();
+        $line = $context->ID()->getSymbol()->getLine();
+        $column = $context->ID()->getSymbol()->getCharPositionInLine();
         if (!$this->declare($name . "function", [])) {
             $this->addError(
                 "La funcion '$name' ya fue declarada",
@@ -1992,7 +2045,9 @@ class Interpreter extends GrammarBaseVisitor
             "type"      => $etiq,
             "kind"      => "funcion",
             "val"       => "sentencias",
-            "etiq"      => 'funciones'
+            "etiq"      => 'funciones',
+            "line"   => $line,
+            "column" => $column
         ];
     }
 
@@ -2008,6 +2063,8 @@ class Interpreter extends GrammarBaseVisitor
         }
 
         $name = $context->ID()->getText();
+        $line = $context->ID()->getSymbol()->getLine();
+        $column = $context->ID()->getSymbol()->getCharPositionInLine();
         if (!$this->declare($name . "function", [])) {
             $this->addError(
                 "La funcion '$name' ya fue declarada",
@@ -2058,7 +2115,9 @@ class Interpreter extends GrammarBaseVisitor
             "type"      => $etiq,
             "kind"      => "Multifuncion",
             "val"       => "sentencias",
-            "etiq"      => 'funciones'
+            "etiq"      => 'funciones',
+            "line"   => $line,
+            "column" => $column
         ];
     }
 
@@ -2163,6 +2222,7 @@ class Interpreter extends GrammarBaseVisitor
                 $k++;
             }
             try {
+                $this->funcCount++;
                 $this->visit($function["val"]);
             } catch (ReturnException $e) {
                 return $e->value;
@@ -2177,10 +2237,12 @@ class Interpreter extends GrammarBaseVisitor
                         }
                     }
                 }
+                $this->funcCount--;
                 $this->exitScope();
             }
         } else {
             try {
+                $this->funcCount++;
                 $this->visit($function["val"]);
             } catch (ReturnException $e) {
                 return $e->value;
@@ -2195,6 +2257,7 @@ class Interpreter extends GrammarBaseVisitor
                         }
                     }
                 }
+                $this->funcCount--;
                 $this->exitScope();
             }
         }
