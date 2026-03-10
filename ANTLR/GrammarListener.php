@@ -288,42 +288,6 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitDefaultClause(Context\DefaultClauseContext $context): void;
 	/**
-	 * Enter a parse tree produced by the `Declv`
-	 * labeled alternative in {@see GrammarParser::dec()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterDeclv(Context\DeclvContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `Declv` labeled alternative
-	 * in {@see GrammarParser::dec()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitDeclv(Context\DeclvContext $context): void;
-	/**
-	 * Enter a parse tree produced by the `Decl`
-	 * labeled alternative in {@see GrammarParser::dec()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterDecl(Context\DeclContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `Decl` labeled alternative
-	 * in {@see GrammarParser::dec()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitDecl(Context\DeclContext $context): void;
-	/**
-	 * Enter a parse tree produced by the `Sdec`
-	 * labeled alternative in {@see GrammarParser::dec()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterSdec(Context\SdecContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `Sdec` labeled alternative
-	 * in {@see GrammarParser::dec()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitSdec(Context\SdecContext $context): void;
-	/**
 	 * Enter a parse tree produced by the `LongArrayDec`
 	 * labeled alternative in {@see GrammarParser::arraydec()}.
 	 * @param $context The parse tree.
@@ -397,6 +361,42 @@ interface GrammarListener extends ParseTreeListener {
 	 * @param $context The parse tree.
 	 */
 	public function exitArrayElement(Context\ArrayElementContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `Declv`
+	 * labeled alternative in {@see GrammarParser::dec()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterDeclv(Context\DeclvContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `Declv` labeled alternative
+	 * in {@see GrammarParser::dec()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitDeclv(Context\DeclvContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `Decl`
+	 * labeled alternative in {@see GrammarParser::dec()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterDecl(Context\DeclContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `Decl` labeled alternative
+	 * in {@see GrammarParser::dec()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitDecl(Context\DeclContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `Sdec`
+	 * labeled alternative in {@see GrammarParser::dec()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterSdec(Context\SdecContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `Sdec` labeled alternative
+	 * in {@see GrammarParser::dec()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitSdec(Context\SdecContext $context): void;
 	/**
 	 * Enter a parse tree produced by the `ArrayAsig`
 	 * labeled alternative in {@see GrammarParser::asg()}.
@@ -624,6 +624,18 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitFc(Context\FcContext $context): void;
 	/**
+	 * Enter a parse tree produced by the `NAV`
+	 * labeled alternative in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterNAV(Context\NAVContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `NAV` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitNAV(Context\NAVContext $context): void;
+	/**
 	 * Enter a parse tree produced by the `ArrayVal`
 	 * labeled alternative in {@see GrammarParser::vals()}.
 	 * @param $context The parse tree.
@@ -695,6 +707,18 @@ interface GrammarListener extends ParseTreeListener {
 	 * @param $context The parse tree.
 	 */
 	public function exitNil(Context\NilContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `NewArrayVal`
+	 * labeled alternative in {@see GrammarParser::arrVal()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterNewArrayVal(Context\NewArrayValContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `NewArrayVal` labeled alternative
+	 * in {@see GrammarParser::arrVal()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitNewArrayVal(Context\NewArrayValContext $context): void;
 	/**
 	 * Enter a parse tree produced by the `FunReturn`
 	 * labeled alternative in {@see GrammarParser::funcCall()}.

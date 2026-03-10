@@ -346,45 +346,6 @@ class GrammarBaseListener implements GrammarListener
 	 *
 	 * The default implementation does nothing.
 	 */
-	public function enterDeclv(Context\DeclvContext $context): void {}
-
-	/**
-	 * {@inheritdoc}
-	 *
-	 * The default implementation does nothing.
-	 */
-	public function exitDeclv(Context\DeclvContext $context): void {}
-	/**
-	 * {@inheritdoc}
-	 *
-	 * The default implementation does nothing.
-	 */
-	public function enterDecl(Context\DeclContext $context): void {}
-
-	/**
-	 * {@inheritdoc}
-	 *
-	 * The default implementation does nothing.
-	 */
-	public function exitDecl(Context\DeclContext $context): void {}
-	/**
-	 * {@inheritdoc}
-	 *
-	 * The default implementation does nothing.
-	 */
-	public function enterSdec(Context\SdecContext $context): void {}
-
-	/**
-	 * {@inheritdoc}
-	 *
-	 * The default implementation does nothing.
-	 */
-	public function exitSdec(Context\SdecContext $context): void {}
-	/**
-	 * {@inheritdoc}
-	 *
-	 * The default implementation does nothing.
-	 */
 	public function enterLongArrayDec(Context\LongArrayDecContext $context): void {}
 
 	/**
@@ -471,6 +432,45 @@ class GrammarBaseListener implements GrammarListener
 	 * The default implementation does nothing.
 	 */
 	public function exitArrayElement(Context\ArrayElementContext $context): void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function enterDeclv(Context\DeclvContext $context): void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitDeclv(Context\DeclvContext $context): void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function enterDecl(Context\DeclContext $context): void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitDecl(Context\DeclContext $context): void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function enterSdec(Context\SdecContext $context): void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitSdec(Context\SdecContext $context): void {}
 	/**
 	 * {@inheritdoc}
 	 *
@@ -723,6 +723,19 @@ class GrammarBaseListener implements GrammarListener
 	 *
 	 * The default implementation does nothing.
 	 */
+	public function enterNAV(Context\NAVContext $context): void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitNAV(Context\NAVContext $context): void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
 	public function enterArrayVal(Context\ArrayValContext $context): void {}
 
 	/**
@@ -796,6 +809,19 @@ class GrammarBaseListener implements GrammarListener
 	 * The default implementation does nothing.
 	 */
 	public function exitNil(Context\NilContext $context): void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function enterNewArrayVal(Context\NewArrayValContext $context): void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitNewArrayVal(Context\NewArrayValContext $context): void {}
 	/**
 	 * {@inheritdoc}
 	 *

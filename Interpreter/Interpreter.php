@@ -53,6 +53,8 @@ use Context\LenFuncContext;
 use Context\LongArrayDecContext;
 use Context\MethodContext;
 use Context\MultFuncContext;
+use Context\NAVContext;
+use Context\NewArrayValContext;
 use Context\ParContext;
 use Context\ReturnStmtContext;
 use Context\ShortArrayDecContext;
@@ -81,7 +83,7 @@ class Interpreter extends GrammarBaseVisitor
 
     private array $scopes = [];
     private int $inLoop = 0;
-    private int $inFunc = 0;
+    private int $arrCount = 0;
     private int $erCount = 0;
     private int $syCount = 0;
     private int $ifCount = 0;
@@ -152,8 +154,8 @@ class Interpreter extends GrammarBaseVisitor
             "float32" => is_float($value) || is_null($value),
             "bool"   => is_bool($value) || is_null($value),
             "string"  => is_string($value) || is_null($value),
-            "rune"    => is_string($value) || is_null($value) || strlen($value) === 1,
-            "array"   => is_array($value),
+            "rune"    => is_string($value) && strlen($value) === 1 || is_null($value),
+            "array"   => is_array($value) || is_null($value),
             default   => false
         };
     }
@@ -869,7 +871,16 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        $value = $this->visit($context->expr());
+        $t = $this->visit($context->expr());
+        $value =  $this->procesar($t);
+        if (count($value) !== 1) {
+            $this->addError(
+                "En la variable '$name' la asignacion solo acepta un valor",
+                $context->expr()->getStart()
+            );
+            return null;
+        }
+        $value = $value[0];
 
         if (!$this->validateType($symbol["type"], $value)) {
             $this->addError(
@@ -1266,11 +1277,41 @@ class Interpreter extends GrammarBaseVisitor
         return null;
     }
 
+    public function visitNAV(NAVContext $context)
+    {
+        $type = $this->visit($context->type());
+        $value = $this->visit($context->arrayValue());
+        $dims = $context->larray()->NUM();
+
+        if (!$this->validateArray($type, $value)) {
+            $this->addError(
+                "Error al guardar en array, tipos incomplatibles",
+                $context->arrayValue()->getStart()
+            );
+            return null;
+        }
+
+
+        $temp = [];
+        for ($i = 0; $i < count($dims); $i++) {
+            $temp[] = $dims[$i]->gettext(0);
+        }
+        $this->arrCount++;
+        return ["val" => $value, "type" => "array", "dimen" => $temp];
+    }
+
     public function visitSdec(SdecContext $context)
     {
         $ids  = $context->lid()->ID();
         $vals = $context->lval()->expr();
-        if (count($ids) != count($vals)) {
+
+        $t = [];
+        for ($i = 0; $i < count($vals); $i++) {
+            $t[$i] = $this->visit($vals[$i]);
+        }
+
+        $temp = $this->procesar($t);
+        if (count($ids) !== count($temp)) {
             $this->addError(
                 "Cantidad de identificadores y valores no coincide",
                 $ids[0]->getSymbol()
@@ -1283,10 +1324,13 @@ class Interpreter extends GrammarBaseVisitor
 
         for ($i = 0; $i < count($ids); $i++) {
 
-
+            $dimen = null;
+            if (is_array($t[0]) && isset($t[0]['dimen'])) {
+                $dimen = $t[0]['dimen'];
+            }
 
             $name  = $ids[$i]->getText();
-            $value = $this->visit($vals[$i]);
+            $value = $temp[$i];
             $type  = $this->getTypeFromValue($value);
             $etiq  = $this->getEtiquete($value);
 
@@ -1304,23 +1348,67 @@ class Interpreter extends GrammarBaseVisitor
                 $this->syCount++;
             }
 
-            $currentScope[$name] = [
-                "kind" => "var",
-                "type"  => $type,
-                "val"   => $value,
-                "etiq"  => $etiq
-            ];
-            $this->symbolTable[$scopeLevel][$name] = [
-                "ScopeName" => $this->scopes[$scopeLevel]["name"],
-                "n" => $this->syCount,
-                "type"      => $type,
-                "kind"      => "var",
-                "val"       => $value,
-                "etiq"      => $etiq,
-            ];
+            if ($this->arrCount === 0) {
+                $currentScope[$name] = [
+                    "kind" => "var",
+                    "type"  => $type,
+                    "val"   => $value,
+                    "etiq"  => $etiq
+                ];
+                $this->symbolTable[$scopeLevel][$name] = [
+                    "ScopeName" => $this->scopes[$scopeLevel]["name"],
+                    "n" => $this->syCount,
+                    "type"      => $type,
+                    "kind"      => "var",
+                    "val"       => $value,
+                    "etiq"      => $etiq,
+                ];
+            } else {
+                $currentScope[$name] = [
+                    "kind" => $type,
+                    "type"  => "array",
+                    "val"   => $value,
+                    "dimen" => $dimen,
+                    "etiq"  => "array"
+                ];
+
+                $this->symbolTable[$scopeLevel][$name] = [
+                    "ScopeName" => $this->scopes[$scopeLevel]["name"],
+                    "n" => $this->syCount,
+                    "type"      => "array " . $type,
+                    "kind"      => "var",
+                    "val"       => $value,
+                    "etiq"      => $this->arrayToString($value)
+                ];
+                $this->arrCount--;
+            }
         }
 
         return null;
+    }
+    function procesar($array, &$result = [])
+    {
+        foreach ($array as $item) {
+
+            if (is_array($item) && array_key_exists('val', $item)) {
+
+                if (isset($item['type']) && $item['type'] === 'array') {
+                    $result[] = $item['val'];
+                } else {
+                    if (is_array($item['val'])) {
+                        $this->procesar($item['val'], $result);
+                    } else {
+                        $result[] = $item['val'];
+                    }
+                }
+            } elseif (is_array($item)) {
+                $this->procesar($item, $result);
+            } else {
+                $result[] = $item;
+            }
+        }
+
+        return $result;
     }
 
 
@@ -1381,15 +1469,33 @@ class Interpreter extends GrammarBaseVisitor
         return null;
     }
 
+    public function visitNewArrayVal(NewArrayValContext $context)
+    {
+        $type = $this->visit($context->type());
+        $value = $this->visit($context->arrayValue());
+        $dims = $context->larray()->NUM();
+
+        if (!$this->validateArray($type, $value)) {
+            $this->addError(
+                "Error al guardar en array, tipos incomplatibles",
+                $context->arrayValue()->getStart()
+            );
+            return null;
+        }
+
+
+        $temp = [];
+        for ($i = 0; $i < count($dims); $i++) {
+            $temp[] = $dims[$i]->gettext(0);
+        }
+
+        return [$type, $value, $temp];
+    }
+
+
     public function visitLongArrayDec(LongArrayDecContext $context)
     {
         $name = $context->ID()->getText();
-        $type1 = $this->visit($context->type(0));
-        $type2 = $this->visit($context->type(1));
-        $value = $this->visit($context->arrayValue());
-        $leftDims = $context->larray(0)->NUM();
-        $rightDims = $context->larray(1)->NUM();
-
         if (!$this->declare($name, []) && $this->inLoop === 0) {
             $this->addError(
                 "Identificador '$name' ya fue declarado en este scope",
@@ -1398,47 +1504,45 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
+        $type1 = $this->visit($context->type());
+        $arrval = $this->visit($context->arrVal());
+        if ($arrval !== null) {
+            $type2 = $arrval[0];
+            $value = $arrval[1];
+            $rightDims = $arrval[2];
+        } else {
+            return null;
+        }
+
+        $leftDims = $context->larray()->NUM();
+
+
+
+
 
         if (count($leftDims) !== count($rightDims)) {
             $this->addError(
-                "Los valores Dimensionales no coinciden",
-                $rightDims = $context->larray(1)->getStart()
+                "La cantidad de Dimensiones no coinciden",
+                $context->larray()->getStart()
             );
             return null;
         }
 
-
-        if (!$this->validateArray($type1, $value)) {
-            $this->addError(
-                "Error al guardar en array, tipos incomplatibles",
-                $rightDims = $context->arrayValue()->getStart()
-            );
-            return null;
-        }
 
         for ($i = 0; $i < count($leftDims); $i++) {
-            if ($leftDims[$i]->getText() !== $rightDims[$i]->getText()) {
+            if ($leftDims[$i]->getText() !== $rightDims[$i]) {
                 $this->addError(
                     "Los valores Dimensionales no coinciden",
-                    $rightDims = $context->larray(1)->getStart()
+                    $context->larray()->getStart()
                 );
                 return null;
             }
         }
 
-
         if ($type1 !== $type2) {
             $this->addError(
-                "Los valores Dimensionales no coinciden",
-                $rightDims = $context->type(1)->getStart()
-            );
-            return null;
-        }
-
-        if (isset($currentScope[$name]) && $this->inLoop === 0) {
-            $this->addError(
-                "Identificador '$name' ya fue declarado en este scope",
-                $context->ID()->getSymbol()
+                "Los tipos de array no coinciden",
+                $context->type()->getStart()
             );
             return null;
         }
@@ -1456,8 +1560,8 @@ class Interpreter extends GrammarBaseVisitor
         $scopeLevel = count($this->scopes) - 1;
         $currentScope = &$this->scopes[$scopeLevel]["symbols"];
         $currentScope[$name] = [
-            "kind" => "var",
-            "type"  => $type1,
+            "kind" => $type1,
+            "type"  => "array",
             "val"   => $value,
             "dimen" => $temp,
             "etiq"  => "array"
@@ -1506,8 +1610,8 @@ class Interpreter extends GrammarBaseVisitor
         $scopeLevel = count($this->scopes) - 1;
         $currentScope = &$this->scopes[$scopeLevel]["symbols"];
         $currentScope[$name] = [
-            "kind" => "var",
-            "type"  => $type,
+            "kind" => $type,
+            "type"  => "array",
             "val"   => $value,
             "dimen" => $temp,
             "etiq"  => "array"
@@ -1581,7 +1685,6 @@ class Interpreter extends GrammarBaseVisitor
         $name = $context->ID()->getText();
         $dim = $context->larrayexp()->expr();
         $symbol = &$this->resolveRef($name);
-
         if ($symbol === null) {
             $this->addError(
                 "La variable '$name' no ha sido declarada",
@@ -1624,7 +1727,7 @@ class Interpreter extends GrammarBaseVisitor
 
 
         $val = $this->visit($context->expr());
-        $type = $symbol["type"];
+        $type = $symbol["kind"];
         if (!$this->validateType($type, $val)) {
             $this->addError(
                 "Asifnacion de tipos incompatibles en '$name'",
@@ -1642,17 +1745,24 @@ class Interpreter extends GrammarBaseVisitor
 
 
 
+
+
     //------------------------funciones------------------------------
 
 
     public function visitReturnStmt(ReturnStmtContext $context)
     {
-        $val = $context->expr();
-        if ($context->expr() !== null) {
-            $val = $this->visit($val);
+        $val = $context->lval()->expr();
+        $temp = [];
+        for ($i = 0; $i < count($val); $i++) {
+            $v = $this->visit($val[$i]);
+            $temp[$i] = [
+                "val" => $v,
+                "type" => $this->getTypeFromValue($v)
+            ];
         }
 
-        throw new ReturnException($val);
+        throw new ReturnException($temp);
     }
 
     public function visitFuncParamDec(FuncParamDecContext $context)
@@ -1728,8 +1838,8 @@ class Interpreter extends GrammarBaseVisitor
         $scopeLevel = count($this->scopes) - 1;
         $currentScope = &$this->scopes[$scopeLevel]["symbols"];
         $currentScope[$name] = [
-            "kind" => "Func",
-            "type"  => $type,
+            "kind" => $type,
+            "type"  => "array",
             "val"   => $value,
             "dimen" => $temp,
         ];

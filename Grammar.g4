@@ -15,7 +15,7 @@ param:
 typelist: '(' type (',' type)+ ')';
 
 stmts:
-	dec
+	arraydec
 	| asg
 	| ifStmt
 	| forStmt
@@ -23,7 +23,7 @@ stmts:
 	| reserved
 	| pri
 	| switchStmt
-	| arraydec
+	| dec
 	| returnStmt
 	| funcCall;
 
@@ -37,7 +37,7 @@ reserved:
 
 block: '{' stmts* '}';
 inst: BREAK | CONTINUE;
-returnStmt: RETURN expr;
+returnStmt: RETURN lval;
 
 ifStmt: IF expr block (ELSE block)?;
 
@@ -50,20 +50,19 @@ switchStmt: SWITCH expr '{' caseClause+ defaultClause? '}';
 caseClause: CASE lval ':' stmts;
 defaultClause: DEFAULT ':' stmts;
 
-dec:
-	pre lid type '=' lval	# Declv
-	| pre lid type			# Decl
-	| lid ':=' lval			# Sdec;
-
 arraydec:
-	PVAR ID larray type '=' larray type arrayValue	# LongArrayDec
-	| PVAR ID larray type							# ShortArrayDec;
+	PVAR ID larray type '=' arrVal	# LongArrayDec
+	| PVAR ID larray type			# ShortArrayDec;
 larrayexp: '[' expr ']' ('[' expr ']')*;
 larray: '[' NUM ']' ('[' NUM ']')*;
 arrayValue: '{' arrayElements? '}';
 arrayElements: arrayElement (',' arrayElement)*;
 arrayElement: expr | arrayValue;
 
+dec:
+	pre lid type '=' lval	# Declv
+	| pre lid type			# Decl
+	| lid ':=' lval			# Sdec;
 asg:
 	ID larrayexp '=' expr	# ArrayAsig
 	| ID '=' expr			# Asig
@@ -86,15 +85,18 @@ expr:
 	| reserved									# re;
 
 vals:
-	NUM				# Num
-	| FLOAT			# Float
-	| funcCall		# fc
-	| ID larrayexp	# ArrayVal
-	| ID			# IdExpr
-	| BOOLE			# Boole
-	| STRING		# String
-	| RUNE			# Rune
-	| NIL			# Nil;
+	NUM							# Num
+	| FLOAT						# Float
+	| funcCall					# fc
+	| larray type arrayValue	# NAV
+	| ID larrayexp				# ArrayVal
+	| ID						# IdExpr
+	| BOOLE						# Boole
+	| STRING					# String
+	| RUNE						# Rune
+	| NIL						# Nil;
+
+arrVal: larray type arrayValue # NewArrayVal;
 
 funcCall: ID '(' lvalpar? ')' # FunReturn;
 

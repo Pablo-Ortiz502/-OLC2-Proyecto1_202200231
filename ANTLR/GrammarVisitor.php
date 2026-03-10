@@ -250,36 +250,6 @@ interface GrammarVisitor extends ParseTreeVisitor
 	public function visitDefaultClause(Context\DefaultClauseContext $context);
 
 	/**
-	 * Visit a parse tree produced by the `Declv` labeled alternative
-	 * in {@see GrammarParser::dec()}.
-	 *
-	 * @param Context\DeclvContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitDeclv(Context\DeclvContext $context);
-
-	/**
-	 * Visit a parse tree produced by the `Decl` labeled alternative
-	 * in {@see GrammarParser::dec()}.
-	 *
-	 * @param Context\DeclContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitDecl(Context\DeclContext $context);
-
-	/**
-	 * Visit a parse tree produced by the `Sdec` labeled alternative
-	 * in {@see GrammarParser::dec()}.
-	 *
-	 * @param Context\SdecContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitSdec(Context\SdecContext $context);
-
-	/**
 	 * Visit a parse tree produced by the `LongArrayDec` labeled alternative
 	 * in {@see GrammarParser::arraydec()}.
 	 *
@@ -343,6 +313,36 @@ interface GrammarVisitor extends ParseTreeVisitor
 	 * @return mixed The visitor result.
 	 */
 	public function visitArrayElement(Context\ArrayElementContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Declv` labeled alternative
+	 * in {@see GrammarParser::dec()}.
+	 *
+	 * @param Context\DeclvContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitDeclv(Context\DeclvContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Decl` labeled alternative
+	 * in {@see GrammarParser::dec()}.
+	 *
+	 * @param Context\DeclContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitDecl(Context\DeclContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `Sdec` labeled alternative
+	 * in {@see GrammarParser::dec()}.
+	 *
+	 * @param Context\SdecContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitSdec(Context\SdecContext $context);
 
 	/**
 	 * Visit a parse tree produced by the `ArrayAsig` labeled alternative
@@ -534,6 +534,16 @@ interface GrammarVisitor extends ParseTreeVisitor
 	public function visitFc(Context\FcContext $context);
 
 	/**
+	 * Visit a parse tree produced by the `NAV` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 *
+	 * @param Context\NAVContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitNAV(Context\NAVContext $context);
+
+	/**
 	 * Visit a parse tree produced by the `ArrayVal` labeled alternative
 	 * in {@see GrammarParser::vals()}.
 	 *
@@ -592,6 +602,16 @@ interface GrammarVisitor extends ParseTreeVisitor
 	 * @return mixed The visitor result.
 	 */
 	public function visitNil(Context\NilContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `NewArrayVal` labeled alternative
+	 * in {@see GrammarParser::arrVal()}.
+	 *
+	 * @param Context\NewArrayValContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitNewArrayVal(Context\NewArrayValContext $context);
 
 	/**
 	 * Visit a parse tree produced by the `FunReturn` labeled alternative

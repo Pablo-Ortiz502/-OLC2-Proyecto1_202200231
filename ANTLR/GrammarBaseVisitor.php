@@ -294,39 +294,6 @@ class GrammarBaseVisitor extends AbstractParseTreeVisitor implements GrammarVisi
 	 * The default implementation returns the result of calling
 	 * {@see self::visitChildren()} on `context`.
 	 */
-	public function visitDeclv(Context\DeclvContext $context)
-	{
-	    return $this->visitChildren($context);
-	}
-
-	/**
-	 * {@inheritdoc}
-	 *
-	 * The default implementation returns the result of calling
-	 * {@see self::visitChildren()} on `context`.
-	 */
-	public function visitDecl(Context\DeclContext $context)
-	{
-	    return $this->visitChildren($context);
-	}
-
-	/**
-	 * {@inheritdoc}
-	 *
-	 * The default implementation returns the result of calling
-	 * {@see self::visitChildren()} on `context`.
-	 */
-	public function visitSdec(Context\SdecContext $context)
-	{
-	    return $this->visitChildren($context);
-	}
-
-	/**
-	 * {@inheritdoc}
-	 *
-	 * The default implementation returns the result of calling
-	 * {@see self::visitChildren()} on `context`.
-	 */
 	public function visitLongArrayDec(Context\LongArrayDecContext $context)
 	{
 	    return $this->visitChildren($context);
@@ -394,6 +361,39 @@ class GrammarBaseVisitor extends AbstractParseTreeVisitor implements GrammarVisi
 	 * {@see self::visitChildren()} on `context`.
 	 */
 	public function visitArrayElement(Context\ArrayElementContext $context)
+	{
+	    return $this->visitChildren($context);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation returns the result of calling
+	 * {@see self::visitChildren()} on `context`.
+	 */
+	public function visitDeclv(Context\DeclvContext $context)
+	{
+	    return $this->visitChildren($context);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation returns the result of calling
+	 * {@see self::visitChildren()} on `context`.
+	 */
+	public function visitDecl(Context\DeclContext $context)
+	{
+	    return $this->visitChildren($context);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation returns the result of calling
+	 * {@see self::visitChildren()} on `context`.
+	 */
+	public function visitSdec(Context\SdecContext $context)
 	{
 	    return $this->visitChildren($context);
 	}
@@ -613,6 +613,17 @@ class GrammarBaseVisitor extends AbstractParseTreeVisitor implements GrammarVisi
 	 * The default implementation returns the result of calling
 	 * {@see self::visitChildren()} on `context`.
 	 */
+	public function visitNAV(Context\NAVContext $context)
+	{
+	    return $this->visitChildren($context);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation returns the result of calling
+	 * {@see self::visitChildren()} on `context`.
+	 */
 	public function visitArrayVal(Context\ArrayValContext $context)
 	{
 	    return $this->visitChildren($context);
@@ -669,6 +680,17 @@ class GrammarBaseVisitor extends AbstractParseTreeVisitor implements GrammarVisi
 	 * {@see self::visitChildren()} on `context`.
 	 */
 	public function visitNil(Context\NilContext $context)
+	{
+	    return $this->visitChildren($context);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation returns the result of calling
+	 * {@see self::visitChildren()} on `context`.
+	 */
+	public function visitNewArrayVal(Context\NewArrayValContext $context)
 	{
 	    return $this->visitChildren($context);
 	}
