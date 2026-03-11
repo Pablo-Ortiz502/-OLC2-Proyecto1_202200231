@@ -720,15 +720,15 @@
             rows.forEach(r => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-      <td>${r.n ?? ''}</td>
-      <td><strong>${r.name}</strong></td>
-      <td><span class="badge badge-blue">${r.ScopeName ?? ''}</span></td>
-      <td><code>${r.type ?? ''}</code></td>
-      <td><span class="badge badge-green">${r.kind ?? ''}</span></td>
-      <td>${r.val ?? ''}</td>
-      <td>${r.line ?? ''}</td>
-      <td>${r.column ?? ''}</td>
-    `;
+                <td>${r.n ?? ''}</td>
+                <td><strong>${r.name}</strong></td>
+                <td><span class="badge badge-blue">${r.ScopeName ?? ''}</span></td>
+                <td><code>${r.type ?? ''}</code></td>
+                <td><span class="badge badge-green">${r.kind ?? ''}</span></td>
+                <td>${r.val ?? ''}</td>
+                <td>${r.line ?? ''}</td>
+                <td>${r.column ?? ''}</td>
+                `;
                 body.appendChild(tr);
             });
         }
@@ -760,12 +760,12 @@
                 const badge = colorMap[e.type] || 'badge-red';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-      <td>${e.n}</td>
-      <td>${e.desc}</td>
-      <td><span class="badge ${badge}">${e.type}</span></td>
-      <td>${e.line}</td>
-      <td>${e.column}</td>
-    `;
+                <td>${e.n}</td>
+                <td>${e.desc}</td>
+                <td><span class="badge ${badge}">${e.type}</span></td>
+                <td>${e.line}</td>
+                <td>${e.column}</td>
+                `;
                 body.appendChild(tr);
             });
         }

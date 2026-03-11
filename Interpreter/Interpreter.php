@@ -100,6 +100,20 @@ class Interpreter extends GrammarBaseVisitor
         ];
     }
 
+    private function reasign(&$arr)
+    {
+        $contador = 1;
+
+        foreach ($arr as &$scope) {
+            foreach ($scope as &$var) {
+                if (is_array($var) && isset($var['n'])) {
+                    $var['n'] = $contador;
+                    $contador++;
+                }
+            }
+        }
+    }
+
     private function getCurrentScopeLevelOf(string $name): ?int
     {
         for ($i = count($this->scopes) - 1; $i >= 0; $i--) {
@@ -452,6 +466,8 @@ class Interpreter extends GrammarBaseVisitor
         }
 
         $this->visit($context->program());
+
+        $this->reasign($this->symbolTable);
 
 
         return null;
