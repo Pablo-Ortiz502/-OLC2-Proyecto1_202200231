@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Editor de Código</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <style>
         *,
         *::before,
@@ -40,6 +42,7 @@
             min-height: 100vh;
             padding: 0;
         }
+
 
         .topbar {
             background: var(--surface);
@@ -415,7 +418,7 @@
 
 <body>
 
-
+    <!-- TOP BAR -->
     <div class="topbar">
         <span class="topbar-title">Interpreter</span>
 
@@ -441,12 +444,13 @@
         </button>
     </div>
 
+
     <div class="main-layout">
 
 
         <div style="display:flex;flex-direction:column;gap:20px;">
 
-
+            <!-- EDITOR -->
             <div class="panel">
                 <div class="panel-header">Editor de Código</div>
                 <div class="editor-wrap">
@@ -460,6 +464,7 @@
                 </div>
             </div>
 
+            <!-- CONSOLE -->
             <div class="panel">
                 <div class="panel-header">Consola de Salida</div>
                 <div class="console-box empty" id="consola">Esperando ejecución...</div>
@@ -539,10 +544,12 @@
 
     </div>
 
+
     <div id="toast"></div>
 
     <script>
         let lastResponse = null;
+
 
         function actualizarLineas() {
             const ta = document.getElementById('codeEditor');
@@ -570,7 +577,6 @@
                 actualizarLineas();
             }
         }
-
 
         actualizarLineas();
 
@@ -615,7 +621,6 @@
 
         function limpiarConsola() {
             const c = document.getElementById('consola');
-            const t = document.getElementById()
             c.textContent = 'Esperando ejecución...';
             c.className = 'console-box empty';
         }
@@ -637,19 +642,34 @@
             consola.textContent = 'Ejecutando...';
 
             try {
+                const payload = JSON.stringify({
+                    input: code
+                });
+
                 const res = await fetch('http://localhost:8000/interpreter', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
-                    body: JSON.stringify({
-                        input: code
-                    })
+                    body: payload
                 });
 
                 if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
 
-                const data = await res.json();
+                const rawText = await res.text();
+
+                let data;
+                try {
+                    data = JSON.parse(rawText);
+                } catch (e) {
+                    consola.textContent = rawText || '(Sin salida)';
+                    consola.className = 'console-box';
+                    renderizarTablaSimbolos({});
+                    renderizarTablaErrores([]);
+                    return;
+                }
+
                 lastResponse = data;
 
 
@@ -723,7 +743,7 @@
             if (!errorTable.length) {
                 table.style.display = 'none';
                 empty.style.display = '';
-                empty.textContent = '✅ Sin errores reportados.';
+                empty.textContent = 'Sin errores reportados.';
                 return;
             }
 
@@ -757,14 +777,85 @@
         }
 
         function descargarErrores() {
-            if (!lastResponse || !lastResponse.errorTable) {
+            if (!lastResponse) {
                 mostrarToast('Ejecuta el código primero.');
                 return;
             }
-            const lines = lastResponse.errorTable.map(e =>
-                `#${e.n} | ${e.type} | Línea ${e.line}, Col ${e.column} | ${e.desc}`
-            );
-            descargarTxt(lines.join('\n'), 'errores.txt');
+            const errores = lastResponse.errorTable || [];
+            if (errores.length === 0) {
+                mostrarToast('No hay errores para exportar.');
+                return;
+            }
+
+            const {
+                jsPDF
+            } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'landscape'
+            });
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.setTextColor(220, 38, 38);
+            doc.text('Reporte de Errores', 14, 16);
+
+            doc.setFontSize(9);
+            doc.setTextColor(100, 116, 139);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Generado: ${new Date().toLocaleString()}`, 14, 23);
+
+            doc.autoTable({
+                startY: 28,
+                head: [
+                    ['#', 'Descripción', 'Tipo', 'Línea', 'Columna']
+                ],
+                body: errores.map(e => [e.n, e.desc, e.type, e.line, e.column]),
+                headStyles: {
+                    fillColor: [220, 38, 38],
+                    textColor: 255,
+                    fontStyle: 'bold',
+                    fontSize: 9
+                },
+                bodyStyles: {
+                    fontSize: 9,
+                    textColor: [30, 41, 59]
+                },
+                alternateRowStyles: {
+                    fillColor: [254, 242, 242]
+                },
+                columnStyles: {
+                    0: {
+                        cellWidth: 12,
+                        halign: 'center'
+                    },
+                    1: {
+                        cellWidth: 'auto'
+                    },
+                    2: {
+                        cellWidth: 30,
+                        halign: 'center'
+                    },
+                    3: {
+                        cellWidth: 18,
+                        halign: 'center'
+                    },
+                    4: {
+                        cellWidth: 18,
+                        halign: 'center'
+                    }
+                },
+                margin: {
+                    left: 14,
+                    right: 14
+                },
+                styles: {
+                    lineColor: [226, 232, 240],
+                    lineWidth: 0.3
+                }
+            });
+
+            doc.save('errores.pdf');
+            mostrarToast('PDF de errores generado.');
         }
 
         function descargarTablaSimbolos() {
@@ -772,16 +863,99 @@
                 mostrarToast('Ejecuta el código primero.');
                 return;
             }
+
             const rows = [];
-            rows.push('N\tNombre\tScope\tTipo\tKind\tValor\tLínea\tColumna');
             for (const scopeId in lastResponse.symbolTable) {
                 const scope = lastResponse.symbolTable[scopeId];
                 for (const name in scope) {
                     const r = scope[name];
-                    rows.push(`${r.n}\t${name}\t${r.ScopeName}\t${r.type}\t${r.kind}\t${r.val}\t${r.line}\t${r.column}`);
+                    rows.push([r.n ?? '', name, r.ScopeName ?? '', r.type ?? '', r.kind ?? '', r.val ?? '', r.line ?? '', r.column ?? '']);
                 }
             }
-            descargarTxt(rows.join('\n'), 'tabla_simbolos.txt');
+
+            if (rows.length === 0) {
+                mostrarToast('No hay símbolos para exportar.');
+                return;
+            }
+
+            const {
+                jsPDF
+            } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'landscape'
+            });
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.setTextColor(37, 99, 235);
+            doc.text('Tabla de Símbolos', 14, 16);
+
+            doc.setFontSize(9);
+            doc.setTextColor(100, 116, 139);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Generado: ${new Date().toLocaleString()}`, 14, 23);
+
+            doc.autoTable({
+                startY: 28,
+                head: [
+                    ['#', 'Nombre', 'Scope', 'Tipo', 'Kind', 'Valor', 'Línea', 'Col']
+                ],
+                body: rows,
+                headStyles: {
+                    fillColor: [37, 99, 235],
+                    textColor: 255,
+                    fontStyle: 'bold',
+                    fontSize: 9
+                },
+                bodyStyles: {
+                    fontSize: 9,
+                    textColor: [30, 41, 59]
+                },
+                alternateRowStyles: {
+                    fillColor: [239, 246, 255]
+                },
+                columnStyles: {
+                    0: {
+                        cellWidth: 12,
+                        halign: 'center'
+                    },
+                    1: {
+                        cellWidth: 35,
+                        fontStyle: 'bold'
+                    },
+                    2: {
+                        cellWidth: 30
+                    },
+                    3: {
+                        cellWidth: 30
+                    },
+                    4: {
+                        cellWidth: 25
+                    },
+                    5: {
+                        cellWidth: 25
+                    },
+                    6: {
+                        cellWidth: 18,
+                        halign: 'center'
+                    },
+                    7: {
+                        cellWidth: 14,
+                        halign: 'center'
+                    }
+                },
+                margin: {
+                    left: 14,
+                    right: 14
+                },
+                styles: {
+                    lineColor: [226, 232, 240],
+                    lineWidth: 0.3
+                }
+            });
+
+            doc.save('tabla_simbolos.pdf');
+            mostrarToast('PDF de tabla de símbolos generado.');
         }
 
         function descargarTxt(content, filename) {

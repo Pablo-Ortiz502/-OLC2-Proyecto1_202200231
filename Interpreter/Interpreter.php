@@ -124,6 +124,10 @@ class Interpreter extends GrammarBaseVisitor
         }
 
         $currentScope[$name] = $info;
+        if ($this->inLoop == 0) {
+            $this->syCount++;
+        }
+
         return true;
     }
 
@@ -725,7 +729,9 @@ class Interpreter extends GrammarBaseVisitor
 
     public function visitLongFor(LongForContext $context)
     {
-        $this->forCount++;
+        if ($this->inLoop == 0) {
+            $this->forCount++;
+        }
         $this->enterScope("For" . $this->forCount);
         $this->visit($context->dec());;
         $firstId = "";
@@ -786,7 +792,9 @@ class Interpreter extends GrammarBaseVisitor
 
     public function visitMidFor(MidForContext $context)
     {
-        $this->forCount++;
+        if ($this->inLoop == 0) {
+            $this->forCount++;
+        }
         $this->enterScope("For" . $this->forCount);
         $this->inLoop++;
 
@@ -827,7 +835,9 @@ class Interpreter extends GrammarBaseVisitor
 
     public function visitShortFor(ShortForContext $context)
     {
-        $this->forCount++;
+        if ($this->inLoop == 0) {
+            $this->forCount++;
+        }
         $this->enterScope("For" . $this->forCount);
         $this->inLoop++;
         $safeCount = 0;
@@ -1218,10 +1228,6 @@ class Interpreter extends GrammarBaseVisitor
                 continue;
             }
 
-            if ($this->declare($name, [])) {
-                $this->syCount++;
-            }
-
             $scopeLevel = count($this->scopes) - 1;
             $currentScope = &$this->scopes[$scopeLevel]["symbols"];
             $etiq = $this->getEtiquete($value);
@@ -1279,9 +1285,6 @@ class Interpreter extends GrammarBaseVisitor
                 continue;
             }
 
-            if ($this->declare($name, [])) {
-                $this->syCount++;
-            }
 
             $scopeLevel = count($this->scopes) - 1;
             $currentScope = &$this->scopes[$scopeLevel]["symbols"];
@@ -1387,7 +1390,9 @@ class Interpreter extends GrammarBaseVisitor
 
 
             if ($this->declare($name, [])) {
-                $this->syCount++;
+                if ($this->inLoop == 0) {
+                    $this->syCount++;
+                }
             }
 
             if ($this->arrCount === 0) {
@@ -1592,10 +1597,6 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
-        if ($this->declare($name, [])) {
-            $this->syCount++;
-        }
-
         $temp = [];
         for ($i = 0; $i < count($leftDims); $i++) {
             $temp[] = $leftDims[$i]->gettext(0);
@@ -1644,9 +1645,7 @@ class Interpreter extends GrammarBaseVisitor
 
 
 
-        if ($this->declare($name, [])) {
-            $this->syCount++;
-        }
+
 
         $temp = [];
         for ($i = 0; $i < count($leftDims); $i++) {
@@ -1844,10 +1843,6 @@ class Interpreter extends GrammarBaseVisitor
                 return null;
             }
 
-            if ($this->declare($name, [])) {
-                $this->syCount++;
-            }
-
             $scopeLevel = count($this->scopes) - 1;
             $currentScope = &$this->scopes[$scopeLevel]["symbols"];
             $etiq = $this->getDefaultEtiquet($type);
@@ -1889,8 +1884,6 @@ class Interpreter extends GrammarBaseVisitor
                 $context->ID()->getSymbol()
             );
             return null;
-        } else {
-            $this->syCount++;
         }
 
         $temp = [];
@@ -1944,8 +1937,6 @@ class Interpreter extends GrammarBaseVisitor
                 $context->ID()->getSymbol()
             );
             return null;
-        } else {
-            $this->syCount++;
         }
 
         $params = null;
@@ -1969,7 +1960,7 @@ class Interpreter extends GrammarBaseVisitor
             "ScopeName" => $this->scopes[$scopeLevel]["name"],
             "n" => $this->syCount,
             "type"      => 'Metodo',
-            "kind"      => "funcion",
+            "kind"      => "Metodo",
             "val"       => "sentencias",
             "etiq"      => 'funciones',
             "line"   => $line,
@@ -2009,8 +2000,6 @@ class Interpreter extends GrammarBaseVisitor
                 $context->ID()->getSymbol()
             );
             return null;
-        } else {
-            $this->syCount++;
         }
 
         $params = null;
@@ -2042,8 +2031,8 @@ class Interpreter extends GrammarBaseVisitor
         $this->symbolTable[0][$name] = [
             "ScopeName" => $this->scopes[0]["name"],
             "n" => $this->syCount,
-            "type"      => $etiq,
-            "kind"      => "funcion",
+            "type"      => "Funcion",
+            "kind"      => "Funcion Simple",
             "val"       => "sentencias",
             "etiq"      => 'funciones',
             "line"   => $line,
@@ -2071,8 +2060,6 @@ class Interpreter extends GrammarBaseVisitor
                 $context->ID()->getSymbol()
             );
             return null;
-        } else {
-            $this->syCount++;
         }
 
         $params = null;
@@ -2112,7 +2099,7 @@ class Interpreter extends GrammarBaseVisitor
         $this->symbolTable[0][$name] = [
             "ScopeName" => $this->scopes[0]["name"],
             "n" => $this->syCount,
-            "type"      => $etiq,
+            "type"      => "Funcion",
             "kind"      => "Multifuncion",
             "val"       => "sentencias",
             "etiq"      => 'funciones',
