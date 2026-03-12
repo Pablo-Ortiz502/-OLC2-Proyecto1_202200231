@@ -75,9 +75,9 @@ asg:
 incdec: ID op = ('++' | '--');
 
 expr:
-	larray type arrayValue						# NAV
-	| expr op = ('*' | '/' | '%') expr			# MulDivMod
+	expr op = ('*' | '/' | '%') expr			# MulDivMod
 	| expr op = ('+' | '-') expr				# AddSub
+	| '!' expr									# Not
 	| expr op = ('==' | '!=') expr				# EqNotEq
 	| expr op = ('>=' | '<=' | '>' | '<') expr	# MoreLessEq
 	| expr op = ('&&' | '||') expr				# AndOr
@@ -86,15 +86,16 @@ expr:
 	| reserved									# re;
 
 vals:
-	NUM				# Num
-	| FLOAT			# Float
-	| funcCall		# fc
-	| ID larrayexp	# ArrayVal
-	| ID			# IdExpr
-	| BOOLE			# Boole
-	| STRING		# String
-	| RUNE			# Rune
-	| NIL			# Nil;
+	NUM							# Num
+	| FLOAT						# Float
+	| BOOLE						# Boole
+	| STRING					# String
+	| RUNE						# Rune
+	| NIL						# Nil
+	| funcCall					# fc
+	| larray type arrayValue	# NAV
+	| ID larrayexp				# ArrayVal
+	| ID						# IdExpr;
 
 arrVal: larray type arrayValue # NewArrayVal;
 

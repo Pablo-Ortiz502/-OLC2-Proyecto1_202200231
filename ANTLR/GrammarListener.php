@@ -492,17 +492,17 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitIncdec(Context\IncdecContext $context): void;
 	/**
-	 * Enter a parse tree produced by the `NAV`
+	 * Enter a parse tree produced by the `Not`
 	 * labeled alternative in {@see GrammarParser::expr()}.
 	 * @param $context The parse tree.
 	 */
-	public function enterNAV(Context\NAVContext $context): void;
+	public function enterNot(Context\NotContext $context): void;
 	/**
-	 * Exit a parse tree produced by the `NAV` labeled alternative
+	 * Exit a parse tree produced by the `Not` labeled alternative
 	 * in {@see GrammarParser::expr()}.
 	 * @param $context The parse tree.
 	 */
-	public function exitNAV(Context\NAVContext $context): void;
+	public function exitNot(Context\NotContext $context): void;
 	/**
 	 * Enter a parse tree produced by the `MulDivMod`
 	 * labeled alternative in {@see GrammarParser::expr()}.
@@ -624,42 +624,6 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitFloat(Context\FloatContext $context): void;
 	/**
-	 * Enter a parse tree produced by the `fc`
-	 * labeled alternative in {@see GrammarParser::vals()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterFc(Context\FcContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `fc` labeled alternative
-	 * in {@see GrammarParser::vals()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitFc(Context\FcContext $context): void;
-	/**
-	 * Enter a parse tree produced by the `ArrayVal`
-	 * labeled alternative in {@see GrammarParser::vals()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterArrayVal(Context\ArrayValContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `ArrayVal` labeled alternative
-	 * in {@see GrammarParser::vals()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitArrayVal(Context\ArrayValContext $context): void;
-	/**
-	 * Enter a parse tree produced by the `IdExpr`
-	 * labeled alternative in {@see GrammarParser::vals()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterIdExpr(Context\IdExprContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `IdExpr` labeled alternative
-	 * in {@see GrammarParser::vals()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitIdExpr(Context\IdExprContext $context): void;
-	/**
 	 * Enter a parse tree produced by the `Boole`
 	 * labeled alternative in {@see GrammarParser::vals()}.
 	 * @param $context The parse tree.
@@ -707,6 +671,54 @@ interface GrammarListener extends ParseTreeListener {
 	 * @param $context The parse tree.
 	 */
 	public function exitNil(Context\NilContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `fc`
+	 * labeled alternative in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterFc(Context\FcContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `fc` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitFc(Context\FcContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `NAV`
+	 * labeled alternative in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterNAV(Context\NAVContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `NAV` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitNAV(Context\NAVContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `ArrayVal`
+	 * labeled alternative in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterArrayVal(Context\ArrayValContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `ArrayVal` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitArrayVal(Context\ArrayValContext $context): void;
+	/**
+	 * Enter a parse tree produced by the `IdExpr`
+	 * labeled alternative in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterIdExpr(Context\IdExprContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `IdExpr` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitIdExpr(Context\IdExprContext $context): void;
 	/**
 	 * Enter a parse tree produced by the `NewArrayVal`
 	 * labeled alternative in {@see GrammarParser::arrVal()}.

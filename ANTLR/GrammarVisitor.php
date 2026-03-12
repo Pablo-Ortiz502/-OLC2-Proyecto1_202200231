@@ -424,14 +424,14 @@ interface GrammarVisitor extends ParseTreeVisitor
 	public function visitIncdec(Context\IncdecContext $context);
 
 	/**
-	 * Visit a parse tree produced by the `NAV` labeled alternative
+	 * Visit a parse tree produced by the `Not` labeled alternative
 	 * in {@see GrammarParser::expr()}.
 	 *
-	 * @param Context\NAVContext $context The parse tree.
+	 * @param Context\NotContext $context The parse tree.
 	 *
 	 * @return mixed The visitor result.
 	 */
-	public function visitNAV(Context\NAVContext $context);
+	public function visitNot(Context\NotContext $context);
 
 	/**
 	 * Visit a parse tree produced by the `MulDivMod` labeled alternative
@@ -534,36 +534,6 @@ interface GrammarVisitor extends ParseTreeVisitor
 	public function visitFloat(Context\FloatContext $context);
 
 	/**
-	 * Visit a parse tree produced by the `fc` labeled alternative
-	 * in {@see GrammarParser::vals()}.
-	 *
-	 * @param Context\FcContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitFc(Context\FcContext $context);
-
-	/**
-	 * Visit a parse tree produced by the `ArrayVal` labeled alternative
-	 * in {@see GrammarParser::vals()}.
-	 *
-	 * @param Context\ArrayValContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitArrayVal(Context\ArrayValContext $context);
-
-	/**
-	 * Visit a parse tree produced by the `IdExpr` labeled alternative
-	 * in {@see GrammarParser::vals()}.
-	 *
-	 * @param Context\IdExprContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitIdExpr(Context\IdExprContext $context);
-
-	/**
 	 * Visit a parse tree produced by the `Boole` labeled alternative
 	 * in {@see GrammarParser::vals()}.
 	 *
@@ -602,6 +572,46 @@ interface GrammarVisitor extends ParseTreeVisitor
 	 * @return mixed The visitor result.
 	 */
 	public function visitNil(Context\NilContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `fc` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 *
+	 * @param Context\FcContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitFc(Context\FcContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `NAV` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 *
+	 * @param Context\NAVContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitNAV(Context\NAVContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `ArrayVal` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 *
+	 * @param Context\ArrayValContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitArrayVal(Context\ArrayValContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `IdExpr` labeled alternative
+	 * in {@see GrammarParser::vals()}.
+	 *
+	 * @param Context\IdExprContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitIdExpr(Context\IdExprContext $context);
 
 	/**
 	 * Visit a parse tree produced by the `NewArrayVal` labeled alternative

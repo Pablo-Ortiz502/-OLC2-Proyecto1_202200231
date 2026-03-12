@@ -55,6 +55,7 @@ use Context\MethodContext;
 use Context\MultFuncContext;
 use Context\NAVContext;
 use Context\NewArrayValContext;
+use Context\NotContext;
 use Context\ParContext;
 use Context\ReturnStmtContext;
 use Context\ShortArrayDecContext;
@@ -1418,17 +1419,31 @@ class Interpreter extends GrammarBaseVisitor
             $column = $ids[$i]->getSymbol()->getCharPositionInLine();
             $value = $temp[$i];
 
+
             $type = $value[0][0] ?? null;
+
+            if (!is_string($value)) {
+                $type  = $this->getTypeFromValue($type);
+                $etiq  = $this->getEtiquete($value);
+            } else {
+                $type = null;
+            }
             if ($type === null) {
                 $type = $value[0] ?? null;
+                if (!is_string($value)) {
+                    $type  = $this->getTypeFromValue($type);
+                    $etiq  = $this->getEtiquete($value);
+                } else {
+                    $type = null;
+                }
             }
             if ($type === null) {
                 $type = $value;
+                $type  = $this->getTypeFromValue($type);
+                $etiq  = $this->getEtiquete($value);
             } else {
                 $this->arrCount++;
             }
-            $type  = $this->getTypeFromValue($type);
-            $etiq  = $this->getEtiquete($value);
 
 
             if (isset($currentScope[$name]) && $this->inLoop === 0) {
@@ -1459,7 +1474,7 @@ class Interpreter extends GrammarBaseVisitor
                     "type"      => $type,
                     "kind"      => "var",
                     "val"       => $value,
-                    "etiq"      => "array",
+                    "etiq"      => $etiq,
                     "line"   => $line,
                     "column" => $column,
                 ];
@@ -2369,6 +2384,21 @@ class Interpreter extends GrammarBaseVisitor
         };
     }
 
+    public function visitNot(NotContext $context)
+    {
+        $val = $this->visit($context->expr());
+
+        if (!is_bool($val)) {
+            $this->addError(
+                "el operador ! solo se puede usar en booleanos",
+                $context->expr()->getStart()
+            );
+            return null;
+        }
+
+        return !$val;
+    }
+
     public function visitEqNotEq(EqNotEqContext $context)
     {
         $left  = $this->visit($context->expr(0));
@@ -2381,6 +2411,11 @@ class Interpreter extends GrammarBaseVisitor
         if (is_array($left)) {
             $left = $left[0]["val"];
         }
+
+        if (is_null($left) && is_null($right)) {
+            return true;
+        }
+
 
         if (is_null($left) || is_null($right)) {
             $this->addError(
