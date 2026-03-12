@@ -47,6 +47,7 @@
             color: var(--text);
             min-height: 100vh;
             padding: 0;
+            padding-top: 60px
         }
 
         .topbar {
@@ -54,10 +55,16 @@
             border-bottom: 1px solid var(--border);
             padding: 10px 24px;
             display: flex;
+            position: fixed;
             align-items: center;
             gap: 10px;
             flex-wrap: wrap;
             box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
         }
 
         .topbar-title {
@@ -167,19 +174,19 @@
 
 
         .editor-wrap {
-            height: 600px;
+            height: 700px;
             overflow: hidden;
         }
 
         .CodeMirror {
-            height: 600px !important;
+            height: 700px !important;
             font-family: 'JetBrains Mono', monospace !important;
             font-size: .88rem !important;
             line-height: 1.6 !important;
         }
 
         .CodeMirror-scroll {
-            height: 600px;
+            height: 700px;
         }
 
 
@@ -191,7 +198,7 @@
             line-height: 1.7;
             padding: 14px 18px;
             min-height: 120px;
-            max-height: 400px;
+            max-height: 500px;
             overflow-y: auto;
             white-space: pre-wrap;
         }
@@ -304,7 +311,7 @@
 
         .table-scroll {
             overflow-x: auto;
-            max-height: 260px;
+            max-height: 500px;
             overflow-y: auto;
         }
 

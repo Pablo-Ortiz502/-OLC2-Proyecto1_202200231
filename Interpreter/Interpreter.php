@@ -122,23 +122,21 @@ class Interpreter extends GrammarBaseVisitor
         }
     }
 
-    private function deleteRepeat($tabla)
+    private function removeDuplicates(&$arr)
     {
-        $vistos = [];
+        $seen = [];
 
-        foreach ($tabla as $indice => $scope) {
-            foreach ($scope as $varName => $datos) {
-                $clave = $varName . '||' . ($datos['ScopeName'] ?? '');
+        foreach ($arr as $index => $scope) {
+            foreach ($scope as $varName => $var) {
+                if (is_array($var) && isset($var['ScopeName'])) {
+                    $key = $varName . '|' . $var['ScopeName'];
 
-                if (isset($vistos[$clave])) {
-                    unset($tabla[$indice][$varName]);
-                } else {
-                    $vistos[$clave] = true;
+                    if (in_array($key, $seen)) {
+                        unset($arr[$index]);
+                    } else {
+                        $seen[] = $key;
+                    }
                 }
-            }
-
-            if (empty($tabla[$indice])) {
-                unset($tabla[$indice]);
             }
         }
     }
@@ -482,9 +480,8 @@ class Interpreter extends GrammarBaseVisitor
             $this->visit($f0);
         }
         $this->visit($context->program());
+        $this->removeDuplicates($this->symbolTable);
         $this->reasign($this->symbolTable);
-        $this->deleteRepeat($this->symbolTable);
-
 
         return null;
     }
