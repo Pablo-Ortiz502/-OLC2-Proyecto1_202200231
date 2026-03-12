@@ -65,3 +65,19 @@ func main() {
     fmt.Println(grid[0][1])
     fmt.Println(grid[1][2]) 
 }
+
+=======================================
+func factorial(n int32) int32 {
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+func main () {
+
+  fmt.Println("\n--- 3.5 FUNCION RECURSIVA (UN RETORNO) ---")
+    fact := factorial(5)
+    fmt.Println("Factorial de 5:", fact)
+
+}

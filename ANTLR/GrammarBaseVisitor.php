@@ -492,6 +492,17 @@ class GrammarBaseVisitor extends AbstractParseTreeVisitor implements GrammarVisi
 	 * The default implementation returns the result of calling
 	 * {@see self::visitChildren()} on `context`.
 	 */
+	public function visitNAV(Context\NAVContext $context)
+	{
+	    return $this->visitChildren($context);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation returns the result of calling
+	 * {@see self::visitChildren()} on `context`.
+	 */
 	public function visitMulDivMod(Context\MulDivModContext $context)
 	{
 	    return $this->visitChildren($context);
@@ -603,17 +614,6 @@ class GrammarBaseVisitor extends AbstractParseTreeVisitor implements GrammarVisi
 	 * {@see self::visitChildren()} on `context`.
 	 */
 	public function visitFc(Context\FcContext $context)
-	{
-	    return $this->visitChildren($context);
-	}
-
-	/**
-	 * {@inheritdoc}
-	 *
-	 * The default implementation returns the result of calling
-	 * {@see self::visitChildren()} on `context`.
-	 */
-	public function visitNAV(Context\NAVContext $context)
 	{
 	    return $this->visitChildren($context);
 	}

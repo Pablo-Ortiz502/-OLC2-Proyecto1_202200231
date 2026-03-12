@@ -17,6 +17,8 @@
     use Antlr\Antlr4\Runtime\InputStream;
     use Antlr\Antlr4\Runtime\CommonTokenStream;
 
+    require_once __DIR__ . "/Interpreter/Interpreter.php";
+
     $input = "";
     $output = "";
 

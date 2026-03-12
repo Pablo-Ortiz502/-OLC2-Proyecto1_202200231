@@ -8,6 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/go/go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
     <style>
         *,
         *::before,
@@ -42,7 +48,6 @@
             min-height: 100vh;
             padding: 0;
         }
-
 
         .topbar {
             background: var(--surface);
@@ -162,42 +167,19 @@
 
 
         .editor-wrap {
-            display: flex;
-            height: 300px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: .88rem;
-        }
-
-        .line-numbers {
-            padding: 12px 0;
-            min-width: 42px;
-            text-align: right;
-            background: #f8fafc;
-            border-right: 1px solid var(--border);
-            color: #94a3b8;
-            font-size: .82rem;
-            line-height: 1.6;
-            user-select: none;
+            height: 600px;
             overflow: hidden;
         }
 
-        .line-numbers span {
-            display: block;
-            padding-right: 10px;
+        .CodeMirror {
+            height: 600px !important;
+            font-family: 'JetBrains Mono', monospace !important;
+            font-size: .88rem !important;
+            line-height: 1.6 !important;
         }
 
-        #codeEditor {
-            flex: 1;
-            border: none;
-            outline: none;
-            resize: none;
-            padding: 12px 14px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: .88rem;
-            line-height: 1.6;
-            color: var(--text);
-            background: transparent;
-            tab-size: 2;
+        .CodeMirror-scroll {
+            height: 600px;
         }
 
 
@@ -209,7 +191,7 @@
             line-height: 1.7;
             padding: 14px 18px;
             min-height: 120px;
-            max-height: 220px;
+            max-height: 400px;
             overflow-y: auto;
             white-space: pre-wrap;
         }
@@ -278,8 +260,8 @@
 
         .tables-section {
             grid-column: 1 / -1;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 20px;
         }
 
@@ -363,7 +345,6 @@
             font-style: italic;
         }
 
-
         .spinner {
             display: inline-block;
             width: 14px;
@@ -380,7 +361,6 @@
                 transform: rotate(360deg);
             }
         }
-
 
         #toast {
             position: fixed;
@@ -418,7 +398,7 @@
 
 <body>
 
-    <!-- TOP BAR -->
+
     <div class="topbar">
         <span class="topbar-title">Interpreter</span>
 
@@ -450,30 +430,24 @@
 
         <div style="display:flex;flex-direction:column;gap:20px;">
 
-            <!-- EDITOR -->
+
             <div class="panel">
                 <div class="panel-header">Editor de Código</div>
                 <div class="editor-wrap">
-                    <div class="line-numbers" id="lineNumbers">
-                        <span>1</span>
-                    </div>
-                    <textarea id="codeEditor" spellcheck="false"
-                        placeholder="// Escribe o carga tu código aquí..."
-                        oninput="actualizarLineas()" onscroll="sincronizarScroll()"
-                        onkeydown="manejarTab(event)"></textarea>
+                    <textarea id="codeEditor"></textarea>
                 </div>
             </div>
 
-            <!-- CONSOLE -->
+
             <div class="panel">
                 <div class="panel-header">Consola de Salida</div>
                 <div class="console-box empty" id="consola">Esperando ejecución...</div>
             </div>
 
-            <!-- TABLES -->
+
             <div class="tables-section">
 
-                <!-- SYMBOL TABLE -->
+
                 <div class="panel">
                     <div class="panel-header">Tabla de Símbolos</div>
                     <div class="table-scroll">
@@ -496,7 +470,7 @@
                     </div>
                 </div>
 
-                <!-- ERROR TABLE -->
+
                 <div class="panel">
                     <div class="panel-header">Reporte de Errores</div>
                     <div class="table-scroll">
@@ -551,41 +525,30 @@
         let lastResponse = null;
 
 
-        function actualizarLineas() {
-            const ta = document.getElementById('codeEditor');
-            const ln = document.getElementById('lineNumbers');
-            const lines = ta.value.split('\n').length;
-            ln.innerHTML = Array.from({
-                length: lines
-            }, (_, i) => `<span>${i+1}</span>`).join('');
-        }
-
-        function sincronizarScroll() {
-            const ta = document.getElementById('codeEditor');
-            const ln = document.getElementById('lineNumbers');
-            ln.scrollTop = ta.scrollTop;
-        }
-
-        function manejarTab(e) {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                const ta = document.getElementById('codeEditor');
-                const start = ta.selectionStart;
-                const end = ta.selectionEnd;
-                ta.value = ta.value.substring(0, start) + '  ' + ta.value.substring(end);
-                ta.selectionStart = ta.selectionEnd = start + 2;
-                actualizarLineas();
-            }
-        }
-
-        actualizarLineas();
-
+        let editor;
+        window.addEventListener('DOMContentLoaded', () => {
+            editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+                mode: 'text/x-go',
+                theme: 'dracula',
+                lineNumbers: true,
+                matchBrackets: true,
+                autoCloseBrackets: true,
+                indentUnit: 2,
+                tabSize: 2,
+                indentWithTabs: false,
+                lineWrapping: false,
+                autofocus: true,
+                extraKeys: {
+                    'Tab': cm => cm.execCommand('insertSoftTab')
+                }
+            });
+        });
 
         function nuevoArchivo() {
-            if (document.getElementById('codeEditor').value.trim() &&
+            if (editor.getValue().trim() &&
                 !confirm('¿Crear nuevo archivo? Se perderá el contenido actual.')) return;
-            document.getElementById('codeEditor').value = '';
-            actualizarLineas();
+            editor.setValue('');
+            editor.clearHistory();
             limpiarConsola();
         }
 
@@ -595,8 +558,8 @@
             if (!file) return;
             const reader = new FileReader();
             reader.onload = e => {
-                document.getElementById('codeEditor').value = e.target.result;
-                actualizarLineas();
+                editor.setValue(e.target.result);
+                editor.clearHistory();
                 mostrarToast(`Archivo "${file.name}" cargado.`);
             };
             reader.readAsText(file);
@@ -605,7 +568,7 @@
 
 
         function guardarCodigo() {
-            const code = document.getElementById('codeEditor').value;
+            const code = editor.getValue();
             const blob = new Blob([code], {
                 type: 'text/plain'
             });
@@ -627,7 +590,7 @@
 
 
         async function ejecutarCodigo() {
-            const code = document.getElementById('codeEditor').value;
+            const code = editor.getValue();
             if (!code.trim()) {
                 mostrarToast('El editor está vacío.');
                 return;
@@ -661,13 +624,29 @@
 
                 let data;
                 try {
+
                     data = JSON.parse(rawText);
                 } catch (e) {
-                    consola.textContent = rawText || '(Sin salida)';
-                    consola.className = 'console-box';
-                    renderizarTablaSimbolos({});
-                    renderizarTablaErrores([]);
-                    return;
+
+                    const jsonStart = rawText.indexOf('{');
+                    if (jsonStart !== -1) {
+                        try {
+                            data = JSON.parse(rawText.substring(jsonStart));
+                        } catch (e2) {
+
+                            consola.textContent = rawText || '(Sin salida)';
+                            consola.className = 'console-box';
+                            renderizarTablaSimbolos({});
+                            renderizarTablaErrores([]);
+                            return;
+                        }
+                    } else {
+                        consola.textContent = rawText || '(Sin salida)';
+                        consola.className = 'console-box';
+                        renderizarTablaSimbolos({});
+                        renderizarTablaErrores([]);
+                        return;
+                    }
                 }
 
                 lastResponse = data;
@@ -720,15 +699,15 @@
             rows.forEach(r => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                <td>${r.n ?? ''}</td>
-                <td><strong>${r.name}</strong></td>
-                <td><span class="badge badge-blue">${r.ScopeName ?? ''}</span></td>
-                <td><code>${r.type ?? ''}</code></td>
-                <td><span class="badge badge-green">${r.kind ?? ''}</span></td>
-                <td>${r.val ?? ''}</td>
-                <td>${r.line ?? ''}</td>
-                <td>${r.column ?? ''}</td>
-                `;
+            <td>${r.n ?? ''}</td>
+            <td><strong>${r.name}</strong></td>
+            <td><span class="badge badge-blue">${r.ScopeName ?? ''}</span></td>
+            <td><code>${r.type ?? ''}</code></td>
+            <td><span class="badge badge-green">${r.kind ?? ''}</span></td>
+            <td>${r.val ?? ''}</td>
+            <td>${r.line ?? ''}</td>
+            <td>${r.column ?? ''}</td>
+    `;
                 body.appendChild(tr);
             });
         }
@@ -743,7 +722,7 @@
             if (!errorTable.length) {
                 table.style.display = 'none';
                 empty.style.display = '';
-                empty.textContent = 'Sin errores reportados.';
+                empty.textContent = '✅ Sin errores reportados.';
                 return;
             }
 
@@ -769,7 +748,6 @@
                 body.appendChild(tr);
             });
         }
-
 
         function descargarResultado() {
             const txt = document.getElementById('consola').textContent;

@@ -492,6 +492,18 @@ interface GrammarListener extends ParseTreeListener {
 	 */
 	public function exitIncdec(Context\IncdecContext $context): void;
 	/**
+	 * Enter a parse tree produced by the `NAV`
+	 * labeled alternative in {@see GrammarParser::expr()}.
+	 * @param $context The parse tree.
+	 */
+	public function enterNAV(Context\NAVContext $context): void;
+	/**
+	 * Exit a parse tree produced by the `NAV` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 * @param $context The parse tree.
+	 */
+	public function exitNAV(Context\NAVContext $context): void;
+	/**
 	 * Enter a parse tree produced by the `MulDivMod`
 	 * labeled alternative in {@see GrammarParser::expr()}.
 	 * @param $context The parse tree.
@@ -623,18 +635,6 @@ interface GrammarListener extends ParseTreeListener {
 	 * @param $context The parse tree.
 	 */
 	public function exitFc(Context\FcContext $context): void;
-	/**
-	 * Enter a parse tree produced by the `NAV`
-	 * labeled alternative in {@see GrammarParser::vals()}.
-	 * @param $context The parse tree.
-	 */
-	public function enterNAV(Context\NAVContext $context): void;
-	/**
-	 * Exit a parse tree produced by the `NAV` labeled alternative
-	 * in {@see GrammarParser::vals()}.
-	 * @param $context The parse tree.
-	 */
-	public function exitNAV(Context\NAVContext $context): void;
 	/**
 	 * Enter a parse tree produced by the `ArrayVal`
 	 * labeled alternative in {@see GrammarParser::vals()}.

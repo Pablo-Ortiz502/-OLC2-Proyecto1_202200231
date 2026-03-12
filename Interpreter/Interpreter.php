@@ -61,7 +61,7 @@ use Context\ShortArrayDecContext;
 use Context\SimpleFuncContext;
 use Context\SubSContext;
 use Context\SwitchStmtContext;
-use LDAP\Result;
+
 
 class BreakException extends \Exception {}
 class ContinueException extends \Exception {}
@@ -91,6 +91,8 @@ class Interpreter extends GrammarBaseVisitor
     private int $funcCount = 0;
     private int $retCount = 0;
     private int $elseCount = 0;
+    private int $rec = 0;
+    private array $dimensRet = [];
 
     private function enterScope(string $scopeName): void
     {
@@ -98,6 +100,11 @@ class Interpreter extends GrammarBaseVisitor
             "name" => $scopeName,
             "symbols" => []
         ];
+    }
+
+    private function exitScope($name): void
+    {
+        array_pop($this->scopes);
     }
 
     private function reasign(&$arr)
@@ -114,6 +121,27 @@ class Interpreter extends GrammarBaseVisitor
         }
     }
 
+    private function deleteRepeat($tabla)
+    {
+        $vistos = [];
+
+        foreach ($tabla as $indice => $scope) {
+            foreach ($scope as $varName => $datos) {
+                $clave = $varName . '||' . ($datos['ScopeName'] ?? '');
+
+                if (isset($vistos[$clave])) {
+                    unset($tabla[$indice][$varName]);
+                } else {
+                    $vistos[$clave] = true;
+                }
+            }
+
+            if (empty($tabla[$indice])) {
+                unset($tabla[$indice]);
+            }
+        }
+    }
+
     private function getCurrentScopeLevelOf(string $name): ?int
     {
         for ($i = count($this->scopes) - 1; $i >= 0; $i--) {
@@ -122,11 +150,6 @@ class Interpreter extends GrammarBaseVisitor
             }
         }
         return null;
-    }
-
-    private function exitScope(): void
-    {
-        array_pop($this->scopes);
     }
 
     private function declare(string $name, array $info): bool
@@ -447,8 +470,8 @@ class Interpreter extends GrammarBaseVisitor
     public function visitS(SContext $context)
     {
         $this->enterScope("Global");
-        $f0 = $context->functiondec(0);
-        $f1 = $context->functiondec(1);
+        $f0 = $context->functiondec();
+
 
         if ($f0 !== null && is_array($f0)) {
             for ($i = 0; $i < count($f0); $i++) {
@@ -457,17 +480,9 @@ class Interpreter extends GrammarBaseVisitor
         } else if ($f0 !== null) {
             $this->visit($f0);
         }
-        if ($f1 !== null && is_array($f1)) {
-            for ($i = 0; $i < count($f1); $i++) {
-                $this->visit($f1[$i]);
-            }
-        } else if ($f1 !== null) {
-            $this->visit($f1);
-        }
-
         $this->visit($context->program());
-
         $this->reasign($this->symbolTable);
+        $this->deleteRepeat($this->symbolTable);
 
 
         return null;
@@ -477,7 +492,7 @@ class Interpreter extends GrammarBaseVisitor
     {
         $this->enterScope("main");
         $this->visit($context->block());
-        $this->exitScope();
+        $this->exitScope("main");
         return null;
     }
 
@@ -704,16 +719,29 @@ class Interpreter extends GrammarBaseVisitor
         }
 
 
+
         if ($condition) {
             $this->ifCount++;
             $this->enterScope("If" . $this->ifCount);
-            $this->visit($context->block(0));
-            $this->exitScope();
+
+            try {
+                $this->visit($context->block(0));
+            } finally {
+                $this->exitScope("If");
+            }
+
+            return null;
         } else if ($context->ELSE() !== null) {
             $this->elseCount++;
             $this->enterScope("Else" . $this->elseCount);
-            $this->visit($context->block(1));
-            $this->exitScope();
+
+            try {
+                $this->visit($context->block(1));
+            } finally {
+                $this->exitScope("Else");
+            }
+
+            return null;
         }
 
         return null;
@@ -796,13 +824,13 @@ class Interpreter extends GrammarBaseVisitor
                 $this->visit($context->incdec());
                 continue;
             } catch (BreakException $e) {
-                $this->exitScope();
+                $this->exitScope("For");
                 break;
             }
         }
 
         $this->inLoop--;
-        $this->exitScope();
+        $this->exitScope("For");
         return null;
     }
 
@@ -811,7 +839,7 @@ class Interpreter extends GrammarBaseVisitor
         if ($this->inLoop == 0) {
             $this->forCount++;
         }
-        $this->enterScope("For" . $this->forCount);
+        $this->enterScope("For");
         $this->inLoop++;
 
         try {
@@ -843,7 +871,7 @@ class Interpreter extends GrammarBaseVisitor
         } finally {
 
             $this->inLoop--;
-            $this->exitScope();
+            $this->exitScope("For");
         }
 
         return null;
@@ -854,7 +882,7 @@ class Interpreter extends GrammarBaseVisitor
         if ($this->inLoop == 0) {
             $this->forCount++;
         }
-        $this->enterScope("For" . $this->forCount);
+        $this->enterScope("For");
         $this->inLoop++;
         $safeCount = 0;
 
@@ -866,7 +894,7 @@ class Interpreter extends GrammarBaseVisitor
                         "Bucle Infinito",
                         $context->getStart()
                     );
-                    $this->exitScope();
+                    $this->exitScope("For");
                     break;
                 }
                 try {
@@ -874,14 +902,14 @@ class Interpreter extends GrammarBaseVisitor
                 } catch (ContinueException $e) {
                     continue;
                 } catch (BreakException $e) {
-                    $this->exitScope();
+                    $this->exitScope("For");
                     break;
                 }
             }
         } finally {
 
             $this->inLoop--;
-            $this->exitScope();
+            $this->exitScope("For");
         }
 
         return null;
@@ -910,15 +938,12 @@ class Interpreter extends GrammarBaseVisitor
         }
 
         $t = $this->visit($context->expr());
-        $value =  $this->procesar($t);
-        if (count($value) !== 1) {
-            $this->addError(
-                "En la variable '$name' la asignacion solo acepta un valor",
-                $context->expr()->getStart()
-            );
-            return null;
+        if (is_array($t)) {
+            $value =  $this->procesar($t);
+        } else {
+            $value = $t;
         }
-        $value = $value[0];
+
 
         if (!$this->validateType($symbol["type"], $value)) {
             $this->addError(
@@ -1216,7 +1241,6 @@ class Interpreter extends GrammarBaseVisitor
             $name  = $ids[$i]->getText();
             $column = $ids[$i]->getSymbol()->getCharPositionInLine();
             $value = $temp[$i];
-            print_r($this->retCount);
 
 
             if ($kind === "const" && is_null($value)) {
@@ -1347,7 +1371,6 @@ class Interpreter extends GrammarBaseVisitor
         for ($i = 0; $i < count($dims); $i++) {
             $temp[] = $dims[$i]->gettext(0);
         }
-        $this->arrCount++;
         return ["val" => $value, "type" => "array", "dimen" => $temp];
     }
 
@@ -1366,6 +1389,7 @@ class Interpreter extends GrammarBaseVisitor
             }
         }
 
+
         $temp = $this->procesar($t);
 
         if (count($ids) !== count($temp)) {
@@ -1378,7 +1402,6 @@ class Interpreter extends GrammarBaseVisitor
 
         $scopeLevel = count($this->scopes) - 1;
         $currentScope = &$this->scopes[$scopeLevel]["symbols"];
-
         for ($i = 0; $i < count($ids); $i++) {
 
 
@@ -1386,13 +1409,25 @@ class Interpreter extends GrammarBaseVisitor
             if (is_array($t[0]) && isset($t[0]['dimen'])) {
                 $dimen = $t[0]['dimen'];
             }
+            if (is_array($t[0][$i]) && isset($t[0][$i]['dimen'])) {
+                $dimen = $t[0][$i]['dimen'];
+            }
+
 
             $name  = $ids[$i]->getText();
             $column = $ids[$i]->getSymbol()->getCharPositionInLine();
             $value = $temp[$i];
 
-
-            $type  = $this->getTypeFromValue($value);
+            $type = $value[0][0] ?? null;
+            if ($type === null) {
+                $type = $value[0] ?? null;
+            }
+            if ($type === null) {
+                $type = $value;
+            } else {
+                $this->arrCount++;
+            }
+            $type  = $this->getTypeFromValue($type);
             $etiq  = $this->getEtiquete($value);
 
 
@@ -1424,11 +1459,14 @@ class Interpreter extends GrammarBaseVisitor
                     "type"      => $type,
                     "kind"      => "var",
                     "val"       => $value,
-                    "etiq"      => $etiq,
+                    "etiq"      => "array",
                     "line"   => $line,
                     "column" => $column,
                 ];
             } else {
+
+                $etiq = $this->arrayToString($value);
+
                 $currentScope[$name] = [
                     "kind" => $type,
                     "type"  => "array",
@@ -1443,7 +1481,7 @@ class Interpreter extends GrammarBaseVisitor
                     "type"      => "array " . $type,
                     "kind"      => "var",
                     "val"       => $value,
-                    "etiq"      => $this->arrayToString($value),
+                    "etiq"      => $etiq,
                     "line"   => $line,
                     "column" => $column,
 
@@ -1451,11 +1489,11 @@ class Interpreter extends GrammarBaseVisitor
                 $this->arrCount--;
             }
         }
-
         return null;
     }
     function procesar($array, &$result = [])
     {
+
         foreach ($array as $item) {
 
             if (is_array($item) && array_key_exists('val', $item)) {
@@ -1825,15 +1863,22 @@ class Interpreter extends GrammarBaseVisitor
             );
             return null;
         }
-
         $val = $context->lval()->expr();
         $temp = [];
         for ($i = 0; $i < count($val); $i++) {
             $v = $this->visit($val[$i]);
-            $temp[$i] = [
-                "val" => $v,
-                "type" => $this->getTypeFromValue($v)
-            ];
+            if (is_array($v)) {
+                $temp[$i] = [
+                    "val" => $v,
+                    "type" => $this->getTypeFromValue($v),
+                    "dimen" => $this->dimensRet
+                ];
+            } else {
+                $temp[$i] = [
+                    "val" => $v,
+                    "type" => $this->getTypeFromValue($v)
+                ];
+            }
         }
 
         $this->retCount++;
@@ -2204,7 +2249,7 @@ class Interpreter extends GrammarBaseVisitor
                         "Tipo incompatible en '$name'",
                         $context->ID()->getSymbol()
                     );
-                    $this->exitScope();
+                    $this->exitScope("func");
                     return null;
                 }
 
@@ -2241,10 +2286,11 @@ class Interpreter extends GrammarBaseVisitor
                     }
                 }
                 $this->funcCount--;
-                $this->exitScope();
+                $this->exitScope("func");
             }
         } else {
             try {
+                $this->enterScope("func");
                 $this->funcCount++;
                 $this->visit($function["val"]);
             } catch (ReturnException $e) {
@@ -2261,7 +2307,7 @@ class Interpreter extends GrammarBaseVisitor
                     }
                 }
                 $this->funcCount--;
-                $this->exitScope();
+                $this->exitScope("func");
             }
         }
     }
@@ -2290,7 +2336,7 @@ class Interpreter extends GrammarBaseVisitor
     {
         $op    = $context->op->getText();
         $left  = $this->visit($context->expr(0));
-        if (is_array($left) && $this->retCount === 1) {
+        if (is_array($left)) {
             $left = $left[0]["val"];
         }
         if (!$left && $op === "&&") {
@@ -2300,7 +2346,7 @@ class Interpreter extends GrammarBaseVisitor
             return true;
         }
         $right = $this->visit($context->expr(1));
-        if (is_array($right) && $this->retCount === 1) {
+        if (is_array($right) && $this->retCount > 0) {
             $right = $right[0]["val"];
         }
 
@@ -2329,10 +2375,10 @@ class Interpreter extends GrammarBaseVisitor
         $right = $this->visit($context->expr(1));
         $op    = $context->op->getText();
 
-        if (is_array($right) && $this->retCount === 1) {
+        if (is_array($right)) {
             $right = $right[0]["val"];
         }
-        if (is_array($left) && $this->retCount === 1) {
+        if (is_array($left)) {
             $left = $left[0]["val"];
         }
 
@@ -2377,10 +2423,10 @@ class Interpreter extends GrammarBaseVisitor
         $left  = $this->visit($context->expr(0));
         $right = $this->visit($context->expr(1));
         $op    = $context->op->getText();
-        if (is_array($right) && $this->retCount === 1) {
+        if (is_array($right)) {
             $right = $right[0]["val"];
         }
-        if (is_array($left) && $this->retCount === 1) {
+        if (is_array($left)) {
             $left = $left[0]["val"];
         }
 
@@ -2445,6 +2491,10 @@ class Interpreter extends GrammarBaseVisitor
             return null;
         }
 
+        if ($symbol["type"] === "array") {
+            $this->dimensRet = $symbol["dimen"];
+        }
+
         return $symbol["val"];
     }
 
@@ -2460,10 +2510,10 @@ class Interpreter extends GrammarBaseVisitor
         $op    = $context->op->getText();
 
 
-        if (is_array($right) && $this->retCount === 1) {
-            $right = $right[0]["val"];
+
+        if (is_array($right)) {
         }
-        if (is_array($left) && $this->retCount === 1) {
+        if (is_array($left)) {
             $left = $left[0]["val"];
         }
 
@@ -2518,10 +2568,12 @@ class Interpreter extends GrammarBaseVisitor
         $right = $this->visit($context->expr(1));
         $op    = $context->op->getText();
 
-        if (is_array($right) && $this->retCount === 1) {
+
+
+        if (is_array($right)) {
             $right = $right[0]["val"];
         }
-        if (is_array($left) && $this->retCount === 1) {
+        if (is_array($left)) {
             $left = $left[0]["val"];
         }
 

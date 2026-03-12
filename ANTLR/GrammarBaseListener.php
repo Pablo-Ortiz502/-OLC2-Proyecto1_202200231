@@ -580,6 +580,19 @@ class GrammarBaseListener implements GrammarListener
 	 *
 	 * The default implementation does nothing.
 	 */
+	public function enterNAV(Context\NAVContext $context): void {}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
+	public function exitNAV(Context\NAVContext $context): void {}
+	/**
+	 * {@inheritdoc}
+	 *
+	 * The default implementation does nothing.
+	 */
 	public function enterMulDivMod(Context\MulDivModContext $context): void {}
 
 	/**
@@ -718,19 +731,6 @@ class GrammarBaseListener implements GrammarListener
 	 * The default implementation does nothing.
 	 */
 	public function exitFc(Context\FcContext $context): void {}
-	/**
-	 * {@inheritdoc}
-	 *
-	 * The default implementation does nothing.
-	 */
-	public function enterNAV(Context\NAVContext $context): void {}
-
-	/**
-	 * {@inheritdoc}
-	 *
-	 * The default implementation does nothing.
-	 */
-	public function exitNAV(Context\NAVContext $context): void {}
 	/**
 	 * {@inheritdoc}
 	 *

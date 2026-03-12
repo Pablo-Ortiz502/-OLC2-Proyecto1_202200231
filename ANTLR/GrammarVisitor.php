@@ -424,6 +424,16 @@ interface GrammarVisitor extends ParseTreeVisitor
 	public function visitIncdec(Context\IncdecContext $context);
 
 	/**
+	 * Visit a parse tree produced by the `NAV` labeled alternative
+	 * in {@see GrammarParser::expr()}.
+	 *
+	 * @param Context\NAVContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitNAV(Context\NAVContext $context);
+
+	/**
 	 * Visit a parse tree produced by the `MulDivMod` labeled alternative
 	 * in {@see GrammarParser::expr()}.
 	 *
@@ -532,16 +542,6 @@ interface GrammarVisitor extends ParseTreeVisitor
 	 * @return mixed The visitor result.
 	 */
 	public function visitFc(Context\FcContext $context);
-
-	/**
-	 * Visit a parse tree produced by the `NAV` labeled alternative
-	 * in {@see GrammarParser::vals()}.
-	 *
-	 * @param Context\NAVContext $context The parse tree.
-	 *
-	 * @return mixed The visitor result.
-	 */
-	public function visitNAV(Context\NAVContext $context);
 
 	/**
 	 * Visit a parse tree produced by the `ArrayVal` labeled alternative
